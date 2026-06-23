@@ -1,0 +1,22 @@
+---
+description: React component conventions
+alwaysApply: true
+---
+
+# Components
+
+## Naming
+- Use PascalCase for components
+- Use kebab-case filenames
+
+## Structure
+- One component per file
+- Keep components focused and reusable
+
+## Props
+- Use interfaces for props
+- Avoid inline types
+
+## Logic
+- Keep business logic in hooks or services
+- Components should primarily handle rendering

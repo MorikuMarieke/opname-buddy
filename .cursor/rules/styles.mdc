@@ -1,0 +1,21 @@
+---
+description: Styling and UI guidelines
+alwaysApply: true
+---
+
+# Styling
+
+## Tailwind
+- Use Tailwind utility classes
+- Avoid inline styles
+
+## Design
+- Tablet-first experience
+- Large touch targets
+- High accessibility
+- Clear visual hierarchy
+
+## Dashboard UI
+- Prefer card-based layouts
+- Use consistent spacing
+- Prioritize readability over visual complexity

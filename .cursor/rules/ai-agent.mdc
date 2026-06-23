@@ -1,0 +1,36 @@
+---
+description: AI Agent architecture and tool calling
+alwaysApply: false
+---
+
+# AI Agent Rules
+
+## Architecture
+- Use Vercel AI SDK
+- Use tool calling
+- Use Zod schemas for all tools
+
+## Agent Behavior
+- Agents must retrieve data through tools
+- Avoid passing all context in a single prompt
+- Prefer multi-step reasoning through tool usage
+
+## Requirements
+- Use at least 3 tools
+- Use maxSteps >= 3
+- Use streaming responses
+
+## OpnameBuddy
+
+The DailyBuddy agent may use:
+
+- getPatientCheckins
+- getPatientRestrictions
+- getAvailableActivities
+- getActivityFeedback
+- getOpenQuestions
+- saveDailyAdvice
+
+The AI must never provide medical diagnoses or treatment recommendations.
+
+The AI may only support recovery participation within caregiver-defined boundaries.
