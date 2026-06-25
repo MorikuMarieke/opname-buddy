@@ -1,8 +1,14 @@
+import { ClipboardList } from "lucide-react";
+import { PatientSubPageView } from "@/components/dashboard/patient-sub-page-view";
+
 export default function CheckinPage() {
   return (
-    <div className="space-y-2">
-      <h2 className="text-xl font-semibold">Dagelijkse check-in</h2>
-      <p className="text-zinc-600">Placeholder — nog te implementeren.</p>
-    </div>
+    <PatientSubPageView
+      title="Dagelijkse check-in"
+      description="Vertel hoe je je vandaag voelt."
+      icon={ClipboardList}
+      emptyTitle="Check-in nog niet ingevuld"
+      emptyDescription="Hier kun je straks je dagelijkse check-in invullen. Neem de tijd en deel hoe je je voelt."
+    />
   );
 }

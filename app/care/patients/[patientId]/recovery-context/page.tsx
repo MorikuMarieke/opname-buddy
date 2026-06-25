@@ -1,6 +1,6 @@
 import { CarePatientDetailView } from "@/components/dashboard/care-patient-detail-view";
 
-interface CarePatientDetailPageProps {
+interface CarePatientRecoveryContextPageProps {
   params: Promise<{ patientId: string }>;
 }
 
@@ -11,9 +11,9 @@ const patientNames: Record<string, { name: string; room: string }> = {
   "els-vermeer": { name: "Els Vermeer", room: "215" },
 };
 
-export default async function CarePatientDetailPage({
+export default async function CarePatientRecoveryContextPage({
   params,
-}: CarePatientDetailPageProps) {
+}: CarePatientRecoveryContextPageProps) {
   const { patientId } = await params;
   const patient = patientNames[patientId] ?? {
     name: "Onbekende patiënt",
@@ -25,7 +25,7 @@ export default async function CarePatientDetailPage({
       patientId={patientId}
       patientName={patient.name}
       room={patient.room}
-      variant="overview"
+      variant="recovery-context"
     />
   );
 }

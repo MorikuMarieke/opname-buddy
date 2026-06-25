@@ -1,8 +1,14 @@
+import { MessageCircleQuestion } from "lucide-react";
+import { PatientSubPageView } from "@/components/dashboard/patient-sub-page-view";
+
 export default function QuestionsPage() {
   return (
-    <div className="space-y-2">
-      <h2 className="text-xl font-semibold">Mijn vragen</h2>
-      <p className="text-zinc-600">Placeholder — nog te implementeren.</p>
-    </div>
+    <PatientSubPageView
+      title="Mijn vragen"
+      description="Stel vragen aan je zorgteam."
+      icon={MessageCircleQuestion}
+      emptyTitle="Nog geen vragen"
+      emptyDescription="Heb je een vraag voor je zorgteam? Hier kun je straks vragen stellen en antwoorden bekijken."
+    />
   );
 }

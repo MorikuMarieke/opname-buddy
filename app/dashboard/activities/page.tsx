@@ -1,8 +1,14 @@
-export default function PatientActivitiesPage() {
+import { Calendar } from "lucide-react";
+import { PatientSubPageView } from "@/components/dashboard/patient-sub-page-view";
+
+export default function ActivitiesPage() {
   return (
-    <div className="space-y-2">
-      <h2 className="text-xl font-semibold">Activiteiten</h2>
-      <p className="text-zinc-600">Placeholder — nog te implementeren.</p>
-    </div>
+    <PatientSubPageView
+      title="Activiteiten"
+      description="Bekijk geplande activiteiten op de afdeling."
+      icon={Calendar}
+      emptyTitle="Geen activiteiten vandaag"
+      emptyDescription="Er zijn vandaag nog geen activiteiten gepland. Kom later terug of vraag je zorgteam om meer informatie."
+    />
   );
 }

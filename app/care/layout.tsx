@@ -1,9 +1,9 @@
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { CareShell } from "@/components/layout/care-shell";
 
 export default function CareDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <DashboardLayout title="Zorg dashboard">{children}</DashboardLayout>;
+  return <CareShell>{children}</CareShell>;
 }

@@ -1,9 +1,9 @@
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { AdminShell } from "@/components/layout/admin-shell";
 
-export default function AdminDashboardLayout({
+export default function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <DashboardLayout title="Beheer">{children}</DashboardLayout>;
+  return <AdminShell>{children}</AdminShell>;
 }
