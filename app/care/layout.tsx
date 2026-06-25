@@ -1,9 +1,9 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 
-export default function AdminDashboardLayout({
+export default function CareDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <DashboardLayout title="Beheer">{children}</DashboardLayout>;
+  return <DashboardLayout title="Zorg dashboard">{children}</DashboardLayout>;
 }
