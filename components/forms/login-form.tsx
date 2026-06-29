@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +19,6 @@ function getErrorMessage(message: string): string {
 }
 
 export function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,20 +29,22 @@ export function LoginForm() {
     setIsLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (signInError) {
-      setError(getErrorMessage(signInError.message));
+      if (signInError) {
+        setError(getErrorMessage(signInError.message));
+        return;
+      }
+
+      window.location.assign("/auth/redirect");
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (

@@ -2,7 +2,16 @@ import Link from "next/link";
 
 import { LoginForm } from "@/components/forms/login-form";
 
-export default function LoginPage() {
+interface LoginPageProps {
+  searchParams: Promise<{
+    error?: string;
+    message?: string;
+  }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { error, message } = await searchParams;
+
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
@@ -11,6 +20,13 @@ export default function LoginPage() {
           Log in om verder te gaan met OpnameBuddy.
         </p>
       </div>
+
+      {error === "roles" ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          Kon je rollen niet ophalen na het inloggen.
+          {message ? ` (${message})` : " Controleer je Supabase API-sleutels in .env.local."}
+        </p>
+      ) : null}
 
       <LoginForm />
 

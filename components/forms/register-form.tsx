@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +19,6 @@ function getErrorMessage(message: string): string {
 }
 
 export function RegisterForm() {
-  const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,8 +48,7 @@ export function RegisterForm() {
     }
 
     if (data.session) {
-      router.push("/dashboard");
-      router.refresh();
+      window.location.assign("/auth/redirect");
       return;
     }
 

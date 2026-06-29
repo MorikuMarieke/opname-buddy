@@ -644,5 +644,115 @@ After implementation, explain:
 
 **Debug 3.1** Needed to fix middleware convention to proxy because of error: Uncaught Error: Cannot find middleware module.
 
+**Prompt 3.4** We are working on the OpnameBuddy graduation project.
+
+Current branch: feature/supabase-auth-roles.
+
+Already completed:
+- Supabase auth database schema exists:
+  profiles, roles, user_roles, RLS policies and auth trigger.
+- Supabase client layer exists.
+- Root middleware exists.
+- Login, register, logout and protected /dashboard work.
+
+Goal:
+Implement role lookup and role-based routing.
+
+Implement only:
+
+1. Auth helper functions
+Create reusable server-side helpers in lib/auth/:
+- getCurrentUser()
+- getCurrentUserProfile()
+- getCurrentUserRoles()
+- getPrimaryRole()
+- requireAuth()
+- requireRole()
+
+Use Supabase server client.
+Use types from types/database.ts.
+
+2. Role lookup
+Read roles through user_roles joined with roles.
+Return role names as typed RoleName values.
+
+3. Role-based redirect after login
+After successful login:
+- patient -> /dashboard
+- caregiver -> /care
+- activity_coordinator -> /planning
+- admin -> /admin
+- no role -> /unauthorized
+
+4. Protected route checks
+Protect these route groups/pages:
+- /dashboard requires patient
+- /care requires caregiver
+- /planning requires activity_coordinator
+- /admin requires admin
+
+If unauthenticated:
+- redirect to /login
+
+If authenticated but wrong role:
+- redirect to /unauthorized
+
+5. Unauthorized page
+Create /unauthorized with a clear message and logout/back-to-login option.
+
+6. Do not implement:
+- admin role assignment UI
+- check-ins
+- questions
+- restrictions
+- activities
+- AI
+- database schema changes
+- RLS changes
+
+Important:
+- Keep .gitkeep files in place.
+- Do not expose SUPABASE_SERVICE_ROLE_KEY to the browser.
+- Keep role logic server-side where possible.
+- Keep implementation simple and maintainable.
+- Keep existing styling/layout conventions.
+
+After implementation, explain:
+- which files were created or changed
+- how roles are fetched
+- how role-based redirects work
+- how protected role routes work
+- how I can manually assign a role in Supabase for testing
+- what test users I should create
+- what the next step should be
+
+Follow up question If a user has multiple roles in user_roles, how should getPrimaryRole() pick the post-login redirect?
+Answer: Use a fixed priority order for post-login redirect:
+
+admin > activity_coordinator > caregiver > patient
+
+This priority only determines the default landing page after login.
+
+Important:
+Users can have multiple staff roles. For example:
+- admin + caregiver
+- caregiver + activity_coordinator
+- admin + activity_coordinator
+
+The UI should eventually make it easy for staff users to navigate between all pages/modules they are allowed to access.
+
+So:
+- getPrimaryRole() chooses the default redirect.
+- requireRole() should check the full role list.
+- Navigation should later be based on all roles, not only the primary role.
+
+Domain rule:
+A patient should normally only have the patient role.
+Staff users may have multiple roles.
+
+**Debug mode:** logging in with newly created patient test account, logging in returned /unathorized. After fixing supabase link in this project it was established that there were missing postgres GRANTs on new supabase project. 
+
+
+
 
 
