@@ -309,7 +309,7 @@ The professional dashboards should remain clean and information-dense, but shoul
 
 Use the attached inspiration images again and iterate on the current implementation instead of starting over.
 
-_Ended up undoing this iteration, because the results were odd._
+*Ended up undoing this iteration, because the results were odd.*
 
 Worked with 2 questions from the chat:
 What felt most off in the polish iteration? (Pick all that apply so we can avoid those in a revised approach.)
@@ -319,7 +319,208 @@ What would you like to do next?
 
 I mainly want to work on color improvement, colors need to be updated to brighter versions from the chart I provided before.
 
-_After this the color iteration was good enough._
+*After this the color iteration was good enough.*
 
+We are working on the OpnameBuddy graduation project.
 
+Current branch: feature/supabase-auth-roles.
+
+Supabase project has already been created manually.
+
+Environment variables have already been configured in .env.local and .env.example.
+
+Goal:
+
+Create the initial Supabase database foundation for authentication, profiles and role-based access.
+
+Do not implement frontend authentication yet.
+
+Do not implement login/register pages yet.
+
+Do not implement check-ins, questions, restrictions, activities, AI agents or dashboards.
+
+Create a SQL migration/script for Supabase that can be executed manually in the Supabase SQL Editor.
+
+Required tables:
+
+1. profiles
+
+- id uuid primary key references auth.users(id) on delete cascade
+- full_name text
+- preferred_language text default 'nl'
+- created_at timestamptz default now()
+- updated_at timestamptz default now()
+
+1. roles
+
+- id uuid primary key default gen_random_uuid()
+- name text unique not null
+
+Allowed role names:
+
+- patient
+- caregiver
+- activity_coordinator
+- admin
+
+1. user_roles
+
+- user_id uuid references profiles(id) on delete cascade
+- role_id uuid references roles(id) on delete cascade
+- primary key (user_id, role_id)
+- created_at timestamptz default now()
+
+Required database behavior:
+
+1. Enable Row Level Security on all public tables:
+
+- profiles
+- roles
+- user_roles
+
+1. Create a trigger/function so that when a new Supabase Auth user is created, a matching profile row is automatically created.
+
+- Use auth.users insert trigger.
+- Store full_name from raw_user_meta_data if available.
+- Default preferred_language to 'nl'.
+
+1. Seed the roles table with:
+
+- patient
+- caregiver
+- activity_coordinator
+- admin
+
+1. Create RLS policies for branch 1:
+
+Profiles:
+
+- Authenticated users can read their own profile.
+- Authenticated users can update their own profile.
+- Authenticated users cannot delete profiles from the client.
+
+Roles:
+
+- Authenticated users can read available roles.
+- No client-side insert/update/delete for roles.
+
+User_roles:
+
+- Authenticated users can read their own roles.
+- No client-side insert/update/delete for user_roles yet.
+- Role assignment will later be handled by admin functionality.
+
+1. Add updated_at trigger logic for profiles.
+2. Add helpful comments in the SQL explaining:
+
+- why RLS is enabled
+- why user_roles cannot be modified by normal clients
+- how profile creation is connected to Supabase Auth
+
+1. Keep the SQL idempotent where reasonable:
+
+- use create table if not exists
+- use insert ... on conflict do nothing
+- drop policies before recreating them if needed
+
+1. After creating the SQL, explain:
+
+- what each table is responsible for
+- what each RLS policy does
+- how I should run this in the Supabase SQL Editor
+- what I should check in the Supabase Table Editor and Schema Visualizer afterwards
+- what the next implementation step should be
+
+**Step 3:** implement supabase
+**Prompt 3.1** We are working on the OpnameBuddy graduation project.
+
+Current branch: feature/supabase-auth-roles.
+
+Supabase project has already been created manually.
+Environment variables have already been configured in .env.local and .env.example.
+
+Goal:
+Create the initial Supabase database foundation for authentication, profiles and role-based access.
+
+Do not implement frontend authentication yet.
+Do not implement login/register pages yet.
+Do not implement check-ins, questions, restrictions, activities, AI agents or dashboards.
+
+Create a SQL migration/script for Supabase that can be executed manually in the Supabase SQL Editor.
+
+Required tables:
+
+1. profiles
+- id uuid primary key references auth.users(id) on delete cascade
+- full_name text
+- preferred_language text default 'nl'
+- created_at timestamptz default now()
+- updated_at timestamptz default now()
+
+2. roles
+- id uuid primary key default gen_random_uuid()
+- name text unique not null
+Allowed role names:
+- patient
+- caregiver
+- activity_coordinator
+- admin
+
+3. user_roles
+- user_id uuid references profiles(id) on delete cascade
+- role_id uuid references roles(id) on delete cascade
+- primary key (user_id, role_id)
+- created_at timestamptz default now()
+
+Required database behavior:
+
+1. Enable Row Level Security on all public tables:
+- profiles
+- roles
+- user_roles
+
+2. Create a trigger/function so that when a new Supabase Auth user is created, a matching profile row is automatically created.
+- Use auth.users insert trigger.
+- Store full_name from raw_user_meta_data if available.
+- Default preferred_language to 'nl'.
+
+3. Seed the roles table with:
+- patient
+- caregiver
+- activity_coordinator
+- admin
+
+4. Create RLS policies for branch 1:
+Profiles:
+- Authenticated users can read their own profile.
+- Authenticated users can update their own profile.
+- Authenticated users cannot delete profiles from the client.
+
+Roles:
+- Authenticated users can read available roles.
+- No client-side insert/update/delete for roles.
+
+User_roles:
+- Authenticated users can read their own roles.
+- No client-side insert/update/delete for user_roles yet.
+- Role assignment will later be handled by admin functionality.
+
+5. Add updated_at trigger logic for profiles.
+
+6. Add helpful comments in the SQL explaining:
+- why RLS is enabled
+- why user_roles cannot be modified by normal clients
+- how profile creation is connected to Supabase Auth
+
+7. Keep the SQL idempotent where reasonable:
+- use create table if not exists
+- use insert ... on conflict do nothing
+- drop policies before recreating them if needed
+
+8. After creating the SQL, explain:
+- what each table is responsible for
+- what each RLS policy does
+- how I should run this in the Supabase SQL Editor
+- what I should check in the Supabase Table Editor and Schema Visualizer afterwards
+- what the next implementation step should be
 
