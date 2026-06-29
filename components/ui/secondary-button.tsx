@@ -33,7 +33,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-dust-grey bg-white font-medium text-carbon-black transition-colors hover:bg-dust-grey/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-dust-grey-200 bg-white font-medium text-carbon-black-900 transition-colors hover:bg-dust-grey-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-600 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
 
 export function SecondaryButton(props: SecondaryButtonProps) {
   const { children, size = "md", className, icon } = props;

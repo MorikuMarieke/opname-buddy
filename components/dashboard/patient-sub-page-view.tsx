@@ -20,12 +20,13 @@ export function PatientSubPageView({
 }: PatientSubPageViewProps) {
   return (
     <div className="space-y-6">
-      <SectionHeader title={title} description={description} />
-      <DashboardCard>
+      <SectionHeader title={title} description={description} size="kiosk" />
+      <DashboardCard density="comfortable" padding="lg">
         <EmptyState
           icon={icon}
           title={emptyTitle}
           description={emptyDescription}
+          size="kiosk"
         />
       </DashboardCard>
     </div>

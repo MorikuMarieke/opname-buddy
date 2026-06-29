@@ -40,47 +40,51 @@ const patients = [
 
 export function CareOverviewView() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Patiëntenoverzicht"
         description="Overzicht van vandaag op de afdeling."
+        size="compact"
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <DashboardCard padding="sm">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-pearl-aqua/40 p-2 text-blue-slate">
-              <Users className="h-5 w-5" />
+            <div className="rounded-lg bg-pearl-aqua-50 p-2 text-blue-slate-700">
+              <Users className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm text-carbon-black/60">Patiënten vandaag</p>
-              <p className="text-2xl font-semibold text-carbon-black">24</p>
+              <p className="text-xs text-carbon-black-600">Patiënten vandaag</p>
+              <p className="text-xl font-semibold text-carbon-black-900">24</p>
             </div>
           </div>
         </DashboardCard>
 
-        <DashboardCard padding="sm">
+        <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-pearl-aqua/40 p-2 text-blue-slate">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="rounded-lg bg-pearl-aqua-50 p-2 text-blue-slate-700">
+              <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm text-carbon-black/60">Check-ins voltooid</p>
-              <p className="text-2xl font-semibold text-carbon-black">
-                17 <span className="text-base font-normal text-carbon-black/60">/ 71%</span>
+              <p className="text-xs text-carbon-black-600">Check-ins voltooid</p>
+              <p className="text-xl font-semibold text-carbon-black-900">
+                17{" "}
+                <span className="text-sm font-normal text-carbon-black-600">
+                  / 71%
+                </span>
               </p>
             </div>
           </div>
         </DashboardCard>
 
-        <DashboardCard padding="sm">
+        <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-copper/15 p-2 text-copper">
-              <MessageCircle className="h-5 w-5" />
+            <div className="rounded-lg bg-copper-50 p-2 text-copper-600">
+              <MessageCircle className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm text-carbon-black/60">Open vragen</p>
-              <p className="text-2xl font-semibold text-carbon-black">
+              <p className="text-xs text-carbon-black-600">Open vragen</p>
+              <p className="text-xl font-semibold text-carbon-black-900">
                 8{" "}
                 <StatusBadge variant="attention" className="ml-1 align-middle">
                   3 urgent
@@ -90,57 +94,60 @@ export function CareOverviewView() {
           </div>
         </DashboardCard>
 
-        <DashboardCard padding="sm">
+        <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-blue-slate/10 p-2 text-blue-slate">
-              <Shield className="h-5 w-5" />
+            <div className="rounded-lg bg-blue-slate-50 p-2 text-blue-slate-700">
+              <Shield className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm text-carbon-black/60">Actieve beperkingen</p>
-              <p className="text-2xl font-semibold text-carbon-black">12</p>
+              <p className="text-xs text-carbon-black-600">Actieve beperkingen</p>
+              <p className="text-xl font-semibold text-carbon-black-900">12</p>
             </div>
           </div>
         </DashboardCard>
       </div>
 
-      <DashboardCard padding="sm" className="overflow-x-auto">
+      <DashboardCard density="compact" className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
-            <tr className="border-b border-dust-grey text-carbon-black/60">
-              <th className="px-3 py-3 font-medium">Naam</th>
-              <th className="px-3 py-3 font-medium">Kamer</th>
-              <th className="px-3 py-3 font-medium">Check-in</th>
-              <th className="px-3 py-3 font-medium">Vragen</th>
-              <th className="px-3 py-3 font-medium">Beperkingen</th>
-              <th className="px-3 py-3 font-medium">Laatst bijgewerkt</th>
+            <tr className="border-b border-dust-grey-200 text-carbon-black-600">
+              <th className="px-3 py-2 font-medium">Naam</th>
+              <th className="px-3 py-2 font-medium">Kamer</th>
+              <th className="px-3 py-2 font-medium">Check-in</th>
+              <th className="px-3 py-2 font-medium">Vragen</th>
+              <th className="px-3 py-2 font-medium">Beperkingen</th>
+              <th className="px-3 py-2 font-medium">Laatst bijgewerkt</th>
             </tr>
           </thead>
           <tbody>
             {patients.map((patient) => (
               <tr
                 key={patient.name}
-                className="border-b border-dust-grey/60 last:border-0"
+                className="border-b border-dust-grey-100 last:border-0"
               >
-                <td className="px-3 py-3 font-medium text-carbon-black">
+                <td className="px-3 py-2 font-medium text-carbon-black-900">
                   {patient.name}
                 </td>
-                <td className="px-3 py-3">{patient.room}</td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-2">{patient.room}</td>
+                <td className="px-3 py-2">
                   {patient.checkin ? (
-                    <CheckCircle2 className="h-5 w-5 text-pearl-aqua" aria-label="Voltooid" />
+                    <CheckCircle2
+                      className="h-4 w-4 text-pearl-aqua-500"
+                      aria-label="Voltooid"
+                    />
                   ) : (
-                    <span className="text-carbon-black/40">—</span>
+                    <span className="text-carbon-black-400">—</span>
                   )}
                 </td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-2">
                   {patient.questions > 0 ? (
                     <StatusBadge variant="attention">{patient.questions}</StatusBadge>
                   ) : (
-                    <span className="text-carbon-black/40">0</span>
+                    <span className="text-carbon-black-400">0</span>
                   )}
                 </td>
-                <td className="px-3 py-3">{patient.restrictions}</td>
-                <td className="px-3 py-3 text-carbon-black/60">{patient.updated}</td>
+                <td className="px-3 py-2">{patient.restrictions}</td>
+                <td className="px-3 py-2 text-carbon-black-600">{patient.updated}</td>
               </tr>
             ))}
           </tbody>
@@ -152,10 +159,10 @@ export function CareOverviewView() {
 
 export function CareOverviewRightPanel() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-carbon-black">Acties</h3>
-        <ul className="space-y-2 text-sm text-blue-slate">
+        <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">Acties</h3>
+        <ul className="space-y-1.5 text-sm text-blue-slate-700">
           <li>
             <span className="cursor-default hover:underline">Nieuwe patiënt</span>
           </li>
@@ -169,15 +176,15 @@ export function CareOverviewRightPanel() {
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-carbon-black">Meldingen</h3>
-        <ul className="space-y-3 text-sm">
-          <li className="rounded-xl bg-parchment p-3">
-            <p className="font-medium text-carbon-black">3 urgente vragen</p>
-            <p className="text-carbon-black/60">Wachten op beantwoording</p>
+        <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">Meldingen</h3>
+        <ul className="space-y-2 text-sm">
+          <li className="rounded-lg bg-parchment-50 p-3">
+            <p className="font-medium text-carbon-black-900">3 urgente vragen</p>
+            <p className="text-carbon-black-600">Wachten op beantwoording</p>
           </li>
-          <li className="rounded-xl bg-parchment p-3">
-            <p className="font-medium text-carbon-black">Check-in herinnering</p>
-            <p className="text-carbon-black/60">7 patiënten nog niet ingevuld</p>
+          <li className="rounded-lg bg-parchment-50 p-3">
+            <p className="font-medium text-carbon-black-900">Check-in herinnering</p>
+            <p className="text-carbon-black-600">7 patiënten nog niet ingevuld</p>
           </li>
         </ul>
       </div>

@@ -47,9 +47,13 @@ export function CarePatientDetailView({
   const content = variantContent[variant];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <SectionHeader title={patientName} description={`Kamer ${room}`} />
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <SectionHeader
+          title={patientName}
+          description={`Kamer ${room}`}
+          size="compact"
+        />
         <div className="flex gap-2">
           <StatusBadge variant="positive">Check-in voltooid</StatusBadge>
           <StatusBadge variant="attention">2 open vragen</StatusBadge>
@@ -57,7 +61,7 @@ export function CarePatientDetailView({
       </div>
 
       <nav
-        className="flex flex-wrap gap-2 border-b border-dust-grey pb-4"
+        className="flex flex-wrap gap-2 border-b border-dust-grey-200 pb-3"
         aria-label="Patiënt subnavigatie"
       >
         {subNavItems.map((item) => {
@@ -67,10 +71,10 @@ export function CarePatientDetailView({
               key={item.href}
               href={item.href}
               className={cn(
-                "rounded-xl px-4 py-2 text-sm font-medium transition-colors",
+                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-blue-slate text-white"
-                  : "bg-dust-grey/50 text-carbon-black hover:bg-dust-grey",
+                  ? "bg-blue-slate-800 text-white"
+                  : "bg-dust-grey-100 text-carbon-black-900 hover:bg-dust-grey-200",
               )}
             >
               {item.label}
@@ -79,10 +83,14 @@ export function CarePatientDetailView({
         })}
       </nav>
 
-      <SectionHeader title={content.title} description={content.description} />
+      <SectionHeader
+        title={content.title}
+        description={content.description}
+        size="compact"
+      />
 
-      <DashboardCard>
-        <p className="text-carbon-black/70">{content.body}</p>
+      <DashboardCard density="compact">
+        <p className="text-sm text-carbon-black-600">{content.body}</p>
       </DashboardCard>
     </div>
   );

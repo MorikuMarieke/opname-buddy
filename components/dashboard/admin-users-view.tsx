@@ -13,10 +13,11 @@ const users = [
 
 export function AdminUsersView() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Gebruikers"
         description="Beheer gebruikers en toegang tot OpnameBuddy."
+        size="compact"
         action={
           <PrimaryButton size="sm" icon={<Plus className="h-4 w-4" />}>
             Gebruiker toevoegen
@@ -24,28 +25,28 @@ export function AdminUsersView() {
         }
       />
 
-      <DashboardCard padding="sm" className="overflow-x-auto">
+      <DashboardCard density="compact" className="overflow-x-auto">
         <table className="w-full min-w-[560px] text-left text-sm">
           <thead>
-            <tr className="border-b border-dust-grey text-carbon-black/60">
-              <th className="px-3 py-3 font-medium">Naam</th>
-              <th className="px-3 py-3 font-medium">E-mail</th>
-              <th className="px-3 py-3 font-medium">Rol</th>
-              <th className="px-3 py-3 font-medium">Status</th>
+            <tr className="border-b border-dust-grey-200 text-carbon-black-600">
+              <th className="px-3 py-2 font-medium">Naam</th>
+              <th className="px-3 py-2 font-medium">E-mail</th>
+              <th className="px-3 py-2 font-medium">Rol</th>
+              <th className="px-3 py-2 font-medium">Status</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr
                 key={user.email}
-                className="border-b border-dust-grey/60 last:border-0"
+                className="border-b border-dust-grey-100 last:border-0"
               >
-                <td className="px-3 py-3 font-medium text-carbon-black">
+                <td className="px-3 py-2 font-medium text-carbon-black-900">
                   {user.name}
                 </td>
-                <td className="px-3 py-3">{user.email}</td>
-                <td className="px-3 py-3">{user.role}</td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-2">{user.email}</td>
+                <td className="px-3 py-2">{user.role}</td>
+                <td className="px-3 py-2">
                   <StatusBadge variant={user.active ? "positive" : "neutral"}>
                     {user.active ? "Actief" : "Inactief"}
                   </StatusBadge>

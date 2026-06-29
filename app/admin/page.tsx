@@ -5,36 +5,37 @@ import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function AdminPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Beheer"
         description="Beheer gebruikers, rollen en systeeminstellingen."
+        size="compact"
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <DashboardCard padding="sm">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-pearl-aqua/40 p-2 text-blue-slate">
-              <LayoutDashboard className="h-5 w-5" />
+            <div className="rounded-lg bg-pearl-aqua-50 p-2 text-blue-slate-700">
+              <LayoutDashboard className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm text-carbon-black/60">Gebruikers</p>
-              <p className="text-2xl font-semibold text-carbon-black">25</p>
-              <StatusBadge variant="positive" className="mt-2">
+              <p className="text-xs text-carbon-black-600">Gebruikers</p>
+              <p className="text-xl font-semibold text-carbon-black-900">25</p>
+              <StatusBadge variant="positive" className="mt-1.5">
                 23 actief
               </StatusBadge>
             </div>
           </div>
         </DashboardCard>
 
-        <DashboardCard padding="sm">
-          <p className="text-sm text-carbon-black/60">Rollen</p>
-          <p className="text-2xl font-semibold text-carbon-black">4</p>
+        <DashboardCard density="compact">
+          <p className="text-xs text-carbon-black-600">Rollen</p>
+          <p className="text-xl font-semibold text-carbon-black-900">4</p>
         </DashboardCard>
 
-        <DashboardCard padding="sm">
-          <p className="text-sm text-carbon-black/60">Laatste wijziging</p>
-          <p className="text-2xl font-semibold text-carbon-black">Vandaag</p>
+        <DashboardCard density="compact">
+          <p className="text-xs text-carbon-black-600">Laatste wijziging</p>
+          <p className="text-xl font-semibold text-carbon-black-900">Vandaag</p>
         </DashboardCard>
       </div>
     </div>

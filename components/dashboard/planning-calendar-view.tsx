@@ -13,44 +13,47 @@ const calendarEvents = [
 
 export function PlanningCalendarView() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Kalender"
         description="Weekoverzicht van geplande activiteiten."
+        size="compact"
       />
 
-      <DashboardCard padding="sm" className="overflow-x-auto">
+      <DashboardCard density="compact" className="overflow-x-auto">
         <div className="min-w-[640px]">
-          <div className="grid grid-cols-7 gap-2 border-b border-dust-grey pb-3">
+          <div className="grid grid-cols-7 gap-2 border-b border-dust-grey-200 pb-2">
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center text-sm font-medium text-carbon-black/60"
+                className="text-center text-xs font-medium text-carbon-black-600"
               >
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="mt-3 grid grid-cols-7 gap-2">
+          <div className="mt-2 grid grid-cols-7 gap-2">
             {Array.from({ length: 7 }, (_, index) => {
               const dayEvents = calendarEvents.filter((e) => e.day === index);
               return (
                 <div
                   key={index}
-                  className="min-h-28 rounded-xl border border-dust-grey bg-parchment p-2"
+                  className="min-h-24 rounded-lg border border-dust-grey-200 bg-parchment-50 p-2"
                 >
-                  <p className="mb-2 text-xs font-medium text-carbon-black/60">
+                  <p className="mb-1.5 text-xs font-medium text-carbon-black-600">
                     {index + 19}
                   </p>
                   <div className="space-y-1">
                     {dayEvents.map((event) => (
                       <div
                         key={`${event.title}-${event.time}`}
-                        className="rounded-lg bg-pearl-aqua/40 px-2 py-1 text-xs"
+                        className="rounded-md bg-pearl-aqua-50 px-1.5 py-1 text-xs"
                       >
-                        <p className="font-medium text-carbon-black">{event.title}</p>
-                        <p className="text-carbon-black/60">{event.time}</p>
+                        <p className="font-medium text-carbon-black-900">
+                          {event.title}
+                        </p>
+                        <p className="text-carbon-black-600">{event.time}</p>
                       </div>
                     ))}
                   </div>

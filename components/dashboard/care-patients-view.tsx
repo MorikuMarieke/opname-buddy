@@ -13,49 +13,53 @@ const patients = [
 
 export function CarePatientsView() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Patiënten"
         description="Alle patiënten op de afdeling."
+        size="compact"
       />
 
-      <DashboardCard padding="sm" className="overflow-x-auto">
+      <DashboardCard density="compact" className="overflow-x-auto">
         <table className="w-full min-w-[560px] text-left text-sm">
           <thead>
-            <tr className="border-b border-dust-grey text-carbon-black/60">
-              <th className="px-3 py-3 font-medium">Naam</th>
-              <th className="px-3 py-3 font-medium">Kamer</th>
-              <th className="px-3 py-3 font-medium">Check-in</th>
-              <th className="px-3 py-3 font-medium">Vragen</th>
+            <tr className="border-b border-dust-grey-200 text-carbon-black-600">
+              <th className="px-3 py-2 font-medium">Naam</th>
+              <th className="px-3 py-2 font-medium">Kamer</th>
+              <th className="px-3 py-2 font-medium">Check-in</th>
+              <th className="px-3 py-2 font-medium">Vragen</th>
             </tr>
           </thead>
           <tbody>
             {patients.map((patient) => (
               <tr
                 key={patient.href}
-                className="border-b border-dust-grey/60 last:border-0"
+                className="border-b border-dust-grey-100 last:border-0"
               >
-                <td className="px-3 py-3">
+                <td className="px-3 py-2">
                   <Link
                     href={patient.href}
-                    className="font-medium text-blue-slate hover:underline"
+                    className="font-medium text-blue-slate-700 hover:underline"
                   >
                     {patient.name}
                   </Link>
                 </td>
-                <td className="px-3 py-3">{patient.room}</td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-2">{patient.room}</td>
+                <td className="px-3 py-2">
                   {patient.checkin ? (
-                    <CheckCircle2 className="h-5 w-5 text-pearl-aqua" aria-label="Voltooid" />
+                    <CheckCircle2
+                      className="h-4 w-4 text-pearl-aqua-500"
+                      aria-label="Voltooid"
+                    />
                   ) : (
-                    <span className="text-carbon-black/40">—</span>
+                    <span className="text-carbon-black-400">—</span>
                   )}
                 </td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-2">
                   {patient.questions > 0 ? (
                     <StatusBadge variant="attention">{patient.questions}</StatusBadge>
                   ) : (
-                    <span className="text-carbon-black/40">0</span>
+                    <span className="text-carbon-black-400">0</span>
                   )}
                 </td>
               </tr>

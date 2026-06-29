@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 type ActionTileAccent = "copper" | "blue-slate" | "pearl-aqua";
+type ActionTileSize = "default" | "kiosk";
 
 interface ActionTileProps {
   href: string;
@@ -10,13 +11,39 @@ interface ActionTileProps {
   title: string;
   description: string;
   accent?: ActionTileAccent;
+  size?: ActionTileSize;
   className?: string;
 }
 
 const accentClasses: Record<ActionTileAccent, string> = {
-  copper: "bg-copper/15 text-copper",
-  "blue-slate": "bg-blue-slate/10 text-blue-slate",
-  "pearl-aqua": "bg-pearl-aqua/40 text-blue-slate",
+  copper: "bg-copper-50 text-copper-600",
+  "blue-slate": "bg-blue-slate-50 text-blue-slate-700",
+  "pearl-aqua": "bg-pearl-aqua-50 text-blue-slate-700",
+};
+
+const tileSizeClasses: Record<ActionTileSize, string> = {
+  default: "min-h-[140px] gap-4 rounded-2xl p-6",
+  kiosk: "min-h-[180px] gap-6 rounded-3xl p-8",
+};
+
+const iconWrapSizeClasses: Record<ActionTileSize, string> = {
+  default: "h-12 w-12",
+  kiosk: "h-16 w-16",
+};
+
+const iconSizeClasses: Record<ActionTileSize, string> = {
+  default: "h-6 w-6",
+  kiosk: "h-8 w-8",
+};
+
+const titleSizeClasses: Record<ActionTileSize, string> = {
+  default: "text-lg",
+  kiosk: "text-xl",
+};
+
+const descriptionSizeClasses: Record<ActionTileSize, string> = {
+  default: "text-sm",
+  kiosk: "text-base",
 };
 
 export function ActionTile({
@@ -25,27 +52,36 @@ export function ActionTile({
   title,
   description,
   accent = "blue-slate",
+  size = "kiosk",
   className,
 }: ActionTileProps) {
   return (
     <Link
       href={href}
       className={cn(
-        "flex min-h-[140px] flex-col gap-4 rounded-2xl border border-dust-grey bg-white p-6 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper focus-visible:ring-offset-2",
+        "flex flex-col border border-dust-grey-200 bg-white shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-600 focus-visible:ring-offset-2",
+        tileSizeClasses[size],
         className,
       )}
     >
       <div
         className={cn(
-          "flex h-12 w-12 items-center justify-center rounded-xl",
+          "flex items-center justify-center rounded-xl",
+          iconWrapSizeClasses[size],
           accentClasses[accent],
         )}
       >
-        <Icon className="h-6 w-6" aria-hidden />
+        <Icon className={iconSizeClasses[size]} aria-hidden />
       </div>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-carbon-black">{title}</h3>
-        <p className="text-sm text-carbon-black/70">{description}</p>
+        <h3
+          className={cn("font-semibold text-carbon-black-900", titleSizeClasses[size])}
+        >
+          {title}
+        </h3>
+        <p className={cn("text-carbon-black-600", descriptionSizeClasses[size])}>
+          {description}
+        </p>
       </div>
     </Link>
   );

@@ -5,20 +5,20 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 
 export default function Home() {
   return (
-    <div className="flex min-h-full flex-col bg-parchment">
-      <header className="border-b border-dust-grey bg-white px-6 py-5">
+    <div className="flex min-h-full flex-col bg-parchment-50">
+      <header className="border-b border-dust-grey-200 bg-white px-6 py-5">
         <OpnameBuddyLogo />
       </header>
 
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-12">
         <div className="mb-8 space-y-2 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pearl-aqua/50 text-blue-slate">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pearl-aqua-50 text-blue-slate-700">
             <Heart className="h-7 w-7" aria-hidden />
           </div>
-          <h1 className="text-3xl font-semibold text-carbon-black">
+          <h1 className="text-3xl font-semibold text-carbon-black-900">
             Welkom bij OpnameBuddy
           </h1>
-          <p className="text-carbon-black/70">
+          <p className="text-carbon-black-600">
             Herstelparticipatie platform voor gehospitaliseerde patiënten.
           </p>
         </div>
@@ -30,6 +30,7 @@ export default function Home() {
             title="Patiënt dashboard"
             description="Dagelijks herstel en participatie."
             accent="copper"
+            size="default"
           />
           <ActionTile
             href="/care"
@@ -37,6 +38,7 @@ export default function Home() {
             title="Zorg dashboard"
             description="Overzicht voor het zorgteam."
             accent="blue-slate"
+            size="default"
           />
           <ActionTile
             href="/planning"
@@ -44,6 +46,7 @@ export default function Home() {
             title="Planning"
             description="Activiteiten en vrijwilligers."
             accent="pearl-aqua"
+            size="default"
           />
           <ActionTile
             href="/admin"
@@ -51,11 +54,12 @@ export default function Home() {
             title="Beheer"
             description="Gebruikers en rollen."
             accent="blue-slate"
+            size="default"
           />
         </div>
 
-        <DashboardCard className="mt-6 text-center">
-          <p className="text-sm text-carbon-black/70">
+        <DashboardCard className="mt-6 text-center" density="comfortable">
+          <p className="text-sm text-carbon-black-600">
             Ontwikkelaarsnavigatie — kies een module om de visuele basis te bekijken.
           </p>
         </DashboardCard>

@@ -34,10 +34,11 @@ const locations = [
 
 export function PlanningOverviewView() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Activiteitenplanning"
         description="Dinsdag 20 mei 2025"
+        size="compact"
         action={
           <div className="flex flex-wrap gap-2">
             <SecondaryButton size="sm">Week</SecondaryButton>
@@ -49,18 +50,20 @@ export function PlanningOverviewView() {
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
         {locations.map((location) => (
-          <DashboardCard key={location.name} title={location.name} padding="sm">
-            <div className="space-y-3">
+          <DashboardCard key={location.name} title={location.name} density="compact">
+            <div className="space-y-2">
               {location.activities.map((activity) => (
                 <div
                   key={activity.title}
-                  className="rounded-xl bg-pearl-aqua/30 p-3"
+                  className="rounded-lg bg-pearl-aqua-50 p-2.5"
                 >
-                  <p className="font-medium text-carbon-black">{activity.title}</p>
-                  <p className="text-sm text-carbon-black/60">{activity.time}</p>
-                  <p className="mt-1 text-xs font-medium text-blue-slate">
+                  <p className="text-sm font-medium text-carbon-black-900">
+                    {activity.title}
+                  </p>
+                  <p className="text-xs text-carbon-black-600">{activity.time}</p>
+                  <p className="mt-1 text-xs font-medium text-blue-slate-700">
                     {activity.participants} deelnemers
                   </p>
                 </div>
@@ -75,39 +78,39 @@ export function PlanningOverviewView() {
 
 export function PlanningOverviewRightPanel() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-carbon-black">
+        <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">
           Vrijwilligers vandaag
         </h3>
-        <ul className="space-y-3 text-sm">
-          <li className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua/50 text-xs font-semibold text-blue-slate">
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pearl-aqua-50 text-xs font-semibold text-blue-slate-700">
               LV
             </div>
             <div>
-              <p className="font-medium text-carbon-black">Lisa van Dijk</p>
-              <p className="text-carbon-black/60">09:00 – 13:00</p>
+              <p className="font-medium text-carbon-black-900">Lisa van Dijk</p>
+              <p className="text-xs text-carbon-black-600">09:00 – 13:00</p>
             </div>
           </li>
-          <li className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua/50 text-xs font-semibold text-blue-slate">
+          <li className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pearl-aqua-50 text-xs font-semibold text-blue-slate-700">
               TH
             </div>
             <div>
-              <p className="font-medium text-carbon-black">Tom Hendriks</p>
-              <p className="text-carbon-black/60">13:00 – 17:00</p>
+              <p className="font-medium text-carbon-black-900">Tom Hendriks</p>
+              <p className="text-xs text-carbon-black-600">13:00 – 17:00</p>
             </div>
           </li>
         </ul>
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-semibold text-carbon-black">Notities</h3>
-        <p className="text-sm text-carbon-black/70">
+        <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">Notities</h3>
+        <p className="text-sm text-carbon-black-600">
           Extra stoelen nodig voor koffieochtend in de huiskamer.
         </p>
-        <p className="mt-2 text-sm text-blue-slate">Notitie toevoegen</p>
+        <p className="mt-1.5 text-sm text-blue-slate-700">Notitie toevoegen</p>
       </div>
     </div>
   );

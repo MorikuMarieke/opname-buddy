@@ -27,21 +27,22 @@ const roles = [
 
 export function AdminRolesView() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Rollen"
         description="Overzicht van rollen en rechten in OpnameBuddy."
+        size="compact"
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {roles.map((role) => (
-          <DashboardCard key={role.name}>
+          <DashboardCard key={role.name} density="compact">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-carbon-black">
+                <h3 className="text-base font-semibold text-carbon-black-900">
                   {role.name}
                 </h3>
-                <p className="mt-1 text-sm text-carbon-black/70">
+                <p className="mt-1 text-sm text-carbon-black-600">
                   {role.description}
                 </p>
               </div>

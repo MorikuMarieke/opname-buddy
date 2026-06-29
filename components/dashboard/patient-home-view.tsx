@@ -11,13 +11,14 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 export function PatientHomeView() {
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2">
         <ActionTile
           href="/dashboard/checkin"
           icon={ClipboardList}
           title="Check-in"
           description="Hoe voel je je vandaag?"
           accent="blue-slate"
+          size="kiosk"
         />
         <ActionTile
           href="/dashboard/questions"
@@ -25,6 +26,7 @@ export function PatientHomeView() {
           title="Mijn vragen"
           description="Stel of bekijk je vragen."
           accent="copper"
+          size="kiosk"
         />
         <ActionTile
           href="/dashboard/activities"
@@ -32,6 +34,7 @@ export function PatientHomeView() {
           title="Activiteiten"
           description="Bekijk activiteiten."
           accent="blue-slate"
+          size="kiosk"
         />
         <ActionTile
           href="/dashboard/advice"
@@ -39,6 +42,7 @@ export function PatientHomeView() {
           title="DagBuddy"
           description="Jouw persoonlijke advies."
           accent="copper"
+          size="kiosk"
         />
         <ActionTile
           href="/dashboard"
@@ -46,10 +50,17 @@ export function PatientHomeView() {
           title="Mijn overzicht"
           description="Bekijk je weekoverzicht."
           accent="pearl-aqua"
+          size="kiosk"
         />
-        <DashboardCard className="flex flex-col justify-center">
-          <p className="text-sm font-medium text-carbon-black/60">Dinsdag 20 mei</p>
-          <p className="mt-2 text-lg font-semibold text-carbon-black">
+        <DashboardCard
+          density="comfortable"
+          padding="lg"
+          className="flex min-h-[180px] flex-col justify-center bg-pearl-aqua-50"
+        >
+          <p className="text-base font-medium text-carbon-black-600">
+            Dinsdag 20 mei
+          </p>
+          <p className="mt-3 text-xl font-semibold text-carbon-black-900">
             Vergeet niet je check-in in te vullen.
           </p>
         </DashboardCard>

@@ -5,12 +5,13 @@ import { SectionHeader } from "@/components/ui/section-header";
 
 export default function PlanningSessionsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader
         title="Sessies"
         description="Plan en beheer activiteitensessies."
+        size="compact"
       />
-      <DashboardCard>
+      <DashboardCard density="compact">
         <EmptyState
           icon={CalendarDays}
           title="Sessieplanning"
