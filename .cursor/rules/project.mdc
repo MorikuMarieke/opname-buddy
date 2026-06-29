@@ -1,0 +1,76 @@
+---
+description: General project rules and conventions
+alwaysApply: true
+---
+
+# Project Rules
+
+## Tech Stack
+- Next.js 16 with App Router
+- TypeScript strict mode
+- Tailwind CSS
+- Supabase
+- React Query
+- Vercel AI SDK
+
+## Conventions
+- Use functional React components
+- Use TypeScript interfaces
+- Use async/await instead of `.then()` chains
+- Use kebab-case for file names
+- Use PascalCase for component names
+- Avoid `any` types
+- Keep business logic outside UI components
+
+## Folder Structure
+- `app/` - App Router routes, layouts and API routes
+
+### Auth
+- `app/(auth)/login/` - login route
+- `app/(auth)/register/` - register route
+
+### Patient dashboard
+- `app/dashboard/` - patient home
+- `app/dashboard/checkin/` - daily check-in
+- `app/dashboard/questions/` - patient questions
+- `app/dashboard/activities/` - patient activities
+- `app/dashboard/advice/` - DailyBuddy advice
+
+### Care dashboard
+- `app/care/` - care team home
+- `app/care/patients/` - patient list
+- `app/care/patients/[patientId]/` - patient detail
+
+### Planning module
+- `app/planning/` - planning home
+- `app/planning/activities/` - activity planning
+- `app/planning/sessions/` - session planning
+- `app/planning/volunteers/` - volunteer coordination
+
+### Admin module
+- `app/admin/` - admin home
+- `app/admin/users/` - user management
+- `app/admin/roles/` - role management
+
+### Shared
+- `components/ui/` - small reusable UI primitives
+- `components/layout/` - layout components
+- `components/dashboard/` - domain-specific view components
+- `components/forms/` - reusable form components
+- `hooks/` - custom React hooks and React Query hooks
+- `lib/` - application logic, integrations and utilities
+- `lib/supabase/` - Supabase clients and helpers
+- `lib/services/` - data access and business logic
+- `lib/ai/` - AI agents and AI configuration
+- `lib/tools/` - AI tool calling functions
+- `lib/constants/` - shared constants
+- `lib/utils/` - utility functions
+- `types/` - shared TypeScript type definitions
+- `providers/` - React context providers
+- `public/` - static assets
+
+## Scope
+- Build OpnameBuddy as a patient recovery participation dashboard.
+- Do not add features outside the requested scope.
+- Do not implement medical diagnosis or treatment recommendation logic.
+- AI may only support recovery participation within caregiver-defined boundaries.
