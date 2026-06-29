@@ -524,3 +524,125 @@ User_roles:
 - what I should check in the Supabase Table Editor and Schema Visualizer afterwards
 - what the next implementation step should be
 
+**Prompt 3.2** We are working on the OpnameBuddy graduation project.
+
+Current branch: feature/supabase-auth-roles.
+
+The initial Supabase SQL migration for profiles, roles and user_roles has already been created and executed in Supabase.
+
+Goal:
+Set up the Supabase client layer and generated database types.
+
+Implement only:
+1. Install required packages:
+- @supabase/supabase-js
+- @supabase/ssr
+
+2. Create reusable Supabase clients:
+- lib/supabase/client.ts for browser/client components
+- lib/supabase/server.ts for server components and server actions
+- lib/supabase/middleware.ts for middleware session handling
+
+3. Generate or add TypeScript database types:
+- types/database.ts
+- Include types for profiles, roles and user_roles
+- Use the current Supabase schema as source of truth if possible
+
+4. Use existing environment variables:
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_URL
+- SUPABASE_SERVICE_ROLE_KEY
+
+Important constraints:
+- Do not expose SUPABASE_SERVICE_ROLE_KEY to the browser.
+- Do not implement login/register pages yet.
+- Do not implement route protection yet.
+- Do not implement role-based redirects yet.
+- Do not create new database tables.
+- Do not modify unrelated UI files.
+
+After implementation, explain:
+- which packages were installed
+- which files were created or changed
+- when to use each Supabase client
+- how the generated database types are used
+- what the next step should be
+
+**Prompt 3.3:** We are working on the OpnameBuddy graduation project.
+
+Current branch: feature/supabase-auth-roles.
+
+Already completed:
+- Supabase project was created manually.
+- Environment variables are configured.
+- Initial auth database schema was created and executed:
+  profiles, roles, user_roles, RLS policies and auth trigger.
+- Supabase client layer is implemented:
+  lib/supabase/client.ts
+  lib/supabase/server.ts
+  lib/supabase/middleware.ts
+  types/database.ts
+- Build passes.
+
+Important:
+Leave existing .gitkeep files in place for now.
+Do not remove .gitkeep files in this step.
+They are currently kept intentionally as part of the folder setup.
+
+Goal:
+Implement the first working authentication flow.
+
+Implement only:
+1. Root middleware
+- Create root middleware.ts.
+- Call updateSession from lib/supabase/middleware.ts.
+- Use a matcher that avoids static assets and Next.js internals.
+- Do not implement role-based redirects yet.
+
+2. Login page
+- Wire the existing /login page to Supabase Auth.
+- Login with email and password.
+- Show loading and error states.
+- After successful login, redirect to /dashboard for now.
+
+3. Register page
+- Wire the existing /register page to Supabase Auth.
+- Register with email, password and full name.
+- Pass full_name in signup metadata so the database trigger can populate profiles.full_name.
+- Show loading and error states.
+- After successful registration, show a clear message or redirect depending on Supabase email confirmation behavior.
+
+4. Logout
+- Add logout functionality from the protected dashboard or existing dashboard layout.
+- After logout, redirect to /login.
+
+5. Basic protected dashboard
+- Ensure /dashboard requires an authenticated user.
+- If no user is logged in, redirect to /login.
+- If a user is logged in, show basic user info from Supabase Auth.
+- Do not fetch roles yet.
+- Do not implement patient/caregiver/admin redirects yet.
+
+Constraints:
+- Do not create or modify database tables.
+- Do not change RLS policies.
+- Do not implement check-ins, questions, restrictions, activities or AI.
+- Do not implement role management.
+- Do not expose SUPABASE_SERVICE_ROLE_KEY to the browser.
+- Do not remove .gitkeep files.
+- Keep existing styling and layout structure as much as possible.
+- Keep the implementation simple and maintainable.
+
+After implementation, explain:
+- which files were created or changed
+- how middleware session refresh works
+- how login/register/logout works
+- how /dashboard is protected
+- how I can test this manually in Supabase and in the browser
+- what the next step should be
+
+**Debug 3.1** Needed to fix middleware convention to proxy because of error: Uncaught Error: Cannot find middleware module.
+
+
+

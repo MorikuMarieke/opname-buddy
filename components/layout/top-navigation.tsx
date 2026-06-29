@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search } from "lucide-react";
+import { LogoutButton } from "@/components/auth/logout-button";
 import { OpnameBuddyLogo } from "@/components/layout/opname-buddy-logo";
-import { SecondaryButton } from "@/components/ui/secondary-button";
 import { patientBottomNavItems } from "@/lib/constants/navigation";
 import { cn } from "@/lib/utils/cn";
 
@@ -28,9 +28,7 @@ export function TopNavigation({
       <header className="border-b border-parchment-200 bg-white px-4 py-4 sm:px-6 lg:py-5">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
           <OpnameBuddyLogo />
-          <SecondaryButton href="/login" size="sm">
-            Uitloggen
-          </SecondaryButton>
+          <LogoutButton />
         </div>
 
         {greeting ? (
