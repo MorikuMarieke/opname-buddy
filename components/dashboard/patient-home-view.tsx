@@ -55,14 +55,16 @@ export function PatientHomeView() {
         <DashboardCard
           density="comfortable"
           padding="lg"
-          className="flex min-h-[180px] flex-col justify-center bg-pearl-aqua-50"
+          className="flex min-h-[180px] flex-col justify-center border-l-4 border-l-copper-400"
         >
-          <p className="text-base font-medium text-carbon-black-600">
-            Dinsdag 20 mei
-          </p>
-          <p className="mt-3 text-xl font-semibold text-carbon-black-900">
-            Vergeet niet je check-in in te vullen.
-          </p>
+          <div className="rounded-xl bg-pearl-aqua-100 px-4 py-3">
+            <p className="text-base font-medium text-carbon-black-600">
+              Dinsdag 20 mei
+            </p>
+            <p className="mt-2 text-xl font-semibold text-carbon-black-900">
+              Vergeet niet je check-in in te vullen.
+            </p>
+          </div>
         </DashboardCard>
       </div>
     </div>

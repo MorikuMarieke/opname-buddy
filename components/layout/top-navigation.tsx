@@ -25,7 +25,7 @@ export function TopNavigation({
 
   if (variant === "patient") {
     return (
-      <header className="border-b border-dust-grey-200 bg-white px-4 py-4 sm:px-6 lg:py-5">
+      <header className="border-b border-parchment-200 bg-white px-4 py-4 sm:px-6 lg:py-5">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
           <OpnameBuddyLogo />
           <SecondaryButton href="/login" size="sm">
@@ -58,8 +58,8 @@ export function TopNavigation({
                 className={cn(
                   "flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-copper-50 text-copper-600"
-                    : "text-carbon-black-600 hover:bg-dust-grey-100 hover:text-blue-slate-700",
+                    ? "bg-copper-200 text-copper-700"
+                    : "text-carbon-black-600 hover:bg-parchment-100 hover:text-blue-slate-700",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden />
@@ -73,7 +73,7 @@ export function TopNavigation({
   }
 
   return (
-    <header className="border-b border-dust-grey-200 bg-white px-4 py-3 sm:px-5">
+    <header className="border-b border-parchment-200 bg-white px-4 py-3 sm:px-5">
       <div className="flex items-center gap-4">
         <button
           type="button"
@@ -101,7 +101,7 @@ export function TopNavigation({
             type="search"
             disabled
             placeholder="Zoek patiënt..."
-            className="h-10 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 pl-10 pr-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
+            className="h-10 w-full rounded-xl border border-parchment-200 bg-white pl-10 pr-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
           />
         </div>
 
@@ -113,7 +113,7 @@ export function TopNavigation({
             <p className="text-xs text-carbon-black-600">Verpleegkundige</p>
           </div>
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua-50 text-sm font-semibold text-blue-slate-700"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua-200 text-sm font-semibold text-pearl-aqua-800"
             aria-hidden
           >
             SV

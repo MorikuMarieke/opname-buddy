@@ -216,3 +216,20 @@ Use English for:
 Use the attached inspiration imag as visual direction. 
 
 Focus on creating a strong visual foundation before implementing any functionality.
+
+Prompt 2.2 This plan looks good. Please proceed, but with these adjustments:
+
+1. Use the full provided color scale from my original palette instead of replacing it with simplified suggested hex values.
+2. Use semantic color roles consistently:
+   - blue-slate for primary navigation
+   - copper for main CTA/action buttons
+   - pearl-aqua for calm supportive highlights
+   - parchment for page backgrounds
+   - dust-grey for secondary surfaces and borders
+   - carbon-black for text
+   - cherry-rose only for urgent or attention states
+3. Make the patient dashboard visually more tablet/kiosk-like than the professional dashboards: larger cards, larger icons, larger spacing and stronger touch targets.
+4. Keep care, planning and admin more desktop-oriented and information-dense.
+5. Do not add functionality, data fetching, auth, Supabase, AI, forms or mock services.
+
+Prompt 2.3

@@ -3,6 +3,13 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { SecondaryButton } from "@/components/ui/secondary-button";
+import { cn } from "@/lib/utils/cn";
+
+const nestedActivityColors = [
+  "bg-pearl-aqua-100",
+  "bg-copper-100",
+  "bg-blue-slate-100",
+] as const;
 
 const locations = [
   {
@@ -54,10 +61,13 @@ export function PlanningOverviewView() {
         {locations.map((location) => (
           <DashboardCard key={location.name} title={location.name} density="compact">
             <div className="space-y-2">
-              {location.activities.map((activity) => (
+              {location.activities.map((activity, activityIndex) => (
                 <div
                   key={activity.title}
-                  className="rounded-lg bg-pearl-aqua-50 p-2.5"
+                  className={cn(
+                    "rounded-lg p-2.5",
+                    nestedActivityColors[activityIndex % nestedActivityColors.length],
+                  )}
                 >
                   <p className="text-sm font-medium text-carbon-black-900">
                     {activity.title}
@@ -85,7 +95,7 @@ export function PlanningOverviewRightPanel() {
         </h3>
         <ul className="space-y-2 text-sm">
           <li className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pearl-aqua-50 text-xs font-semibold text-blue-slate-700">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pearl-aqua-200 text-xs font-semibold text-pearl-aqua-800">
               LV
             </div>
             <div>
@@ -94,7 +104,7 @@ export function PlanningOverviewRightPanel() {
             </div>
           </li>
           <li className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pearl-aqua-50 text-xs font-semibold text-blue-slate-700">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pearl-aqua-200 text-xs font-semibold text-pearl-aqua-800">
               TH
             </div>
             <div>

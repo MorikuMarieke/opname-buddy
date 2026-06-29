@@ -22,8 +22,8 @@ export function CarePatientsView() {
 
       <DashboardCard density="compact" className="overflow-x-auto">
         <table className="w-full min-w-[560px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-dust-grey-200 text-carbon-black-600">
+          <thead className="bg-parchment-100">
+            <tr className="border-b border-parchment-200 text-carbon-black-600">
               <th className="px-3 py-2 font-medium">Naam</th>
               <th className="px-3 py-2 font-medium">Kamer</th>
               <th className="px-3 py-2 font-medium">Check-in</th>

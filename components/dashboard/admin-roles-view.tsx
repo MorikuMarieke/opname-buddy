@@ -35,8 +35,16 @@ export function AdminRolesView() {
       />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {roles.map((role) => (
-          <DashboardCard key={role.name} density="compact">
+        {roles.map((role, index) => (
+          <DashboardCard
+            key={role.name}
+            density="compact"
+            className={
+              index % 2 === 0
+                ? "border-pearl-aqua-50"
+                : "border-copper-50"
+            }
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-base font-semibold text-carbon-black-900">

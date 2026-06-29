@@ -69,7 +69,7 @@ export function DashboardShell({
           </main>
 
           {rightPanel ? (
-            <aside className="hidden w-64 shrink-0 border-l border-dust-grey-200 bg-white p-4 xl:block">
+            <aside className="hidden w-64 shrink-0 border-l border-parchment-200 bg-parchment-50 p-4 xl:block">
               {rightPanel}
             </aside>
           ) : null}

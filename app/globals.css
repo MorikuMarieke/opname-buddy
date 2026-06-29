@@ -110,6 +110,11 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --radius-card: 1rem;
+  --shadow-card: 0 2px 12px rgb(30 28 23 / 0.06);
+}
+
+.shadow-card {
+  box-shadow: var(--shadow-card);
 }
 
 body {

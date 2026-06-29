@@ -16,9 +16,9 @@ interface ActionTileProps {
 }
 
 const accentClasses: Record<ActionTileAccent, string> = {
-  copper: "bg-copper-50 text-copper-600",
-  "blue-slate": "bg-blue-slate-50 text-blue-slate-700",
-  "pearl-aqua": "bg-pearl-aqua-50 text-blue-slate-700",
+  copper: "bg-copper-200 text-copper-700",
+  "blue-slate": "bg-blue-slate-200 text-blue-slate-800",
+  "pearl-aqua": "bg-pearl-aqua-200 text-pearl-aqua-800",
 };
 
 const tileSizeClasses: Record<ActionTileSize, string> = {
@@ -59,7 +59,7 @@ export function ActionTile({
     <Link
       href={href}
       className={cn(
-        "flex flex-col border border-dust-grey-200 bg-white shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-600 focus-visible:ring-offset-2",
+        "flex flex-col border border-parchment-200 bg-white shadow-card transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-600 focus-visible:ring-offset-2",
         tileSizeClasses[size],
         className,
       )}

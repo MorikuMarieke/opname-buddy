@@ -43,14 +43,14 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-dust-grey-200 bg-white text-center",
+        "flex flex-col items-center justify-center rounded-2xl border border-parchment-200 bg-white text-center shadow-card",
         containerSizeClasses[size],
         className,
       )}
     >
       <div
         className={cn(
-          "mb-4 flex items-center justify-center rounded-full bg-pearl-aqua-50 text-blue-slate-700",
+          "mb-4 flex items-center justify-center rounded-full bg-pearl-aqua-200 text-pearl-aqua-800",
           iconWrapSizeClasses[size],
         )}
       >

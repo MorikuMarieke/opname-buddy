@@ -10,7 +10,7 @@ export function PatientBottomNavigation() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-dust-grey-200 bg-white px-2 py-2 lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-parchment-200 bg-white/95 px-2 py-2 backdrop-blur lg:hidden"
       aria-label="Patiëntnavigatie"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-between">

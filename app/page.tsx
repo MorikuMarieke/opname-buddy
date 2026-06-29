@@ -6,13 +6,13 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 export default function Home() {
   return (
     <div className="flex min-h-full flex-col bg-parchment-50">
-      <header className="border-b border-dust-grey-200 bg-white px-6 py-5">
+      <header className="border-b border-parchment-200 bg-white px-6 py-5">
         <OpnameBuddyLogo />
       </header>
 
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-12">
         <div className="mb-8 space-y-2 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pearl-aqua-50 text-blue-slate-700">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pearl-aqua-200 text-pearl-aqua-800">
             <Heart className="h-7 w-7" aria-hidden />
           </div>
           <h1 className="text-3xl font-semibold text-carbon-black-900">

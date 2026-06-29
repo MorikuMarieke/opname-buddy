@@ -50,7 +50,7 @@ export function CareOverviewView() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-pearl-aqua-50 p-2 text-blue-slate-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pearl-aqua-200 text-pearl-aqua-800">
               <Users className="h-4 w-4" />
             </div>
             <div>
@@ -62,7 +62,7 @@ export function CareOverviewView() {
 
         <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-pearl-aqua-50 p-2 text-blue-slate-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pearl-aqua-200 text-pearl-aqua-800">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
@@ -79,7 +79,7 @@ export function CareOverviewView() {
 
         <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-copper-50 p-2 text-copper-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-copper-200 text-copper-700">
               <MessageCircle className="h-4 w-4" />
             </div>
             <div>
@@ -96,7 +96,7 @@ export function CareOverviewView() {
 
         <DashboardCard density="compact">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-blue-slate-50 p-2 text-blue-slate-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-slate-200 text-blue-slate-800">
               <Shield className="h-4 w-4" />
             </div>
             <div>
@@ -109,8 +109,8 @@ export function CareOverviewView() {
 
       <DashboardCard density="compact" className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-dust-grey-200 text-carbon-black-600">
+          <thead className="bg-parchment-100">
+            <tr className="border-b border-parchment-200 text-carbon-black-600">
               <th className="px-3 py-2 font-medium">Naam</th>
               <th className="px-3 py-2 font-medium">Kamer</th>
               <th className="px-3 py-2 font-medium">Check-in</th>
@@ -178,11 +178,11 @@ export function CareOverviewRightPanel() {
       <div>
         <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">Meldingen</h3>
         <ul className="space-y-2 text-sm">
-          <li className="rounded-lg bg-parchment-50 p-3">
+          <li className="rounded-lg border border-parchment-200 bg-white p-3 shadow-card">
             <p className="font-medium text-carbon-black-900">3 urgente vragen</p>
             <p className="text-carbon-black-600">Wachten op beantwoording</p>
           </li>
-          <li className="rounded-lg bg-parchment-50 p-3">
+          <li className="rounded-lg border border-parchment-200 bg-white p-3 shadow-card">
             <p className="font-medium text-carbon-black-900">Check-in herinnering</p>
             <p className="text-carbon-black-600">7 patiënten nog niet ingevuld</p>
           </li>

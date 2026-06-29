@@ -39,7 +39,7 @@ export function PlanningCalendarView() {
               return (
                 <div
                   key={index}
-                  className="min-h-24 rounded-lg border border-dust-grey-200 bg-parchment-50 p-2"
+                  className="min-h-24 rounded-lg border border-parchment-200 bg-white p-2"
                 >
                   <p className="mb-1.5 text-xs font-medium text-carbon-black-600">
                     {index + 19}
@@ -48,7 +48,7 @@ export function PlanningCalendarView() {
                     {dayEvents.map((event) => (
                       <div
                         key={`${event.title}-${event.time}`}
-                        className="rounded-md bg-pearl-aqua-50 px-1.5 py-1 text-xs"
+                        className="rounded-md bg-pearl-aqua-200 px-1.5 py-1 text-xs"
                       >
                         <p className="font-medium text-carbon-black-900">
                           {event.title}

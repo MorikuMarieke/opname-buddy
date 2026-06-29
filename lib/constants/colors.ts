@@ -106,5 +106,26 @@ export const semanticColors = {
   background: colorScales.parchment[50],
   surfaceAlt: colorScales.dustGrey[100],
   border: colorScales.dustGrey[200],
+  cardBorder: colorScales.parchment[200],
   white: "#FFFFFF",
+} as const;
+
+/**
+ * Tailwind class token map for the 3-layer surface hierarchy.
+ * Use these as literal class names in components (e.g. `border-parchment-200`);
+ * do not assemble classes dynamically — Tailwind JIT will not detect them.
+ */
+export const surfaceRoles = {
+  page: "parchment-50",
+  canvas: "parchment-50",
+  card: "white",
+  cardBorder: "parchment-200",
+  nestedAqua: "pearl-aqua-100",
+  nestedCopper: "copper-100",
+  accentCopperBg: "copper-200",
+  accentCopperIcon: "copper-700",
+  accentAquaBg: "pearl-aqua-200",
+  accentAquaIcon: "pearl-aqua-700",
+  accentSlateBg: "blue-slate-200",
+  accentSlateIcon: "blue-slate-700",
 } as const;

@@ -9,9 +9,9 @@ interface StatusBadgeProps {
 }
 
 const variantClasses: Record<StatusBadgeVariant, string> = {
-  neutral: "bg-dust-grey-100 text-carbon-black-900",
+  neutral: "bg-parchment-200 text-carbon-black-800",
   attention: "bg-cherry-rose-50 text-cherry-rose-600",
-  positive: "bg-pearl-aqua-50 text-blue-slate-700",
+  positive: "bg-pearl-aqua-200 text-blue-slate-800",
 };
 
 export function StatusBadge({

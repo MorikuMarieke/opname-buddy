@@ -25,7 +25,7 @@ export function OpnameBuddyLogo({
           "flex h-9 w-9 items-center justify-center rounded-xl",
           variant === "light"
             ? "bg-white/15"
-            : "bg-pearl-aqua-50 text-blue-slate-700",
+            : "bg-pearl-aqua-200 text-pearl-aqua-800",
         )}
       >
         <Heart className="h-5 w-5" aria-hidden />

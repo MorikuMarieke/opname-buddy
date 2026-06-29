@@ -10,7 +10,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <div className="mb-8">
         <OpnameBuddyLogo />
       </div>
-      <div className="w-full max-w-md rounded-2xl border border-dust-grey-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-md rounded-2xl border border-parchment-200 bg-white p-8 shadow-card">
         {children}
       </div>
     </div>

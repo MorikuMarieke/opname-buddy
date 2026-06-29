@@ -61,7 +61,7 @@ export function CarePatientDetailView({
       </div>
 
       <nav
-        className="flex flex-wrap gap-2 border-b border-dust-grey-200 pb-3"
+        className="flex flex-wrap gap-2 border-b border-parchment-200 pb-3"
         aria-label="Patiënt subnavigatie"
       >
         {subNavItems.map((item) => {
@@ -73,8 +73,8 @@ export function CarePatientDetailView({
               className={cn(
                 "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-blue-slate-800 text-white"
-                  : "bg-dust-grey-100 text-carbon-black-900 hover:bg-dust-grey-200",
+                  ? "bg-blue-slate-700 text-white"
+                  : "bg-parchment-100 text-carbon-black-900 hover:bg-parchment-200",
               )}
             >
               {item.label}

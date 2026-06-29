@@ -39,7 +39,7 @@ export function DashboardCard({
   return (
     <div
       className={cn(
-        "border border-dust-grey-200 bg-white shadow-sm",
+        "border border-parchment-200 bg-white shadow-card",
         densityClasses[density],
         paddingClasses[resolvedPadding],
         className,
