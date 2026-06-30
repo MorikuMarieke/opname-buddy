@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +18,27 @@ function getErrorMessage(message: string): string {
   return "Inloggen is mislukt. Probeer het opnieuw.";
 }
 
+function handleEnterToSubmit(
+  event: React.KeyboardEvent<HTMLFormElement>,
+  formRef: React.RefObject<HTMLFormElement | null>,
+  isLoading: boolean,
+  submitOnInputId: string,
+) {
+  if (event.key !== "Enter" || isLoading || event.nativeEvent.isComposing) {
+    return;
+  }
+
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || target.id !== submitOnInputId) {
+    return;
+  }
+
+  event.preventDefault();
+  formRef.current?.requestSubmit();
+}
+
 export function LoginForm() {
+  const formRef = useRef<HTMLFormElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,8 +46,15 @@ export function LoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isLoading) {
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+
+    let isRedirecting = false;
 
     try {
       const supabase = createClient();
@@ -41,14 +68,26 @@ export function LoginForm() {
         return;
       }
 
+      isRedirecting = true;
       window.location.assign("/auth/redirect");
+    } catch {
+      setError("Inloggen is mislukt. Probeer het opnieuw.");
     } finally {
-      setIsLoading(false);
+      if (!isRedirecting) {
+        setIsLoading(false);
+      }
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      onKeyDown={(event) =>
+        handleEnterToSubmit(event, formRef, isLoading, "password")
+      }
+      className="space-y-4"
+    >
       <div className="space-y-2">
         <label
           htmlFor="email"
@@ -61,6 +100,7 @@ export function LoginForm() {
           type="email"
           required
           autoComplete="email"
+          enterKeyHint="next"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           disabled={isLoading}
@@ -81,6 +121,7 @@ export function LoginForm() {
           type="password"
           required
           autoComplete="current-password"
+          enterKeyHint="go"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           disabled={isLoading}

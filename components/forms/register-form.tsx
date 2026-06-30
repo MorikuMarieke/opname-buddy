@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +18,27 @@ function getErrorMessage(message: string): string {
   return "Registreren is mislukt. Probeer het opnieuw.";
 }
 
+function handleEnterToSubmit(
+  event: React.KeyboardEvent<HTMLFormElement>,
+  formRef: React.RefObject<HTMLFormElement | null>,
+  isLoading: boolean,
+  submitOnInputId: string,
+) {
+  if (event.key !== "Enter" || isLoading || event.nativeEvent.isComposing) {
+    return;
+  }
+
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || target.id !== submitOnInputId) {
+    return;
+  }
+
+  event.preventDefault();
+  formRef.current?.requestSubmit();
+}
+
 export function RegisterForm() {
+  const formRef = useRef<HTMLFormElement>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,32 +48,46 @@ export function RegisterForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isLoading) {
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    let isRedirecting = false;
 
-    if (signUpError) {
-      setError(getErrorMessage(signUpError.message));
-      setIsLoading(false);
-      return;
+    try {
+      const supabase = createClient();
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (signUpError) {
+        setError(getErrorMessage(signUpError.message));
+        return;
+      }
+
+      if (data.session) {
+        isRedirecting = true;
+        window.location.assign("/auth/redirect");
+        return;
+      }
+
+      setConfirmationSent(true);
+    } catch {
+      setError("Registreren is mislukt. Probeer het opnieuw.");
+    } finally {
+      if (!isRedirecting) {
+        setIsLoading(false);
+      }
     }
-
-    if (data.session) {
-      window.location.assign("/auth/redirect");
-      return;
-    }
-
-    setConfirmationSent(true);
-    setIsLoading(false);
   }
 
   if (confirmationSent) {
@@ -71,7 +105,14 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      onKeyDown={(event) =>
+        handleEnterToSubmit(event, formRef, isLoading, "password")
+      }
+      className="space-y-4"
+    >
       <div className="space-y-2">
         <label
           htmlFor="name"
@@ -84,6 +125,7 @@ export function RegisterForm() {
           type="text"
           required
           autoComplete="name"
+          enterKeyHint="next"
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
           disabled={isLoading}
@@ -104,6 +146,7 @@ export function RegisterForm() {
           type="email"
           required
           autoComplete="email"
+          enterKeyHint="next"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           disabled={isLoading}
@@ -125,6 +168,7 @@ export function RegisterForm() {
           required
           minLength={6}
           autoComplete="new-password"
+          enterKeyHint="go"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           disabled={isLoading}
