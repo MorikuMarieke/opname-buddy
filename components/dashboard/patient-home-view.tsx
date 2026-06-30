@@ -7,6 +7,7 @@ import {
   Sun,
 } from "lucide-react";
 
+import { PatientHomeSummary } from "@/components/dashboard/patient-home-summary";
 import { ActionTile } from "@/components/ui/action-tile";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 
@@ -80,20 +81,7 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
           accent="pearl-aqua"
           size="kiosk"
         />
-        <DashboardCard
-          density="comfortable"
-          padding="lg"
-          className="flex min-h-[180px] flex-col justify-center border-l-4 border-l-copper-400"
-        >
-          <div className="rounded-xl bg-pearl-aqua-100 px-4 py-3">
-            <p className="text-base font-medium text-carbon-black-600">
-              Dinsdag 20 mei
-            </p>
-            <p className="mt-2 text-xl font-semibold text-carbon-black-900">
-              Vergeet niet je check-in in te vullen.
-            </p>
-          </div>
-        </DashboardCard>
+        <PatientHomeSummary />
       </div>
     </div>
   );

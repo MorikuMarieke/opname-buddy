@@ -89,6 +89,97 @@ export type Database = {
           },
         ];
       };
+      patient_checkins: {
+        Row: {
+          id: string;
+          patient_id: string;
+          check_in_date: string;
+          pain_score: number;
+          energy_level: number;
+          mood: number;
+          mobility_level: number;
+          symptoms: string;
+          note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          patient_id: string;
+          check_in_date: string;
+          pain_score: number;
+          energy_level: number;
+          mood: number;
+          mobility_level: number;
+          symptoms?: string;
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          patient_id?: string;
+          check_in_date?: string;
+          pain_score?: number;
+          energy_level?: number;
+          mood?: number;
+          mobility_level?: number;
+          symptoms?: string;
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "patient_checkins_patient_id_fkey";
+            columns: ["patient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      patient_questions: {
+        Row: {
+          id: string;
+          patient_id: string;
+          question_text: string;
+          target_type: string;
+          status: string;
+          answer_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          patient_id: string;
+          question_text: string;
+          target_type: string;
+          status?: string;
+          answer_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          patient_id?: string;
+          question_text?: string;
+          target_type?: string;
+          status?: string;
+          answer_notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "patient_questions_patient_id_fkey";
+            columns: ["patient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -189,6 +280,8 @@ export type TablesUpdate<
 export type Profile = Tables<"profiles">;
 export type Role = Tables<"roles">;
 export type UserRole = Tables<"user_roles">;
+export type PatientCheckin = Tables<"patient_checkins">;
+export type PatientQuestion = Tables<"patient_questions">;
 
 export type RoleName =
   | "patient"

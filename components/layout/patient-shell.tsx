@@ -3,6 +3,7 @@
 import type { User } from "@supabase/supabase-js";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { PatientQueryProvider } from "@/components/layout/patient-query-provider";
 import { patientNavItems } from "@/lib/constants/navigation";
 
 interface PatientShellProps {
@@ -28,12 +29,14 @@ export function PatientShell({ children, user }: PatientShellProps) {
   const greetingName = getGreetingName(user);
 
   return (
-    <DashboardShell
-      variant="patient"
-      navItems={patientNavItems}
-      greeting={`Goedemorgen ${greetingName}, hoe gaat het vandaag?`}
-    >
-      {children}
-    </DashboardShell>
+    <PatientQueryProvider>
+      <DashboardShell
+        variant="patient"
+        navItems={patientNavItems}
+        greeting={`Goedemorgen ${greetingName}, hoe gaat het vandaag?`}
+      >
+        {children}
+      </DashboardShell>
+    </PatientQueryProvider>
   );
 }
