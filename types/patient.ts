@@ -29,7 +29,7 @@ export const CAREGIVER_TARGET_LABELS: Record<CaregiverTargetType, string> = {
   doctor: "Arts",
   nurse: "Verpleging",
   physiotherapist: "Fysiotherapeut",
-  other: "Overig",
+  other: "Overig zorgteam",
 };
 
 export const QUESTION_STATUS_LABELS: Record<QuestionStatus, string> = {

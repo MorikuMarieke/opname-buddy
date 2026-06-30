@@ -114,11 +114,15 @@ Index planned on `(patient_id, check_in_date DESC)` for history lists. No UNIQUE
 
 #### User / problem
 
-Patients forget important questions before rounds or care moments. Writing questions in advance helps them prepare and gives caregivers visibility into discussion topics.
+Patients forget important questions before rounds, visits or care moments. They need a simple **preparation editor**: write a question whenever it comes to mind, label it for the right **hospital specialism**, and keep it until they can discuss it with a caregiver.
+
+**Branch 2:** editor + list only. Questions are **not** organized or summarized in the app yet.
+
+**Branch 8 (QuestionBuddy):** open questions are organized into a **daily summary** (grouped by specialism, clearer wording) for use before rounds. The AI **never answers** medical questions — only organizes. See [`docs/future-questionbuddy-daily-summary.md`](../future-questionbuddy-daily-summary.md).
 
 #### Entity: PatientQuestion
 
-A question the patient wants to discuss with a specific type of caregiver.
+A question the patient wants to discuss with a specific caregiver specialism.
 
 | Concern | Detail |
 |---------|--------|
@@ -127,12 +131,12 @@ A question the patient wants to discuss with a specific type of caregiver.
 
 **Business rules**
 
-- Target types: `doctor`, `nurse`, `physiotherapist`, `other`
+- Target types (specialism): `doctor`, `nurse`, `physiotherapist`, `other`
 - Status lifecycle: `open` → `discussed` → `answered`
 - Patients may **create** questions (default status `open`)
 - Patients may **edit** and **delete** only their own **open** questions
 - `answer_notes` is reserved for **caregiver** use (branch 3); patients may read it when populated
-- QuestionBuddy (branch 8) may organize questions but never answers medical content
+- **No in-app daily summary in branch 2** — QuestionBuddy (branch 8) produces an organized daily list from open questions; it does not answer them
 
 #### Blueprint: `patient_questions` (branch 2 — **Implemented**)
 

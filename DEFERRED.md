@@ -37,3 +37,15 @@ alter default privileges in schema public
 **Context:** Morning check-in and evening participation evaluation use calendar dates (`check_in_date`, `evaluation_date`) in Europe/Amsterdam. The app does not yet use time-of-day windows or evening reminders.
 
 **Full plan:** [`docs/future-participation-scheduling.md`](docs/future-participation-scheduling.md)
+
+---
+
+## Patient questions: daily summary (QuestionBuddy)
+
+**Status:** Parked — branch 2 is editor only  
+**Added:** 2026-06-30  
+**Trigger:** Branch 8 QuestionBuddy agent with Vercel AI SDK.
+
+**Context:** Patients write and label questions in branch 2. Organization into a daily summary for rounds happens later via QuestionBuddy — never medical answers in the app.
+
+**Full plan:** [`docs/future-questionbuddy-daily-summary.md`](docs/future-questionbuddy-daily-summary.md)

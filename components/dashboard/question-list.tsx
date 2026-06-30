@@ -23,8 +23,8 @@ export function QuestionList({
     return (
       <EmptyState
         icon={MessageCircleQuestion}
-        title="Nog geen vragen"
-        description="Heb je een vraag voor je zorgteam? Voeg je eerste vraag toe."
+        title="Nog geen vragen opgeschreven"
+        description="Heb je een vraag voor je arts, verpleging of fysiotherapeut? Schrijf hem hier op zodat je hem niet vergeet."
         size="kiosk"
       />
     );

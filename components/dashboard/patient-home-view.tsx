@@ -53,7 +53,7 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
           href="/dashboard/questions"
           icon={MessageCircleQuestion}
           title="Mijn vragen"
-          description="Stel of bekijk je vragen."
+          description="Schrijf vragen op per specialisme."
           accent="copper"
           size="kiosk"
         />

@@ -79,7 +79,7 @@ export function QuestionsView() {
     <div className="space-y-6">
       <SectionHeader
         title="Mijn vragen"
-        description="Stel vragen aan je zorgteam."
+        description="Schrijf vragen op voor je zorgteam. Kies het specialisme en bewaar je vraag tot een gesprek of visite."
         size="kiosk"
         action={
           !showForm ? (
@@ -119,6 +119,12 @@ export function QuestionsView() {
           />
         )}
       </DashboardCard>
+
+      <p className="text-sm text-carbon-black-600">
+        Later kun je hier een dagelijkse vragensamenvatting krijgen — QuestionBuddy
+        helpt je open vragen overzichtelijk te maken voor een gesprek met je
+        zorgteam. Vragen worden niet beantwoord in de app.
+      </p>
     </div>
   );
 }

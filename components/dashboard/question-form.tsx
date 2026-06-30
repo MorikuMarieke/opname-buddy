@@ -97,8 +97,9 @@ export function QuestionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <FormField
-        label="Voor wie is je vraag?"
+        label="Specialisme"
         htmlFor="target_type"
+        hint="Kies wie je vraag het beste kan beantwoorden binnen het ziekenhuis."
         error={fieldErrors.target_type}
       >
         <FormSelect
@@ -118,7 +119,7 @@ export function QuestionForm({
       <FormField
         label="Je vraag"
         htmlFor="question_text"
-        hint="Schrijf je vraag zoals je die wilt stellen tijdens een gesprek."
+        hint="Noteer je vraag zoals je die wilt stellen — voor een visite, tijdens de ronde of wanneer je iets wilt bespreken."
         error={fieldErrors.question_text}
       >
         <FormTextarea

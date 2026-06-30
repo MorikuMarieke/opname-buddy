@@ -154,9 +154,11 @@ May first build a compact daily context summary from patient and caregiver input
 
 ### QuestionBuddy (secondary agent)
 
-Helps patients organize their own questions: group similar items, clarify wording, produce a concise list for rounds.
+Organizes the patient’s **open questions into a daily summary** — grouped by specialism, clearer wording, ready for rounds or caregiver conversations.
 
-Must **not** answer medical questions. Medical content is redirected back to the caregiver conversation.
+Must **not** answer medical questions. Medical content is redirected back to the caregiver conversation. Answers live in caregiver `answer_notes` (branch 3), not in AI output.
+
+**Deferred until branch 8:** [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md)
 
 ### Agent implementation requirements (project-wide)
 
@@ -206,5 +208,6 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | [`docs/domain-model.md`](domain-model.md) | Entities, relationships, business rules, database blueprint |
 | [`docs/branch-plans/branch-02-patient-checkins-questions.md`](branch-plans/branch-02-patient-checkins-questions.md) | Branch 2 implementation plan |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
+| [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 8) |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |
 | `AGENTS.md` | Next.js 16 project notes for agents |

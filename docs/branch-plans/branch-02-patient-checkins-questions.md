@@ -457,6 +457,12 @@ That document covers current behaviour, intended daily rhythm, suggested `getPar
 
 Also listed in [`DEFERRED.md`](../../DEFERRED.md).
 
+### Question daily summary (deferred — branch 8)
+
+Open questions are **not** organized in-app during branch 2. QuestionBuddy (Vercel AI SDK, branch 8) will produce a **daily summary** grouped by specialism. The AI organizes wording only; it never answers medical questions.
+
+See [`docs/future-questionbuddy-daily-summary.md`](../future-questionbuddy-daily-summary.md).
+
 ---
 
 ## Related files (existing)
