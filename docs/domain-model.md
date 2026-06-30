@@ -84,7 +84,7 @@ A patient-owned reflection about physical and emotional state on a given day.
 
 **Business rules**
 
-- Captures: pain, energy, mood, mobility, symptoms, optional note
+- Captures: pain, energy, mood, mobility, **motivation for activity participation**, symptoms, optional note
 - UI encourages **one check-in per day**; database does **not** yet enforce uniqueness on `(patient_id, check_in_date)` — flexibility for MVP iteration
 - Patients may **create** and **update** their own check-ins
 - Patients may **not delete** check-ins (audit trail for caregivers and AI)
@@ -101,6 +101,7 @@ A patient-owned reflection about physical and emotional state on a given day.
 | `energy_level` | smallint | 1–5 |
 | `mood` | smallint | 1–5 |
 | `mobility_level` | smallint | 1–5 |
+| `motivation_score` | smallint | 1–5; how motivated to participate in an activity today |
 | `symptoms` | text | Free-text; empty string if none |
 | `note` | text | Optional reflection |
 | `created_at`, `updated_at` | timestamptz | `set_updated_at` trigger |
@@ -144,6 +145,49 @@ A question the patient wants to discuss with a specific type of caregiver.
 | `status` | text | CHECK: open, discussed, answered; default open |
 | `answer_notes` | text | Nullable; caregiver writes in branch 3 |
 | `created_at`, `updated_at` | timestamptz | |
+
+---
+
+### Participation evaluation (evening)
+
+#### User / problem
+
+After trying a suggested or planned activity, patients need a quick evening reflection on what they did and how it felt. This informs future DailyBuddy recommendations and complements morning motivation.
+
+#### Entity: PatientParticipationEvaluation
+
+A patient-owned reflection on participation in one activity on a given day.
+
+| Concern | Detail |
+|---------|--------|
+| Ownership | `patient_id` = authenticated patient |
+| Relationships | Belongs to `profiles`; optional `activity_session_id` when activities exist (branch 4) |
+
+**Business rules**
+
+- Status: `done`, `partly_done`, `not_done`
+- `activity_title` holds a human-readable label until activity sessions exist
+- Patients may **create** and **update** their own evaluations
+- Patients may **not delete** evaluations
+- UI polish deferred; data layer implemented first
+
+#### Blueprint: `patient_participation_evaluations` (**Implemented**)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | uuid PK | |
+| `patient_id` | uuid FK → profiles | |
+| `evaluation_date` | date | Europe/Amsterdam calendar day |
+| `activity_title` | text | Label from DagBuddy suggestion or patient input |
+| `activity_session_id` | uuid | Nullable; FK in branch 4 |
+| `status` | text | done, partly_done, not_done |
+| `reason` | text | Optional; especially when partly_done or not_done |
+| `effort_score` | smallint | 1–5 |
+| `after_feeling_score` | smallint | 1–5; how patient feels after |
+| `notes` | text | Optional |
+| `created_at`, `updated_at` | timestamptz | |
+
+**Scheduling (deferred):** The app does not yet distinguish morning vs evening by clock time — only by calendar date. See [`docs/future-participation-scheduling.md`](../future-participation-scheduling.md).
 
 ---
 
@@ -379,6 +423,7 @@ Stored output from DailyBuddy for a patient on a given day.
 erDiagram
   profiles ||--o{ patient_checkins : owns
   profiles ||--o{ patient_questions : owns
+  profiles ||--o{ patient_participation_evaluations : owns
   profiles ||--o{ patient_restrictions : has
   profiles ||--o{ caregiver_contexts : has
   profiles ||--o{ user_roles : has

@@ -205,5 +205,6 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 |----------|---------|
 | [`docs/domain-model.md`](domain-model.md) | Entities, relationships, business rules, database blueprint |
 | [`docs/branch-plans/branch-02-patient-checkins-questions.md`](branch-plans/branch-02-patient-checkins-questions.md) | Branch 2 implementation plan |
+| [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |
 | `AGENTS.md` | Next.js 16 project notes for agents |

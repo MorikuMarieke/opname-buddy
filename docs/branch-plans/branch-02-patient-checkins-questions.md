@@ -437,6 +437,28 @@ Prepare branch 3 by documenting deferred caregiver RLS policies in domain model.
 
 ---
 
+## 14. Follow-up work (after branch 2)
+
+### Motivation + evening evaluation data (done on feature branch)
+
+- `motivation_score` on `patient_checkins` (migrations `00005`)
+- `patient_participation_evaluations` table (migrations `00006`, `00007`)
+- Evening evaluation: services + hooks only; UI deferred
+
+### Participation scheduling (deferred)
+
+The app tracks **calendar days** (Europe/Amsterdam), not morning/evening **time windows**. No evening reminders on the home dashboard yet.
+
+When implementing scheduling, follow:
+
+**[`docs/future-participation-scheduling.md`](../future-participation-scheduling.md)**
+
+That document covers current behaviour, intended daily rhythm, suggested `getParticipationPhase()` helper, home-card copy, and files to touch.
+
+Also listed in [`DEFERRED.md`](../../DEFERRED.md).
+
+---
+
 ## Related files (existing)
 
 | Path | Role |

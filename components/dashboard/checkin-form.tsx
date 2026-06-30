@@ -33,6 +33,7 @@ const defaultValues: PatientCheckinFormValues = {
   energy_level: 3,
   mood: 3,
   mobility_level: 3,
+  motivation_score: 3,
   symptoms: "",
   note: "",
 };
@@ -44,6 +45,7 @@ function toFormValues(checkIn: PatientCheckin): PatientCheckinFormValues {
     energy_level: checkIn.energy_level,
     mood: checkIn.mood,
     mobility_level: checkIn.mobility_level,
+    motivation_score: checkIn.motivation_score,
     symptoms: checkIn.symptoms,
     note: checkIn.note ?? "",
   };
@@ -146,6 +148,16 @@ export function CheckinForm({
         disabled={isSubmitting}
         onChange={(mobility_level) =>
           setValues((current) => ({ ...current, mobility_level }))
+        }
+      />
+
+      <LikertScale
+        id="motivation_score"
+        label="Motivatie voor activiteit"
+        value={values.motivation_score}
+        disabled={isSubmitting}
+        onChange={(motivation_score) =>
+          setValues((current) => ({ ...current, motivation_score }))
         }
       />
 

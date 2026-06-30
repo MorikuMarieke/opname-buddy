@@ -98,6 +98,7 @@ export type Database = {
           energy_level: number;
           mood: number;
           mobility_level: number;
+          motivation_score: number;
           symptoms: string;
           note: string | null;
           created_at: string;
@@ -111,6 +112,7 @@ export type Database = {
           energy_level: number;
           mood: number;
           mobility_level: number;
+          motivation_score: number;
           symptoms?: string;
           note?: string | null;
           created_at?: string;
@@ -124,6 +126,7 @@ export type Database = {
           energy_level?: number;
           mood?: number;
           mobility_level?: number;
+          motivation_score?: number;
           symptoms?: string;
           note?: string | null;
           created_at?: string;
@@ -173,6 +176,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "patient_questions_patient_id_fkey";
+            columns: ["patient_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      patient_participation_evaluations: {
+        Row: {
+          id: string;
+          patient_id: string;
+          evaluation_date: string;
+          activity_title: string;
+          activity_session_id: string | null;
+          status: string;
+          reason: string | null;
+          effort_score: number;
+          after_feeling_score: number;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          patient_id: string;
+          evaluation_date: string;
+          activity_title: string;
+          activity_session_id?: string | null;
+          status: string;
+          reason?: string | null;
+          effort_score: number;
+          after_feeling_score: number;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          patient_id?: string;
+          evaluation_date?: string;
+          activity_title?: string;
+          activity_session_id?: string | null;
+          status?: string;
+          reason?: string | null;
+          effort_score?: number;
+          after_feeling_score?: number;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "patient_participation_evaluations_patient_id_fkey";
             columns: ["patient_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -282,6 +338,8 @@ export type Role = Tables<"roles">;
 export type UserRole = Tables<"user_roles">;
 export type PatientCheckin = Tables<"patient_checkins">;
 export type PatientQuestion = Tables<"patient_questions">;
+export type PatientParticipationEvaluation =
+  Tables<"patient_participation_evaluations">;
 
 export type RoleName =
   | "patient"

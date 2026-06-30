@@ -48,6 +48,12 @@ export function CheckinSummary({ checkIn, onEdit }: CheckinSummaryProps) {
             {checkIn.mobility_level} — {getLikertLabel(checkIn.mobility_level)}
           </dd>
         </div>
+        <div>
+          <dt className="text-sm text-carbon-black-600">Motivatie voor activiteit</dt>
+          <dd className="text-lg font-semibold text-carbon-black-900">
+            {checkIn.motivation_score} — {getLikertLabel(checkIn.motivation_score)}
+          </dd>
+        </div>
       </dl>
 
       {checkIn.symptoms ? (

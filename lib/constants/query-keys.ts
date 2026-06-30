@@ -8,4 +8,11 @@ export const queryKeys = {
   questions: {
     all: ["questions"] as const,
   },
+  participationEvaluations: {
+    all: ["participation-evaluations"] as const,
+    today: () =>
+      [...queryKeys.participationEvaluations.all, "today"] as const,
+    recent: (limit: number) =>
+      [...queryKeys.participationEvaluations.all, "recent", limit] as const,
+  },
 } as const;

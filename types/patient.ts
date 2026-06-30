@@ -16,6 +16,15 @@ export type PatientQuestion = Tables<"patient_questions">;
 export type PatientQuestionInsert = TablesInsert<"patient_questions">;
 export type PatientQuestionUpdate = TablesUpdate<"patient_questions">;
 
+export type ParticipationEvaluationStatus = "done" | "partly_done" | "not_done";
+
+export type PatientParticipationEvaluation =
+  Tables<"patient_participation_evaluations">;
+export type PatientParticipationEvaluationInsert =
+  TablesInsert<"patient_participation_evaluations">;
+export type PatientParticipationEvaluationUpdate =
+  TablesUpdate<"patient_participation_evaluations">;
+
 export const CAREGIVER_TARGET_LABELS: Record<CaregiverTargetType, string> = {
   doctor: "Arts",
   nurse: "Verpleging",
@@ -51,3 +60,21 @@ export const PAIN_LABELS = {
   min: "Geen pijn",
   max: "Ergste pijn",
 } as const;
+
+export const PARTICIPATION_STATUS_LABELS: Record<
+  ParticipationEvaluationStatus,
+  string
+> = {
+  done: "Gedaan",
+  partly_done: "Gedeeltelijk gedaan",
+  not_done: "Niet gedaan",
+};
+
+export const PARTICIPATION_STATUS_OPTIONS: {
+  value: ParticipationEvaluationStatus;
+  label: string;
+}[] = [
+  { value: "done", label: PARTICIPATION_STATUS_LABELS.done },
+  { value: "partly_done", label: PARTICIPATION_STATUS_LABELS.partly_done },
+  { value: "not_done", label: PARTICIPATION_STATUS_LABELS.not_done },
+];

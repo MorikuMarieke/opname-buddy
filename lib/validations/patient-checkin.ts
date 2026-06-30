@@ -8,6 +8,7 @@ export const patientCheckinSchema = z.object({
   energy_level: z.number().int().min(1).max(5),
   mood: z.number().int().min(1).max(5),
   mobility_level: z.number().int().min(1).max(5),
+  motivation_score: z.number().int().min(1).max(5),
   symptoms: z.string().trim().max(500),
   note: z.string().trim().max(1000).optional().or(z.literal("")),
 });

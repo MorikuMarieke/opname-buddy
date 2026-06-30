@@ -88,6 +88,7 @@ export async function createCheckIn(
       energy_level: input.energy_level,
       mood: input.mood,
       mobility_level: input.mobility_level,
+      motivation_score: input.motivation_score,
       symptoms: input.symptoms,
       note: input.note?.trim() ? input.note.trim() : null,
     })
@@ -115,6 +116,7 @@ export async function updateCheckIn(
       energy_level: input.energy_level,
       mood: input.mood,
       mobility_level: input.mobility_level,
+      motivation_score: input.motivation_score,
       symptoms: input.symptoms,
       note: input.note?.trim() ? input.note.trim() : null,
     })
