@@ -1,7 +1,17 @@
 import Link from "next/link";
-import { PrimaryButton } from "@/components/ui/primary-button";
 
-export default function LoginPage() {
+import { LoginForm } from "@/components/forms/login-form";
+
+interface LoginPageProps {
+  searchParams: Promise<{
+    error?: string;
+    message?: string;
+  }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { error, message } = await searchParams;
+
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
@@ -11,49 +21,21 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-carbon-black-900"
-          >
-            E-mailadres
-          </label>
-          <input
-            id="email"
-            type="email"
-            disabled
-            placeholder="naam@voorbeeld.nl"
-            className="h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-carbon-black-900"
-          >
-            Wachtwoord
-          </label>
-          <input
-            id="password"
-            type="password"
-            disabled
-            placeholder="••••••••"
-            className="h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <PrimaryButton className="w-full">Inloggen</PrimaryButton>
-        <p className="text-center text-sm text-carbon-black-600">
-          Nog geen account?{" "}
-          <Link href="/register" className="font-medium text-copper-600 hover:underline">
-            Registreren
-          </Link>
+      {error === "roles" ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          Kon je rollen niet ophalen na het inloggen.
+          {message ? ` (${message})` : " Controleer je Supabase API-sleutels in .env.local."}
         </p>
-      </div>
+      ) : null}
+
+      <LoginForm />
+
+      <p className="text-center text-sm text-carbon-black-600">
+        Nog geen account?{" "}
+        <Link href="/register" className="font-medium text-copper-600 hover:underline">
+          Registreren
+        </Link>
+      </p>
     </div>
   );
 }

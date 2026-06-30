@@ -1,3 +1,4 @@
+import type { User } from "@supabase/supabase-js";
 import {
   Calendar,
   ClipboardList,
@@ -5,12 +6,39 @@ import {
   MessageCircleQuestion,
   Sun,
 } from "lucide-react";
+
 import { ActionTile } from "@/components/ui/action-tile";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 
-export function PatientHomeView() {
+interface PatientHomeViewProps {
+  user: User;
+}
+
+function getDisplayName(user: User): string {
+  const fullName = user.user_metadata?.full_name;
+
+  if (typeof fullName === "string" && fullName.trim()) {
+    return fullName.trim();
+  }
+
+  return user.email ?? "Onbekende gebruiker";
+}
+
+export function PatientHomeView({ user }: PatientHomeViewProps) {
+  const displayName = getDisplayName(user);
+
   return (
     <div className="space-y-6">
+      <DashboardCard density="comfortable" padding="lg">
+        <p className="text-sm font-medium text-carbon-black-600">Ingelogd als</p>
+        <p className="mt-1 text-lg font-semibold text-carbon-black-900">
+          {displayName}
+        </p>
+        {user.email ? (
+          <p className="mt-1 text-sm text-carbon-black-600">{user.email}</p>
+        ) : null}
+      </DashboardCard>
+
       <div className="grid gap-6 sm:grid-cols-2">
         <ActionTile
           href="/dashboard/checkin"
