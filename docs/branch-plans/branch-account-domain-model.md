@@ -3,14 +3,14 @@
 Foundation-first refactor separating login identity, authorization, and clinical
 patient identity.
 
-**Status: Phase 1 + Phase 2 shipped (2026-07-03).** Migrations `00015`–`00024` are
-applied on remote; care data is admission-scoped and the legacy
-`patient_id = auth.uid()` care policies are dropped. Remaining work is deferred to
-Phase 3 (see [`DEFERRED.md`](../../DEFERRED.md) → "Patient entity vs account"):
-drop legacy care `patient_id` columns, `admission_id` NOT NULL, orphan cleanup,
-`updated_by` → `updated_by_staff_id` rename, and organizational caregiver access.
-Sections below marked with historical scope notes (e.g. "first commit") describe
-the state at that commit and are kept as a record.
+**Status: Phase 1–3 shipped (2026-07-03).** Migrations `00015`–`00027` are applied
+on remote. Care data is owned solely by `admission_id` (`NOT NULL`); the legacy
+`patient_id` columns and their policies are dropped; `patient_context` is one row
+per admission with the `updated_by_staff_id` audit field. The only remaining
+deferral is **organizational (department/team) caregiver access**, tracked as its
+own future branch (see [`DEFERRED.md`](../../DEFERRED.md) → "Patient entity vs
+account"). Sections below marked with historical scope notes (e.g. "first commit",
+"Phase 2") describe the state at that commit and are kept as a record.
 
 Durable source: this file. Parked origin: `DEFERRED.md` →
 "Patient entity vs account: feature/account-domain-model".
@@ -173,15 +173,47 @@ Isolation holds under admission-only ownership; patient and caregiver flows keep
 
 **Checkpoint 5 — documentation cleanup — DONE 2026-07-03** — reconciled `docs/project-context.md`, `docs/domain-model.md`, `DEFERRED.md`, and this plan to the shipped Phase 2 state: care-table blueprints and ownership rows now show `admission_id` as the ownership key with `patient_id` retained for provenance; the RLS-patterns section reflects `current_admission_ids()`; the identity/access narrative is stated as implemented; and remaining items are captured as Phase 3 deferrals. Docs-only; no migrations.
 
-**Deferred beyond Phase 2 (do not do now):** drop old care `patient_id` columns; `admission_id` NOT NULL flip; clean orphaned `patient_context` rows (`0c90b156`, `0bde471c`); rename `patient_context.updated_by` → `updated_by_staff_id`.
+**Deferred beyond Phase 2 (do not do now):** drop old care `patient_id` columns; `admission_id` NOT NULL flip; clean orphaned `patient_context` rows (`0c90b156`, `0bde471c`); rename `patient_context.updated_by` → `updated_by_staff_id`. *(All of these shipped in Phase 3 — see below.)*
+
+## Phase 3 — care schema hardening (SHIPPED 2026-07-03)
+
+Retires the transitional dual-model state from Phase 2. Delivered as three local
+commit checkpoints; migrations `00025`–`00027`, applied to remote with approval.
+
+**Checkpoint 1 — orphan cleanup — APPLIED**
+
+`00025_care_orphan_cleanup.sql`: defensive backfill, then deleted the two
+staff-authored `patient_context` rows with no owning admission
+(`caregiver@test.com` `0c90b156`, `staff@test.com` `0bde471c`). Result:
+`patient_context` 3 → 1 row; all four care tables have zero null `admission_id`.
+
+**Checkpoint 2 — drop legacy `patient_id` + harden — APPLIED**
+
+`00026_care_drop_legacy_patient_id.sql`: dropped `patient_id` from all four care
+tables (cascading its FKs, the `patient_context` `UNIQUE(patient_id)`, and
+`patient_id` indexes), added `UNIQUE(admission_id)` on `patient_context`, and
+flipped `admission_id` to `NOT NULL` everywhere. Code cutover in the same
+checkpoint: patient write services stamp only `admission_id` (with a
+no-active-admission guard); the patient's own-context read resolves the active
+admission instead of the login account. Types updated; `tsc`/lint clean.
+Verified: no `patient_id` columns remain, `admission_id` `NOT NULL` on all four,
+`UNIQUE(admission_id)` present, no new security advisories.
+
+**Checkpoint 3 — audit-field rename — APPLIED**
+
+`00027_patient_context_updated_by_staff_id.sql`: `updated_by` →
+`updated_by_staff_id` via add-new + backfill + recreate the two caregiver
+policies + drop (never in-place). Service payload/audit join and types updated.
+Verified: only `updated_by_staff_id` remains; FK `patient_context_updated_by_staff_id_fkey`.
+
+**Checkpoint 4 — documentation cleanup — DONE** — reconciled `docs/project-context.md`,
+`docs/domain-model.md`, `DEFERRED.md`, and this plan to the shipped Phase 3 state.
 
 ### Audit-field decision (updated_by)
 
-`patient_context.updated_by` is **kept as-is** in Phase 2. It currently acts as the
-staff audit field (the acting caregiver, `references profiles(id)`). It should
-later be renamed to / replaced by `updated_by_staff_id` during a dedicated
-care-table audit refactor — done as add-new + backfill + switch + drop, never an
-in-place rename. No rename or backfill of this column happens in Phase 2.
+`patient_context.updated_by` was **kept as-is** in Phase 2 and **renamed to
+`updated_by_staff_id` in Phase 3** (checkpoint 3 above), using add-new + backfill
++ switch + drop — never an in-place rename.
 
 ### Runtime code touch list
 

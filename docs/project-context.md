@@ -30,7 +30,7 @@ Caregivers and activity coordinators gain structured visibility into how patient
 
 The **account/domain model refactor** — the foundation for ownership, access control, and RLS across later branches — has shipped. `patients`, `admissions`, and secure patient↔account linking are live, and patient-owned care data (context, check-ins, questions, participation evaluations) is now scoped to the clinical **admission** rather than the login account.
 
-The rules for this model are defined in [Domain and identity model](#domain-and-identity-model) below. Full sequencing, migrations, verification, and remaining deferrals live in the branch plan: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md). Still deferred: dropping the legacy care `patient_id` columns, `admission_id` NOT NULL, orphan-row cleanup, and organizational (department/team) caregiver access.
+The rules for this model are defined in [Domain and identity model](#domain-and-identity-model) below. Full sequencing, migrations, verification, and remaining deferrals live in the branch plan: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md). The care schema is fully hardened (legacy `patient_id` columns dropped, `admission_id` `NOT NULL`, `updated_by_staff_id` audit field). Still deferred: organizational (department/team) caregiver access.
 
 ---
 
@@ -142,7 +142,7 @@ OpnameBuddy separates **who is acting** (login identity), **what an account may 
 - **Patient accounts are linked to patient records** through a secure linking flow (`patient_link_codes` → `redeem_patient_link_code()`) that connects a login to the clinical patient it belongs to.
 - **`admissions` represent hospital stays.** A patient may have multiple admissions over time; care data is scoped to an admission (via `admission_id`).
 - **Patient-owned care data belongs to a patient/admission, never to the acting staff account.** This includes care context, check-ins, questions, participation evaluations, and (later) daily plans and AI advice. Patient-side RLS is enforced through `current_admission_ids()`.
-- **Staff and caregiver accounts are actors, not owners.** They appear only in audit fields such as `created_by_staff_id` (and `patient_context.updated_by`, pending rename to `updated_by_staff_id`).
+- **Staff and caregiver accounts are actors, not owners.** They appear only in audit fields such as `created_by_staff_id` and `patient_context.updated_by_staff_id`.
 - **Caregiver access should ultimately be based on organizational assignment** — department, team, or admission context — not only a global `caregiver` role. *(Still deferred; caregiver access is currently the global `caregiver` role.)*
 
 ---
@@ -210,7 +210,7 @@ Work proceeds in small vertical slices on feature branches. The account/domain m
 | # | Branch | Focus |
 |---|--------|-------|
 | 1 | `feature/supabase-auth-roles` | Auth, profiles, roles — **completed** |
-| — | `feature/account-domain-model` | **Shipped (Phase 1–2)** — clinical `patients` and `admissions`, admission-scoped care data, staff in audit fields, secure patient↔record linking. Remaining deferrals in the [branch plan](branch-plans/branch-account-domain-model.md) |
+| — | `feature/account-domain-model` | **Shipped (Phase 1–3)** — clinical `patients` and `admissions`, admission-owned care data (legacy `patient_id` dropped, `admission_id` `NOT NULL`), staff in audit fields, secure patient↔record linking. Remaining deferral (org-based caregiver access) in the [branch plan](branch-plans/branch-account-domain-model.md) |
 | 2 | `feature/patient-checkins-questions` | Patient check-ins and questions CRUD |
 | 3 | `feature/care-restrictions-context` | Zorgcontext (`patient_context`), caregiver patient data access |
 | 4 | `feature/planning-activities` | Activities, sessions, volunteers, calendar |

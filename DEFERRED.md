@@ -54,7 +54,7 @@ alter default privileges in schema public
 
 ## Patient entity vs account: `feature/account-domain-model`
 
-**Status:** Phase 1 + Phase 2 applied 2026-07-03 (`00015`–`00024` on remote; types regenerated). Care data is admission-scoped; only the deferrals listed below remain.  
+**Status:** Phase 1–3 applied 2026-07-03 (`00015`–`00027` on remote; types regenerated). Care schema fully hardened onto admission ownership; only organizational caregiver access remains.  
 **Added:** 2026-07-02 · **Started:** 2026-07-03  
 **Branch plan:** [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)  
 **Trigger:** Multiple patients per admission, patients existing before they have a login, cross-account patient data ownership, or hardening RLS beyond `patient_id = auth.uid()`.
@@ -99,12 +99,15 @@ erDiagram
 - Added admission-scoped care RLS, then cut over and **dropped the `patient_id = auth.uid()` care policies** (admission ownership is now the sole patient-side guard; verified by RLS simulation).
 - Caregiver read path re-keyed: `list_care_patients()` returns clinical `patients` + active admission + linked account; `/care/patients/[patientId]` is `patients.id`; `patient_context` read/written by admission.
 
-**Still deferred (Phase 3 / later):**
+**Phase 3 — SHIPPED 2026-07-03** (`00025`–`00027`; full checkpoint log in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)):
 
-- Drop the legacy care `patient_id` columns and make `admission_id` NOT NULL (blocked on orphan cleanup).
-- Rename `patient_context.updated_by` → `updated_by_staff_id` (add-new + backfill + switch + drop; never in-place).
-- Clean up orphaned `patient_context` rows on `caregiver@test.com` (`0c90b156`) and `staff@test.com` (`0bde471c`) — only after confirmation.
-- Organizational (department/team/admission) caregiver access instead of the global `caregiver` role; retire `requireRole("patient")`-only reliance.
+- Cleaned the orphaned `patient_context` rows (`caregiver@test.com`, `staff@test.com`) after a defensive backfill.
+- Dropped the legacy care `patient_id` columns (and their FKs/indexes/unique), added `UNIQUE(admission_id)` on `patient_context`, and flipped `admission_id` to `NOT NULL` on all four care tables. Patient write services and the patient's own-context read no longer touch `patient_id`.
+- Renamed `patient_context.updated_by` → `updated_by_staff_id` (add + backfill + recreate caregiver policies + drop).
+
+**Still deferred (later branch):**
+
+- Organizational (department/team/admission) caregiver access instead of the global `caregiver` role; retire `requireRole("patient")`-only reliance. This is a larger feature (new assignment tables + care-RLS rewrite), tracked as its own future branch rather than part of this refactor.
 
 **Risks/guardrails:** Do not weaken existing RLS or expose `user_roles`/`code_hash`. Security-definer functions and migrations are high-impact remote writes (each apply needs approval). Store the 6-digit code hashed with short TTL.
 
