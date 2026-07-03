@@ -7,8 +7,13 @@ import type {
 } from "@/types/patient-context";
 
 export interface CarePatientSummary {
+  /** Clinical patient id (patients.id) — the caregiver route key. */
   id: string;
   full_name: string | null;
+  /** Active admission for this patient, if any. */
+  admission_id: string | null;
+  /** Linked login account (profiles.id), if the patient has one yet. */
+  user_id: string | null;
 }
 
 function getSupabaseErrorMessage(error: { message: string; code?: string }): string {
@@ -45,6 +50,7 @@ function normalizeFormValues(input: PatientContextFormValues): PatientContextFor
 
 function toDbPayload(
   patientId: string,
+  admissionId: string,
   input: PatientContextFormValues,
   updatedBy: string,
 ) {
@@ -52,6 +58,7 @@ function toDbPayload(
 
   return {
     patient_id: patientId,
+    admission_id: admissionId,
     mobility_status: values.mobility_status,
     transfer_support: values.transfer_support,
     fall_risk: values.fall_risk,
@@ -110,8 +117,47 @@ export async function getOwnPatientContext(): Promise<PatientContextWithAudit | 
   return getPatientContext(user.id);
 }
 
-export async function upsertPatientContext(
-  patientId: string,
+/**
+ * Caregiver-facing read of a patient's Zorgcontext, scoped by the owning
+ * admission (Phase 2 ownership model) instead of the login account.
+ */
+export async function getPatientContextByAdmission(
+  admissionId: string,
+): Promise<PatientContextWithAudit | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("patient_context")
+    .select("*, updater:profiles!patient_context_updated_by_fkey(full_name)")
+    .eq("admission_id", admissionId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(getSupabaseErrorMessage(error));
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const { updater, ...context } = data;
+  const updatedByName = updater?.full_name?.trim() || null;
+
+  return {
+    ...context,
+    updatedByName,
+  };
+}
+
+/**
+ * Caregiver upsert of a patient's Zorgcontext, keyed by the owning admission.
+ * The row is matched/created by `admission_id`; `patient_id` is still written
+ * (the linked account) so the legacy column and the patient's own read path keep
+ * working during the transition. `updated_by` records the acting staff account.
+ */
+export async function upsertPatientContextByAdmission(
+  admissionId: string,
+  patientUserId: string | null,
   input: PatientContextFormValues,
 ): Promise<PatientContext> {
   const supabase = createClient();
@@ -125,12 +171,18 @@ export async function upsertPatientContext(
     throw new Error("Je bent niet ingelogd.");
   }
 
-  const payload = toDbPayload(patientId, input, user.id);
+  if (!patientUserId) {
+    throw new Error(
+      "Deze patiënt heeft nog geen gekoppeld account. Zorgcontext kan nog niet worden opgeslagen.",
+    );
+  }
+
+  const payload = toDbPayload(patientUserId, admissionId, input, user.id);
 
   const { data: existing, error: existingError } = await supabase
     .from("patient_context")
     .select("id")
-    .eq("patient_id", patientId)
+    .eq("admission_id", admissionId)
     .maybeSingle();
 
   if (existingError) {
@@ -168,9 +220,9 @@ export async function upsertPatientContext(
 export async function listPatientsForCare(): Promise<CarePatientSummary[]> {
   const supabase = createClient();
 
-  // Must use the list_care_patients() RPC: profiles RLS also exposes staff/self
-  // to caregivers (for name resolution), and user_roles RLS hides other users'
-  // roles, so patient-role filtering can only be done safely in the database.
+  // list_care_patients() returns clinical patients (patients table) with their
+  // active admission and linked account. It runs SECURITY DEFINER so it can
+  // resolve links/admissions the caregiver cannot read row-by-row.
   const { data, error } = await supabase.rpc("list_care_patients");
 
   if (error) {

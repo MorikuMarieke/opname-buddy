@@ -540,8 +540,10 @@ export type Database = {
       list_care_patients: {
         Args: never
         Returns: {
-          full_name: string
           id: string
+          full_name: string
+          admission_id: string | null
+          user_id: string | null
         }[]
       }
       redeem_patient_link_code: { Args: { p_code: string }; Returns: string }

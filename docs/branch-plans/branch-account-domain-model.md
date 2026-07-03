@@ -138,7 +138,16 @@ Verified: `patient_checkins` 2/2, `patient_questions` 3/3 backfilled; `patient_c
 
 Verified via `pg_policies`: every care table has both the old `_own` and new `_own_admission` policies per command (nothing dropped). Helper mapping confirmed for the seeded patient (`328d194e` → patient `b7011787` → admission `4f315e8c`, matching backfilled `admission_id`). Advisors: only expected notices plus `current_admission_ids` as an authenticated SECURITY DEFINER function (by design, same as `current_patient_ids`). `tsc --noEmit` passes.
 
-**Checkpoint 3 — service and route updates (Planned)** — dual-write `admission_id` in patient services; bridge caregiver read path (`list_care_patients()` → clinical `patients` + active admission; `/care/patients/[patientId]` keyed by `patients.id`). Reads still function under old + new RLS.
+**Checkpoint 3 — service and route updates — APPLIED 2026-07-03**
+
+- Patient writes (`patient-checkins`, `patient-questions`, `patient-participation-evaluations`) now stamp `admission_id` via new `getActiveAdmissionId()` (`lib/services/admissions.ts`), alongside `patient_id`.
+- Caregiver read path re-keyed to the clinical patient: `00023_list_care_patients_v2.sql` makes `list_care_patients()` return `patients` rows with active `admission_id` + linked `user_id`. `/care/patients/[patientId]` is now `patients.id`.
+- `patient_context` read/write for caregivers is admission-based (`getPatientContextByAdmission`, `upsertPatientContextByAdmission`); the legacy `patient_id` column is still written from the linked account and `updated_by` audit is unchanged.
+- Patient's own context read (`useOwnPatientContext`, read-only) left on the old path.
+
+Verified: `list_care_patients()` signature `TABLE(id, full_name, admission_id, user_id)`; projection returns the seeded patient `b7011787` → admission `4f315e8c` → account `328d194e`. `tsc --noEmit` passes; no lint errors.
+
+Follow-up for checkpoint 4: any care rows created in the window between checkpoints 2 and 3 could have a null `admission_id`; re-run the `00020` backfill before the RLS cutover so no patient-owned row is stranded when the old policies are dropped.
 
 **Checkpoint 4 — RLS cutover and verification (Planned)** — `00023_care_retire_old_policies.sql`: switch reads/writes fully to `admission_id`; **drop the `patient_id = auth.uid()` care policies**. Keep old `patient_id` columns (provenance) and leave `admission_id` **nullable** (NOT NULL deferred until orphan cleanup). Verify isolation with a second seeded patient.
 
