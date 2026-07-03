@@ -13,12 +13,18 @@ import {
   Sun,
   Users,
 } from "lucide-react";
+import { PATIENT_CONTEXT_COPY } from "@/lib/constants/patient-context-copy";
 import type { NavItem } from "@/types/navigation";
 
 export const patientBottomNavItems: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Check-in", href: "/dashboard/checkin", icon: ClipboardList },
   { label: "Vragen", href: "/dashboard/questions", icon: MessageCircleQuestion },
+  {
+    label: PATIENT_CONTEXT_COPY.patient.navLabel,
+    href: "/dashboard/context",
+    icon: Heart,
+  },
   { label: "Activiteiten", href: "/dashboard/activities", icon: Calendar },
   { label: "DagBuddy", href: "/dashboard/advice", icon: Sun },
 ];
@@ -56,13 +62,8 @@ export function getCarePatientSubNavItems(patientId: string): NavItem[] {
       icon: LayoutDashboard,
     },
     {
-      label: "Beperkingen",
-      href: `/care/patients/${patientId}/restrictions`,
-      icon: Shield,
-    },
-    {
-      label: "Herstelcontext",
-      href: `/care/patients/${patientId}/recovery-context`,
+      label: PATIENT_CONTEXT_COPY.staff.subNavLabel,
+      href: `/care/patients/${patientId}/context`,
       icon: Heart,
     },
   ];

@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "supabase-opnamebuddy": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=rszlvszlkivbguxuvvvm&read_only=false",
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}"
+      }
+    },
+    "github-opnamebuddy": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_TOKEN}"
+      }
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    }
+  }
+}

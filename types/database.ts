@@ -236,12 +236,96 @@ export type Database = {
           },
         ];
       };
+      patient_context: {
+        Row: {
+          id: string;
+          patient_id: string;
+          mobility_status: string;
+          transfer_support: string;
+          fall_risk: string;
+          requires_supervision: string;
+          mobility_aid_type: string;
+          mobility_aid_available: string;
+          isolation_type: string;
+          room_restriction: string;
+          additional_attention_points: string[];
+          additional_attention_notes: string | null;
+          notes: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          patient_id: string;
+          mobility_status?: string;
+          transfer_support?: string;
+          fall_risk?: string;
+          requires_supervision?: string;
+          mobility_aid_type?: string;
+          mobility_aid_available?: string;
+          isolation_type?: string;
+          room_restriction?: string;
+          additional_attention_points?: string[];
+          additional_attention_notes?: string | null;
+          notes?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          patient_id?: string;
+          mobility_status?: string;
+          transfer_support?: string;
+          fall_risk?: string;
+          requires_supervision?: string;
+          mobility_aid_type?: string;
+          mobility_aid_available?: string;
+          isolation_type?: string;
+          room_restriction?: string;
+          additional_attention_points?: string[];
+          additional_attention_notes?: string | null;
+          notes?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "patient_context_patient_id_fkey";
+            columns: ["patient_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "patient_context_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      has_role: {
+        Args: {
+          role_name: string;
+        };
+        Returns: boolean;
+      };
+      list_care_patients: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          id: string;
+          full_name: string | null;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;
@@ -340,6 +424,7 @@ export type PatientCheckin = Tables<"patient_checkins">;
 export type PatientQuestion = Tables<"patient_questions">;
 export type PatientParticipationEvaluation =
   Tables<"patient_participation_evaluations">;
+export type PatientContext = Tables<"patient_context">;
 
 export type RoleName =
   | "patient"

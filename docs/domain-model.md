@@ -197,79 +197,59 @@ A patient-owned reflection on participation in one activity on a given day.
 
 ## Caregiver safety and context
 
-### Patient restrictions
+### Patient context (Zorgcontext)
 
 #### User / problem
 
-Caregivers define hard safety boundaries so AI and planning never suggest activities outside professional limits.
+Caregivers record **practical care facts** so DagBuddy and activity filtering can apply predefined safety rules. The form stores facts — not derived planning decisions such as volunteer eligibility or max activity intensity.
 
-#### Entity: PatientRestrictions
+#### Entity: PatientContext
 
-Structured, mostly boolean safety flags for one patient. Typically one active row per patient (upsert pattern in UI).
-
-| Concern | Detail |
-|---------|--------|
-| Ownership | Written by caregivers; read by caregivers, AI tools, and planning logic |
-| Relationships | Belongs to patient (`profiles`) |
-
-**Business rules**
-
-- Restrictions are **hard boundaries** — DailyBuddy and planning must never overrule them
-- Hospital care appointments are **out of MVP scope** (would need EHR/calendar integration)
-
-**Planned boolean fields (branch 3):**
-
-- `may_get_out_of_bed`
-- `may_leave_room`
-- `may_leave_ward`
-- `needs_supervision`
-- `mobile_iv_or_pump`
-- `isolation_precautions`
-- `fall_risk`
-- `wandering_risk`
-
-#### Blueprint: `patient_restrictions` (branch 3)
-
-| Field | Type (planned) | Notes |
-|-------|----------------|-------|
-| `id` | uuid PK | |
-| `patient_id` | uuid FK → profiles | Unique per patient (planned) |
-| boolean flags | boolean | See list above |
-| `updated_by` | uuid FK → profiles | Caregiver who last changed |
-| `created_at`, `updated_at` | timestamptz | |
-
----
-
-### Caregiver context
-
-#### User / problem
-
-Structured checklists cannot capture every admission nuance. Caregivers need a place for open-ended context that helps DailyBuddy personalize suggestions without becoming a treatment plan.
-
-#### Entity: CaregiverContext
-
-Free-text context written by a caregiver about a patient's participation situation.
+A caregiver-maintained snapshot of functional care context for one patient. One row per patient (upsert).
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | Written by caregivers for a patient |
-| Relationships | Belongs to patient; tracks `updated_by` caregiver |
+| Ownership | Written by caregivers; read by patient (own row), caregivers, activity coordinators, and later AI tools |
+| Relationships | Belongs to patient (`profiles`); `updated_by` tracks last caregiver |
 
 **Business rules**
 
-- **Open-ended text only** — not a medical treatment plan
-- Avoid fields like `recovery_goal` or `treatment_goal` (too close to medical advice)
-- AI uses context for safe participation suggestions, not to set clinical goals
+- All enum fields include **`unknown`** as an intentional value — never interpreted as “no” or “safe”
+- **Facts only** — volunteer suitability, intensity limits, and duration limits are derived later by DagBuddy from context + check-in + activity requirements
+- Mobility aid fields are conditional on `mobility_status` (`walking_with_aid`, `wheelchair`)
+- Additional attention points use `text[]` chips — non-critical, do not block completeness
+- Living record: caregivers update in place as admission evolves (`updated_at`, `updated_by`)
+- Patients may **read** their own context; they cannot edit it
 
-#### Blueprint: `caregiver_contexts` (branch 3)
+**Critical completeness fields:**
 
-| Field | Type (planned) | Notes |
-|-------|----------------|-------|
+- `mobility_status`, `transfer_support`, `fall_risk`, `requires_supervision` (Begeleiding), `isolation_type`, `room_restriction` (Bewegingsvrijheid)
+- `mobility_aid_available` when mobility status requires an aid
+- Attention chips and notes do **not** block completeness
+
+#### Blueprint: `patient_context` (branch 3 — **Implemented**)
+
+| Field | Type | Notes |
+|-------|------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK → profiles | |
-| `context_note` | text | Open-ended caregiver input |
-| `updated_by` | uuid FK → profiles | Caregiver profile |
-| `created_at`, `updated_at` | timestamptz | |
+| `patient_id` | uuid FK → profiles | UNIQUE |
+| `mobility_status` | text | unknown, bed_bound, chair_only, wheelchair, walking_independent, walking_with_aid, walking_with_assistance |
+| `transfer_support` | text | unknown, none, one_person, two_person, lift |
+| `fall_risk` | text | unknown, low, medium, high |
+| `requires_supervision` | text | unknown, not_required, required (UI: Begeleiding) |
+| `mobility_aid_type` | text | Conditional; unknown, cane, walker, wheelchair, own_aid, other |
+| `mobility_aid_available` | text | Conditional critical; unknown, yes, no |
+| `isolation_type` | text | unknown, none, contact, droplet, airborne, strict, protective |
+| `room_restriction` | text | unknown, room_only, ward_only, no_restriction (UI: Bewegingsvrijheid) |
+| `additional_attention_points` | text[] | iv_pump, oxygen, catheter, wound_or_drain, post_surgery, fatigue, wandering_risk, language_barrier, cognitive_support, hearing_support, vision_support, communication_support, other |
+| `additional_attention_notes` | text | Optional; UI when `other` chip selected |
+| `notes` | text | Optional caregiver notes |
+| `updated_by` | uuid FK → profiles | Caregiver who last saved |
+| `created_at`, `updated_at` | timestamptz | `set_updated_at` trigger |
+
+**Removed fields (migration `00012`):** `weight_bearing_status`, `has_iv_line`, `has_oxygen` — IV/oxygen captured via attention chips.
+
+**Deprecated blueprints:** separate `patient_restrictions` (boolean flags) and `caregiver_contexts` (free text only) — superseded by unified `patient_context`.
 
 ---
 
@@ -428,8 +408,7 @@ erDiagram
   profiles ||--o{ patient_checkins : owns
   profiles ||--o{ patient_questions : owns
   profiles ||--o{ patient_participation_evaluations : owns
-  profiles ||--o{ patient_restrictions : has
-  profiles ||--o{ caregiver_contexts : has
+  profiles ||--o| patient_context : has
   profiles ||--o{ user_roles : has
   roles ||--o{ user_roles : assigned
   activities ||--o{ activity_sessions : schedules
@@ -450,10 +429,19 @@ erDiagram
 | `patient_id = auth.uid()` for SELECT, INSERT, UPDATE | Patient-owned tables |
 | No DELETE on check-ins | `patient_checkins` |
 | DELETE only when `status = 'open'` | `patient_questions` (patient) |
-| Caregiver read/write via separate policies | Branch 3+ |
+| Caregiver read/write via `has_role()` policies | `patient_context`, check-ins, questions (branch 3) |
 | Service role for admin and AI tools | Server-only, never client |
 
 Always pair new tables with **explicit GRANT migrations** for `authenticated` and `service_role`.
+
+### Caregiver patient list must be database-filtered
+
+The caregiver patient list uses the `list_care_patients()` SECURITY DEFINER RPC (migration `00014`), **not** a direct `profiles` select. Client-side role filtering is impossible and unsafe here:
+
+- `profiles` intentionally exposes **staff and self** to caregivers (policies `profiles_select_own` and `profiles_select_staff_for_caregivers`) so caregiver names can be resolved for audit fields like `updated_by`.
+- `user_roles` RLS is `auth.uid() = user_id`, so a caregiver **cannot read other users' roles** to tell patients apart from staff on the client.
+
+A plain `select ... from profiles` therefore returns patients **plus** the caregiver and all staff, which would let non-patient accounts be treated (and edited) as patients. The `security definer` function performs the patient-role filter in the database while keeping the name-resolution policies intact.
 
 ---
 

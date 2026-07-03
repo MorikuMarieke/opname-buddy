@@ -189,9 +189,9 @@ Work proceeds in small vertical slices on feature branches:
 |---|--------|-------|
 | 1 | `feature/supabase-auth-roles` | Auth, profiles, roles — **completed** |
 | 2 | `feature/patient-checkins-questions` | Patient check-ins and questions CRUD |
-| 3 | `feature/care-restrictions-context` | Caregiver dashboard, restrictions, context |
+| 3 | `feature/care-restrictions-context` | Zorgcontext (`patient_context`), caregiver patient data access |
 | 4 | `feature/planning-activities` | Activities, sessions, volunteers, calendar |
-| 5 | `feature/admin-users-roles` | User management and role assignment |
+| 5 | `feature/admin-users-roles` | User management, role assignment, staff profiles — see [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) |
 | 6 | `feature/dagbuddy-agent` | DailyBuddy agent, tools, streaming, advice storage |
 | 7 | `feature/activity-feedback` | Patient activity plans and feedback |
 | 8 | `feature/questionbuddy-agent` | QuestionBuddy agent |
@@ -207,6 +207,8 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 |----------|---------|
 | [`docs/domain-model.md`](domain-model.md) | Entities, relationships, business rules, database blueprint |
 | [`docs/branch-plans/branch-02-patient-checkins-questions.md`](branch-plans/branch-02-patient-checkins-questions.md) | Branch 2 implementation plan |
+| [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan |
+| [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) | Deferred admin, staff accounts, role assignment (branch 5) |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 8) |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |

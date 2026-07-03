@@ -1,5 +1,0 @@
-{"sessionId":"f03560","runId":"post-fix","hypothesisId":"A","location":"proxy.ts:proxy","message":"proxy handler invoked","data":{"pathname":"/"},"timestamp":1782750498963}
-{"sessionId":"f03560","runId":"post-fix","hypothesisId":"A","location":"proxy.ts:proxy","message":"proxy handler invoked","data":{"pathname":"/"},"timestamp":1782750499400}
-{"sessionId":"f03560","runId":"post-fix","hypothesisId":"A","location":"proxy.ts:proxy","message":"proxy handler invoked","data":{"pathname":"/dashboard"},"timestamp":1782750571835}
-{"sessionId":"f03560","runId":"post-fix","hypothesisId":"A","location":"proxy.ts:proxy","message":"proxy handler invoked","data":{"pathname":"/login"},"timestamp":1782750572162}
-{"sessionId":"f03560","runId":"post-fix","hypothesisId":"A","location":"proxy.ts:proxy","message":"proxy handler invoked","data":{"pathname":"/login"},"timestamp":1782750572933}
