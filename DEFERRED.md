@@ -54,7 +54,7 @@ alter default privileges in schema public
 
 ## Patient entity vs account: `feature/account-domain-model`
 
-**Status:** In progress — foundation branch started (docs/scaffolding only; no migrations applied)  
+**Status:** Phase 1 applied 2026-07-03 (`00015`–`00018` on remote; types regenerated). Phase 2 pending.  
 **Added:** 2026-07-02 · **Started:** 2026-07-03  
 **Branch plan:** [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)  
 **Trigger:** Multiple patients per admission, patients existing before they have a login, cross-account patient data ownership, or hardening RLS beyond `patient_id = auth.uid()`.
