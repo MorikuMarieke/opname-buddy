@@ -80,10 +80,15 @@ export async function createParticipationEvaluation(
 
   const admissionId = await getActiveAdmissionId();
 
+  if (!admissionId) {
+    throw new Error(
+      "Er is nog geen actieve opname voor je account. Neem contact op met je zorgteam.",
+    );
+  }
+
   const { data, error } = await supabase
     .from("patient_participation_evaluations")
     .insert({
-      patient_id: user.id,
       admission_id: admissionId,
       evaluation_date: input.evaluation_date,
       activity_title: input.activity_title,

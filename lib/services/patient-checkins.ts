@@ -82,10 +82,15 @@ export async function createCheckIn(
 
   const admissionId = await getActiveAdmissionId();
 
+  if (!admissionId) {
+    throw new Error(
+      "Er is nog geen actieve opname voor je account. Neem contact op met je zorgteam.",
+    );
+  }
+
   const { data, error } = await supabase
     .from("patient_checkins")
     .insert({
-      patient_id: user.id,
       admission_id: admissionId,
       check_in_date: input.check_in_date,
       pain_score: input.pain_score,

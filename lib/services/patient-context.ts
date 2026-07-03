@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { getActiveAdmissionId } from "@/lib/services/admissions";
 import { resetAidFieldsWhenHidden } from "@/lib/patient-context/mobility-aid";
 import type { PatientContextFormValues } from "@/lib/validations/patient-context";
 import type {
@@ -49,7 +50,6 @@ function normalizeFormValues(input: PatientContextFormValues): PatientContextFor
 }
 
 function toDbPayload(
-  patientId: string,
   admissionId: string,
   input: PatientContextFormValues,
   updatedBy: string,
@@ -57,7 +57,6 @@ function toDbPayload(
   const values = normalizeFormValues(input);
 
   return {
-    patient_id: patientId,
     admission_id: admissionId,
     mobility_status: values.mobility_status,
     transfer_support: values.transfer_support,
@@ -74,47 +73,19 @@ function toDbPayload(
   };
 }
 
-export async function getPatientContext(
-  patientId: string,
-): Promise<PatientContextWithAudit | null> {
-  const supabase = createClient();
+/**
+ * Patient-facing read of their own Zorgcontext. Resolves the caller's active
+ * admission and reads the context scoped to it (admission ownership model).
+ * Returns null when the account has no active admission or no context yet.
+ */
+export async function getOwnPatientContext(): Promise<PatientContextWithAudit | null> {
+  const admissionId = await getActiveAdmissionId();
 
-  const { data, error } = await supabase
-    .from("patient_context")
-    .select("*, updater:profiles!patient_context_updated_by_fkey(full_name)")
-    .eq("patient_id", patientId)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(getSupabaseErrorMessage(error));
-  }
-
-  if (!data) {
+  if (!admissionId) {
     return null;
   }
 
-  const { updater, ...context } = data;
-  const updatedByName = updater?.full_name?.trim() || null;
-
-  return {
-    ...context,
-    updatedByName,
-  };
-}
-
-export async function getOwnPatientContext(): Promise<PatientContextWithAudit | null> {
-  const supabase = createClient();
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw new Error("Je bent niet ingelogd.");
-  }
-
-  return getPatientContext(user.id);
+  return getPatientContextByAdmission(admissionId);
 }
 
 /**
@@ -151,9 +122,9 @@ export async function getPatientContextByAdmission(
 
 /**
  * Caregiver upsert of a patient's Zorgcontext, keyed by the owning admission.
- * The row is matched/created by `admission_id`; `patient_id` is still written
- * (the linked account) so the legacy column and the patient's own read path keep
- * working during the transition. `updated_by` records the acting staff account.
+ * The row is matched/created by `admission_id` (the sole ownership key).
+ * `updated_by` records the acting staff account. `patientUserId` is still
+ * required so context is only saved for patients that have a linked account.
  */
 export async function upsertPatientContextByAdmission(
   admissionId: string,
@@ -177,7 +148,7 @@ export async function upsertPatientContextByAdmission(
     );
   }
 
-  const payload = toDbPayload(patientUserId, admissionId, input, user.id);
+  const payload = toDbPayload(admissionId, input, user.id);
 
   const { data: existing, error: existingError } = await supabase
     .from("patient_context")

@@ -117,7 +117,7 @@ export type Database = {
       }
       patient_checkins: {
         Row: {
-          admission_id: string | null
+          admission_id: string
           check_in_date: string
           created_at: string
           energy_level: number
@@ -127,12 +127,11 @@ export type Database = {
           motivation_score: number
           note: string | null
           pain_score: number
-          patient_id: string
           symptoms: string
           updated_at: string
         }
         Insert: {
-          admission_id?: string | null
+          admission_id: string
           check_in_date: string
           created_at?: string
           energy_level: number
@@ -142,12 +141,11 @@ export type Database = {
           motivation_score: number
           note?: string | null
           pain_score: number
-          patient_id: string
           symptoms?: string
           updated_at?: string
         }
         Update: {
-          admission_id?: string | null
+          admission_id?: string
           check_in_date?: string
           created_at?: string
           energy_level?: number
@@ -157,7 +155,6 @@ export type Database = {
           motivation_score?: number
           note?: string | null
           pain_score?: number
-          patient_id?: string
           symptoms?: string
           updated_at?: string
         }
@@ -169,20 +166,13 @@ export type Database = {
             referencedRelation: "admissions"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "patient_checkins_patient_id_fkey"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       patient_context: {
         Row: {
           additional_attention_notes: string | null
           additional_attention_points: string[]
-          admission_id: string | null
+          admission_id: string
           created_at: string
           fall_risk: string
           id: string
@@ -191,7 +181,6 @@ export type Database = {
           mobility_aid_type: string
           mobility_status: string
           notes: string | null
-          patient_id: string
           requires_supervision: string
           room_restriction: string
           transfer_support: string
@@ -201,7 +190,7 @@ export type Database = {
         Insert: {
           additional_attention_notes?: string | null
           additional_attention_points?: string[]
-          admission_id?: string | null
+          admission_id: string
           created_at?: string
           fall_risk?: string
           id?: string
@@ -210,7 +199,6 @@ export type Database = {
           mobility_aid_type?: string
           mobility_status?: string
           notes?: string | null
-          patient_id: string
           requires_supervision?: string
           room_restriction?: string
           transfer_support?: string
@@ -220,7 +208,7 @@ export type Database = {
         Update: {
           additional_attention_notes?: string | null
           additional_attention_points?: string[]
-          admission_id?: string | null
+          admission_id?: string
           created_at?: string
           fall_risk?: string
           id?: string
@@ -229,7 +217,6 @@ export type Database = {
           mobility_aid_type?: string
           mobility_status?: string
           notes?: string | null
-          patient_id?: string
           requires_supervision?: string
           room_restriction?: string
           transfer_support?: string
@@ -240,15 +227,8 @@ export type Database = {
           {
             foreignKeyName: "patient_context_admission_id_fkey"
             columns: ["admission_id"]
-            isOneToOne: false
-            referencedRelation: "admissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "patient_context_patient_id_fkey"
-            columns: ["patient_id"]
             isOneToOne: true
-            referencedRelation: "profiles"
+            referencedRelation: "admissions"
             referencedColumns: ["id"]
           },
           {
@@ -309,14 +289,13 @@ export type Database = {
         Row: {
           activity_session_id: string | null
           activity_title: string
-          admission_id: string | null
+          admission_id: string
           after_feeling_score: number
           created_at: string
           effort_score: number
           evaluation_date: string
           id: string
           notes: string | null
-          patient_id: string
           reason: string | null
           status: string
           updated_at: string
@@ -324,14 +303,13 @@ export type Database = {
         Insert: {
           activity_session_id?: string | null
           activity_title: string
-          admission_id?: string | null
+          admission_id: string
           after_feeling_score: number
           created_at?: string
           effort_score: number
           evaluation_date: string
           id?: string
           notes?: string | null
-          patient_id: string
           reason?: string | null
           status: string
           updated_at?: string
@@ -339,14 +317,13 @@ export type Database = {
         Update: {
           activity_session_id?: string | null
           activity_title?: string
-          admission_id?: string | null
+          admission_id?: string
           after_feeling_score?: number
           created_at?: string
           effort_score?: number
           evaluation_date?: string
           id?: string
           notes?: string | null
-          patient_id?: string
           reason?: string | null
           status?: string
           updated_at?: string
@@ -359,44 +336,34 @@ export type Database = {
             referencedRelation: "admissions"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "patient_participation_evaluations_patient_id_fkey"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       patient_questions: {
         Row: {
-          admission_id: string | null
+          admission_id: string
           answer_notes: string | null
           created_at: string
           id: string
-          patient_id: string
           question_text: string
           status: string
           target_type: string
           updated_at: string
         }
         Insert: {
-          admission_id?: string | null
+          admission_id: string
           answer_notes?: string | null
           created_at?: string
           id?: string
-          patient_id: string
           question_text: string
           status?: string
           target_type: string
           updated_at?: string
         }
         Update: {
-          admission_id?: string | null
+          admission_id?: string
           answer_notes?: string | null
           created_at?: string
           id?: string
-          patient_id?: string
           question_text?: string
           status?: string
           target_type?: string
@@ -408,13 +375,6 @@ export type Database = {
             columns: ["admission_id"]
             isOneToOne: false
             referencedRelation: "admissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "patient_questions_patient_id_fkey"
-            columns: ["patient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
