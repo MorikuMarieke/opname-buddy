@@ -28,9 +28,9 @@ Caregivers and activity coordinators gain structured visibility into how patient
 
 ## Current architectural priority
 
-Before continuing other patient/caregiver feature work, the **account/domain model refactor** is the active architectural priority, because it affects ownership, access control, and RLS across later branches.
+The **account/domain model refactor** — the foundation for ownership, access control, and RLS across later branches — has shipped. `patients`, `admissions`, and secure patient↔account linking are live, and patient-owned care data (context, check-ins, questions, participation evaluations) is now scoped to the clinical **admission** rather than the login account.
 
-The target rules for this model are defined in [Domain and identity model](#domain-and-identity-model) below. Sequencing, migrations, and deferred steps live in the branch plan: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
+The rules for this model are defined in [Domain and identity model](#domain-and-identity-model) below. Full sequencing, migrations, verification, and remaining deferrals live in the branch plan: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md). Still deferred: dropping the legacy care `patient_id` columns, `admission_id` NOT NULL, orphan-row cleanup, and organizational (department/team) caregiver access.
 
 ---
 
@@ -133,17 +133,17 @@ The MVP delivers four role-specific dashboards, patient and staff CRUD flows, pl
 
 ### Domain and identity model
 
-OpnameBuddy separates **who is acting** (login identity), **what an account may do** (authorization), and **who care data is about** (clinical patient). This separation is the target architecture; all new work must follow it.
+OpnameBuddy separates **who is acting** (login identity), **what an account may do** (authorization), and **who care data is about** (clinical patient). This separation is implemented and all new work must follow it.
 
 - **`profiles` / `auth.users` are login identities, not clinical patients.** They model authentication and app-level account data only.
 - **`roles` / `user_roles` define authorization** — what an account may do — independent of clinical data.
 - **`patients` are clinical domain entities**, distinct from any login account.
 - **A clinical patient can exist before a login account exists.** Staff create and maintain patient records whether or not the patient ever logs in.
-- **Patient accounts may later be linked to existing patient records** through a secure linking flow that connects a login to the clinical patient it belongs to.
-- **`admissions` represent hospital stays.** A patient may have multiple admissions over time; care data is scoped to a patient/admission.
-- **Patient-owned care data belongs to a patient/admission, never to the acting staff account.** This includes care restrictions, care context, check-ins, questions, daily plans, and AI advice.
-- **Staff and caregiver accounts are actors, not owners.** They appear only in audit fields such as `created_by_staff_id` or `updated_by_staff_id`.
-- **Caregiver access should ultimately be based on organizational assignment** — department, team, or admission context — not only a global `caregiver` role.
+- **Patient accounts are linked to patient records** through a secure linking flow (`patient_link_codes` → `redeem_patient_link_code()`) that connects a login to the clinical patient it belongs to.
+- **`admissions` represent hospital stays.** A patient may have multiple admissions over time; care data is scoped to an admission (via `admission_id`).
+- **Patient-owned care data belongs to a patient/admission, never to the acting staff account.** This includes care context, check-ins, questions, participation evaluations, and (later) daily plans and AI advice. Patient-side RLS is enforced through `current_admission_ids()`.
+- **Staff and caregiver accounts are actors, not owners.** They appear only in audit fields such as `created_by_staff_id` (and `patient_context.updated_by`, pending rename to `updated_by_staff_id`).
+- **Caregiver access should ultimately be based on organizational assignment** — department, team, or admission context — not only a global `caregiver` role. *(Still deferred; caregiver access is currently the global `caregiver` role.)*
 
 ---
 
@@ -205,12 +205,12 @@ The `feature/supabase-auth-roles` branch established:
 
 ## Branch roadmap
 
-Work proceeds in small vertical slices on feature branches. The account/domain model refactor is the current focus (see [Current architectural priority](#current-architectural-priority)).
+Work proceeds in small vertical slices on feature branches. The account/domain model refactor has shipped (see [Current architectural priority](#current-architectural-priority)).
 
 | # | Branch | Focus |
 |---|--------|-------|
 | 1 | `feature/supabase-auth-roles` | Auth, profiles, roles — **completed** |
-| — | `feature/account-domain-model` | **Current focus** — clinical `patients` and `admissions`, patient/admission-scoped care data, staff in audit fields, secure patient↔record linking. See [branch plan](branch-plans/branch-account-domain-model.md) |
+| — | `feature/account-domain-model` | **Shipped (Phase 1–2)** — clinical `patients` and `admissions`, admission-scoped care data, staff in audit fields, secure patient↔record linking. Remaining deferrals in the [branch plan](branch-plans/branch-account-domain-model.md) |
 | 2 | `feature/patient-checkins-questions` | Patient check-ins and questions CRUD |
 | 3 | `feature/care-restrictions-context` | Zorgcontext (`patient_context`), caregiver patient data access |
 | 4 | `feature/planning-activities` | Activities, sessions, volunteers, calendar |

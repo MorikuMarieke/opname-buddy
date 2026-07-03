@@ -1,8 +1,16 @@
 # Branch plan — feature/account-domain-model
 
 Foundation-first refactor separating login identity, authorization, and clinical
-patient identity. **Docs + scaffolding only in the first commit.** No migrations
-applied, no RLS rewritten, no runtime code changed, no data deleted.
+patient identity.
+
+**Status: Phase 1 + Phase 2 shipped (2026-07-03).** Migrations `00015`–`00024` are
+applied on remote; care data is admission-scoped and the legacy
+`patient_id = auth.uid()` care policies are dropped. Remaining work is deferred to
+Phase 3 (see [`DEFERRED.md`](../../DEFERRED.md) → "Patient entity vs account"):
+drop legacy care `patient_id` columns, `admission_id` NOT NULL, orphan cleanup,
+`updated_by` → `updated_by_staff_id` rename, and organizational caregiver access.
+Sections below marked with historical scope notes (e.g. "first commit") describe
+the state at that commit and are kept as a record.
 
 Durable source: this file. Parked origin: `DEFERRED.md` →
 "Patient entity vs account: feature/account-domain-model".
@@ -163,7 +171,7 @@ Verified via `pg_policies` (no `_own` policies remain) and RLS simulation (`set 
 
 Isolation holds under admission-only ownership; patient and caregiver flows keep working. Advisors: only the pre-existing expected notices.
 
-**Checkpoint 5 — documentation cleanup (Planned)** — reconcile `docs/*`, `DEFERRED.md`, and this plan to the shipped state.
+**Checkpoint 5 — documentation cleanup — DONE 2026-07-03** — reconciled `docs/project-context.md`, `docs/domain-model.md`, `DEFERRED.md`, and this plan to the shipped Phase 2 state: care-table blueprints and ownership rows now show `admission_id` as the ownership key with `patient_id` retained for provenance; the RLS-patterns section reflects `current_admission_ids()`; the identity/access narrative is stated as implemented; and remaining items are captured as Phase 3 deferrals. Docs-only; no migrations.
 
 **Deferred beyond Phase 2 (do not do now):** drop old care `patient_id` columns; `admission_id` NOT NULL flip; clean orphaned `patient_context` rows (`0c90b156`, `0bde471c`); rename `patient_context.updated_by` → `updated_by_staff_id`.
 

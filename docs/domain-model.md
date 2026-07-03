@@ -20,18 +20,18 @@ For each area:
 
 ## Identity and access
 
-> **Upcoming refactor (current priority — docs only, not yet implemented):**
-> The account/domain model is being refactored to separate three concerns that the current schema still blurs. See **Current development priority** in [`docs/project-context.md`](project-context.md).
+> **Account/domain model — implemented (Phase 1 + Phase 2):**
+> The account/domain model separates three concerns the original schema blurred. See [Domain and identity model](project-context.md#domain-and-identity-model) in `docs/project-context.md`.
 >
-> - **Login identity vs clinical patient identity are distinct.** `profiles` / `auth.users` model **login accounts**; a new **`patients`** entity will model the **clinical patient**.
+> - **Login identity vs clinical patient identity are distinct.** `profiles` / `auth.users` model **login accounts**; **`patients`** models the **clinical patient**.
 > - **`roles` / `user_roles` determine what an account may do** and stay separate from domain data.
-> - **Patient-owned care data belongs to a patient/admission, not to a staff login.** Care restrictions, care context, check-ins, questions, daily plans, and AI advice are owned by the clinical patient/admission. Staff appear only through audit fields such as `created_by_staff_id` / `updated_by_staff_id`.
+> - **Patient-owned care data belongs to a patient/admission, not to a staff login.** Care context, check-ins, questions, and participation evaluations are owned by the clinical patient via `admission_id`. Staff appear only through audit fields (`created_by_staff_id`; `patient_context.updated_by` is the staff audit field).
 > - **Staff/caregiver accounts are actors, not owners** of patient-owned data.
-> - **Patient accounts may later be linked to existing patient records** via a secure linking flow.
+> - **Patient accounts are linked to patient records** via the secure `patient_link_codes` / `redeem_patient_link_code()` flow.
 >
-> Blueprints below still describe the pre-refactor shape (e.g. `patient_id` referencing `profiles` / `auth.uid()`). They will be revised as the refactor lands. No migrations are applied for this refactor yet.
+> **What shipped:** `patients`, `admissions`, `patient_account_links`, `patient_link_codes` (migrations `00015`–`00018`); the four care tables gained a nullable `admission_id` (backfilled), admission-scoped RLS via `current_admission_ids()`, and the legacy `patient_id = auth.uid()` policies were dropped (migrations `00019`–`00024`). The caregiver read path (`list_care_patients()`, `/care/patients/[patientId]`) is keyed by `patients.id`.
 >
-> **Foundation branch:** the ownership map, table inventory, and planned migration sequence for this refactor live in [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md). The four care tables (`patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`) still use the profile-based model (`patient_id → profiles`, RLS `patient_id = auth.uid()`) and are unchanged in this commit.
+> **Still deferred (not yet done):** drop the legacy care `patient_id` columns; make `admission_id` NOT NULL; clean orphaned `patient_context` rows; rename `patient_context.updated_by` → `updated_by_staff_id`; organizational (department/team) caregiver access. Blueprints below note `admission_id` as the ownership key; the retained `patient_id` columns are kept for provenance/compatibility. Full history: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
 
 ### User / problem
 
@@ -94,8 +94,8 @@ A patient-owned reflection about physical and emotional state on a given day.
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | `patient_id` = authenticated patient |
-| Relationships | Belongs to `profiles` (patient) |
+| Ownership | `admission_id` → the clinical patient's admission (`patient_id` retained for provenance) |
+| Relationships | Belongs to an `admissions` row (→ `patients`); legacy `patient_id → profiles` still written |
 
 **Business rules**
 
@@ -110,7 +110,8 @@ A patient-owned reflection about physical and emotional state on a given day.
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK → profiles | `auth.uid()` on insert |
+| `admission_id` | uuid FK → admissions | Ownership key; patient's active admission on insert (nullable during transition) |
+| `patient_id` | uuid FK → profiles | Legacy; still written from the account. RLS no longer uses it |
 | `check_in_date` | date | App uses Europe/Amsterdam calendar day |
 | `pain_score` | smallint | 0–10 |
 | `energy_level` | smallint | 1–5 |
@@ -141,8 +142,8 @@ A question the patient wants to discuss with a specific caregiver specialism.
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | `patient_id` = authenticated patient |
-| Relationships | Belongs to `profiles` (patient) |
+| Ownership | `admission_id` → the clinical patient's admission (`patient_id` retained for provenance) |
+| Relationships | Belongs to an `admissions` row (→ `patients`); legacy `patient_id → profiles` still written |
 
 **Business rules**
 
@@ -158,7 +159,8 @@ A question the patient wants to discuss with a specific caregiver specialism.
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK → profiles | |
+| `admission_id` | uuid FK → admissions | Ownership key (nullable during transition) |
+| `patient_id` | uuid FK → profiles | Legacy; still written. RLS no longer uses it |
 | `question_text` | text | Required |
 | `target_type` | text | CHECK: doctor, nurse, physiotherapist, other |
 | `status` | text | CHECK: open, discussed, answered; default open |
@@ -179,8 +181,8 @@ A patient-owned reflection on participation in one activity on a given day.
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | `patient_id` = authenticated patient |
-| Relationships | Belongs to `profiles`; optional `activity_session_id` when activities exist (branch 4) |
+| Ownership | `admission_id` → the clinical patient's admission (`patient_id` retained for provenance) |
+| Relationships | Belongs to an `admissions` row (→ `patients`); optional `activity_session_id` when activities exist (branch 4) |
 
 **Business rules**
 
@@ -195,7 +197,8 @@ A patient-owned reflection on participation in one activity on a given day.
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK → profiles | |
+| `admission_id` | uuid FK → admissions | Ownership key (nullable during transition) |
+| `patient_id` | uuid FK → profiles | Legacy; still written. RLS no longer uses it |
 | `evaluation_date` | date | Europe/Amsterdam calendar day |
 | `activity_title` | text | Label from DagBuddy suggestion or patient input |
 | `activity_session_id` | uuid | Nullable; FK in branch 4 |
@@ -224,8 +227,8 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | Written by caregivers; read by patient (own row), caregivers, activity coordinators, and later AI tools |
-| Relationships | Belongs to patient (`profiles`); `updated_by` tracks last caregiver |
+| Ownership | Belongs to the clinical patient's admission (`admission_id`). Written by caregivers; read by the linked patient (via admission), caregivers, activity coordinators, and later AI tools |
+| Relationships | Belongs to an `admissions` row (→ `patients`); legacy `patient_id → profiles` retained; `updated_by` tracks last caregiver (staff audit field) |
 
 **Business rules**
 
@@ -247,7 +250,8 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK → profiles | UNIQUE |
+| `admission_id` | uuid FK → admissions | Ownership key; caregiver read/write is keyed on this (nullable during transition) |
+| `patient_id` | uuid FK → profiles | Legacy; UNIQUE, still written from the linked account. RLS no longer uses it |
 | `mobility_status` | text | unknown, bed_bound, chair_only, wheelchair, walking_independent, walking_with_aid, walking_with_assistance |
 | `transfer_support` | text | unknown, none, one_person, two_person, lift |
 | `fall_risk` | text | unknown, low, medium, high |
@@ -259,7 +263,7 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 | `additional_attention_points` | text[] | iv_pump, oxygen, catheter, wound_or_drain, post_surgery, fatigue, wandering_risk, language_barrier, cognitive_support, hearing_support, vision_support, communication_support, other |
 | `additional_attention_notes` | text | Optional; UI when `other` chip selected |
 | `notes` | text | Optional caregiver notes |
-| `updated_by` | uuid FK → profiles | Caregiver who last saved |
+| `updated_by` | uuid FK → profiles | Caregiver who last saved (staff audit field; to be renamed `updated_by_staff_id` later) |
 | `created_at`, `updated_at` | timestamptz | `set_updated_at` trigger |
 
 **Removed fields (migration `00012`):** `weight_bearing_status`, `has_iv_line`, `has_oxygen` — IV/oxygen captured via attention chips.
@@ -441,7 +445,8 @@ erDiagram
 
 | Pattern | Applies to |
 |---------|------------|
-| `patient_id = auth.uid()` for SELECT, INSERT, UPDATE | Patient-owned tables |
+| `admission_id in (select current_admission_ids())` for SELECT, INSERT, UPDATE | Patient-owned care tables (Phase 2 ownership) |
+| `patient_id = auth.uid()` | Retired for care tables; still the pattern for `profiles`-owned data |
 | No DELETE on check-ins | `patient_checkins` |
 | DELETE only when `status = 'open'` | `patient_questions` (patient) |
 | Caregiver read/write via `has_role()` policies | `patient_context`, check-ins, questions (branch 3) |
@@ -451,12 +456,7 @@ Always pair new tables with **explicit GRANT migrations** for `authenticated` an
 
 ### Caregiver patient list must be database-filtered
 
-The caregiver patient list uses the `list_care_patients()` SECURITY DEFINER RPC (migration `00014`), **not** a direct `profiles` select. Client-side role filtering is impossible and unsafe here:
-
-- `profiles` intentionally exposes **staff and self** to caregivers (policies `profiles_select_own` and `profiles_select_staff_for_caregivers`) so caregiver names can be resolved for audit fields like `updated_by`.
-- `user_roles` RLS is `auth.uid() = user_id`, so a caregiver **cannot read other users' roles** to tell patients apart from staff on the client.
-
-A plain `select ... from profiles` therefore returns patients **plus** the caregiver and all staff, which would let non-patient accounts be treated (and edited) as patients. The `security definer` function performs the patient-role filter in the database while keeping the name-resolution policies intact.
+The caregiver patient list uses the `list_care_patients()` SECURITY DEFINER RPC, **not** a direct `profiles` select. Since Phase 2 (migration `00023`) it returns **clinical patients** (`patients` rows) with each patient's active `admission_id` and linked login account (`user_id`), so the caregiver UI keys routes by `patients.id` and reads/writes care data by admission. It runs `security definer` because it resolves admissions and account links a caregiver cannot read row-by-row, and only returns rows to `has_role('caregiver')`. Staff/self accounts never appear (they are not in `patients`).
 
 ---
 

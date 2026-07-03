@@ -54,7 +54,7 @@ alter default privileges in schema public
 
 ## Patient entity vs account: `feature/account-domain-model`
 
-**Status:** Phase 1 applied 2026-07-03 (`00015`–`00018` on remote; types regenerated). Phase 2 pending.  
+**Status:** Phase 1 + Phase 2 applied 2026-07-03 (`00015`–`00024` on remote; types regenerated). Care data is admission-scoped; only the deferrals listed below remain.  
 **Added:** 2026-07-02 · **Started:** 2026-07-03  
 **Branch plan:** [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)  
 **Trigger:** Multiple patients per admission, patients existing before they have a login, cross-account patient data ownership, or hardening RLS beyond `patient_id = auth.uid()`.
@@ -93,13 +93,18 @@ erDiagram
 - Types + services + minimal UI: extend `types/database.ts`; add patients/admissions/redeem services + hooks; staff UI to create patient + admission and generate a link code; optional patient onboarding to redeem; bridge `list_care_patients()` to the new entities.
 - Docs: update `docs/domain-model.md` "Identity and access"; move this entry to "in progress" once Phase 1 lands.
 
-**Phase 2 (follow-up, not the foundation branch)** — detailed, sequenced plan now lives in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md) under "Phase 2 plan". Summary:
+**Phase 2 — SHIPPED 2026-07-03** (`00019`–`00024`; full checkpoint log in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)):
 
-- Add `admission_id` (nullable) to `patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`; add `current_admission_ids()`; backfill from links → active admission; dual-write.
-- Standardize `created_by_staff_id` + `updated_by_staff_id` across care tables (add `updated_by_staff_id`, backfill, then drop `patient_context.updated_by` — never in-place rename).
-- Add admission-scoped care RLS alongside the old policies, then cut over and drop `patient_id = auth.uid()` policies; retire `requireRole("patient")`-only protection.
-- Bridge caregiver read path: `list_care_patients()` returns clinical `patients` + active admission; `/care/patients/[patientId]` keyed by `patients.id`.
+- Added `admission_id` (nullable) to all four care tables + `current_admission_ids()`; backfilled from links → active admission; patient services dual-write it.
+- Added admission-scoped care RLS, then cut over and **dropped the `patient_id = auth.uid()` care policies** (admission ownership is now the sole patient-side guard; verified by RLS simulation).
+- Caregiver read path re-keyed: `list_care_patients()` returns clinical `patients` + active admission + linked account; `/care/patients/[patientId]` is `patients.id`; `patient_context` read/written by admission.
+
+**Still deferred (Phase 3 / later):**
+
+- Drop the legacy care `patient_id` columns and make `admission_id` NOT NULL (blocked on orphan cleanup).
+- Rename `patient_context.updated_by` → `updated_by_staff_id` (add-new + backfill + switch + drop; never in-place).
 - Clean up orphaned `patient_context` rows on `caregiver@test.com` (`0c90b156`) and `staff@test.com` (`0bde471c`) — only after confirmation.
+- Organizational (department/team/admission) caregiver access instead of the global `caregiver` role; retire `requireRole("patient")`-only reliance.
 
 **Risks/guardrails:** Do not weaken existing RLS or expose `user_roles`/`code_hash`. Security-definer functions and migrations are high-impact remote writes (each apply needs approval). Store the 6-digit code hashed with short TTL.
 
