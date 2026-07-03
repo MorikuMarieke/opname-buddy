@@ -149,7 +149,19 @@ Verified: `list_care_patients()` signature `TABLE(id, full_name, admission_id, u
 
 Follow-up for checkpoint 4: any care rows created in the window between checkpoints 2 and 3 could have a null `admission_id`; re-run the `00020` backfill before the RLS cutover so no patient-owned row is stranded when the old policies are dropped.
 
-**Checkpoint 4 — RLS cutover and verification (Planned)** — `00023_care_retire_old_policies.sql`: switch reads/writes fully to `admission_id`; **drop the `patient_id = auth.uid()` care policies**. Keep old `patient_id` columns (provenance) and leave `admission_id` **nullable** (NOT NULL deferred until orphan cleanup). Verify isolation with a second seeded patient.
+**Checkpoint 4 — RLS cutover and verification — APPLIED 2026-07-03**
+
+`00024_care_retire_old_policies.sql`: defensive idempotent backfill, then **dropped the `patient_id = auth.uid()` care policies**. Admission-scoped patient policies + caregiver/coordinator policies are now the only care policies. Old `patient_id` columns kept (provenance); `admission_id` left **nullable** (NOT NULL deferred); no orphan cleanup; caregiver access unchanged.
+
+Verified via `pg_policies` (no `_own` policies remain) and RLS simulation (`set local role authenticated` + JWT `sub`):
+
+| Signed-in as | checkins | questions | evals | context |
+|---|---|---|---|---|
+| Patient `328d194e` (linked) | 2 | 3 | 0 | 1 (own) |
+| Unrelated `03b3c749` (no role/link) | 0 | 0 | 0 | 0 |
+| Caregiver `0c90b156` | 2 | 3 | 0 | 3 (all, incl. 2 orphans) |
+
+Isolation holds under admission-only ownership; patient and caregiver flows keep working. Advisors: only the pre-existing expected notices.
 
 **Checkpoint 5 — documentation cleanup (Planned)** — reconcile `docs/*`, `DEFERRED.md`, and this plan to the shipped state.
 
