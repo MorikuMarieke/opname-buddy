@@ -15,4 +15,13 @@ export const queryKeys = {
     recent: (limit: number) =>
       [...queryKeys.participationEvaluations.all, "recent", limit] as const,
   },
+  patientContext: {
+    all: ["patient-context"] as const,
+    byPatient: (patientId: string) =>
+      [...queryKeys.patientContext.all, patientId] as const,
+    own: () => [...queryKeys.patientContext.all, "own"] as const,
+  },
+  carePatients: {
+    all: ["care-patients"] as const,
+  },
 } as const;

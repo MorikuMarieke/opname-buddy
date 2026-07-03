@@ -23,3 +23,23 @@ export function formatDutchDate(dateString: string): string {
     month: "long",
   });
 }
+
+/**
+ * Formats an ISO timestamp for Dutch display in Europe/Amsterdam.
+ */
+export function formatDutchDateTime(isoString: string): string {
+  const date = new Date(isoString);
+
+  if (Number.isNaN(date.getTime())) {
+    return isoString;
+  }
+
+  return date.toLocaleString("nl-NL", {
+    timeZone: "Europe/Amsterdam",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

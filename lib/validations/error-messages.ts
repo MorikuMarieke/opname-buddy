@@ -17,6 +17,15 @@ const FIELD_LABELS: Record<string, string> = {
   effort_score: "Inspanning",
   after_feeling_score: "Gevoel achteraf",
   notes: "Notities",
+  mobility_status: "Mobiliteit",
+  transfer_support: "Transferondersteuning",
+  fall_risk: "Valrisico",
+  requires_supervision: "Begeleiding",
+  mobility_aid_type: "Type loophulpmiddel",
+  mobility_aid_available: "Loophulpmiddel beschikbaar",
+  isolation_type: "Isolatietype",
+  room_restriction: "Bewegingsvrijheid",
+  additional_attention_notes: "Overige toelichting",
 };
 
 export function getFieldErrors(issues: ZodIssue[]): Record<string, string> {
