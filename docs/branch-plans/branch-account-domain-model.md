@@ -79,11 +79,102 @@ expected/by-design notices (see below).
 - Renaming `patient_context.updated_by` → `updated_by_staff_id` (Phase 2)
 - Deleting/cleaning orphaned `patient_context` rows (staff/self accounts)
 
-## Deferred to next commits (Phase 2)
+## Phase 2 plan — move care data onto patient/admission ownership
 
-- `admission_id` / `patient_entity_id` on all four care tables + backfill + dual-write
-- Standardize `created_by_staff_id` + `updated_by_staff_id` across care tables
-- Rewrite care-table RLS from `patient_id = auth.uid()` to admission ownership via `current_patient_ids()`
-- Retire `requireRole("patient")`-only protection for care data
-- Bridge `list_care_patients()` to the new entities
-- Cleanup of orphaned test `patient_context` rows (only after confirmation)
+Phase 1 introduced the clinical entities but left the four care tables on the
+old `patient_id = auth.uid()` model. Phase 2 re-homes care data onto the
+**admission** (and therefore the clinical patient), removes the login-account
+conflation from the caregiver read path, and hardens RLS.
+
+### Guardrails (same discipline as Phase 1)
+
+- Every migration is **additive first**; nothing is dropped until reads/writes have moved and been verified.
+- Each migration is a high-impact remote write and is applied only with explicit approval, then `types/database.ts` is regenerated and `tsc --noEmit` must pass.
+- No care data is deleted. Old columns/policies are removed only in the final cutover step, after the app runs on the new model.
+- Keep patient/caregiver flows working at every commit (dual-run old + new).
+
+### Target end state
+
+- Care rows (`patient_checkins`, `patient_questions`, `patient_participation_evaluations`, `patient_context`, and future `daily_advice`) are owned by an **`admission`** (which resolves to a clinical `patients` row).
+- Patients access their own care data via `admission_id in (select public.current_admission_ids())`, not `patient_id = auth.uid()`.
+- Staff appear only in audit fields (`created_by_staff_id`, `updated_by_staff_id`).
+- The caregiver list/detail flow is keyed by clinical `patients.id` (not `profiles.id`); care data is queried by the patient's active admission.
+- `requireRole("patient")`-only protection is no longer the sole safeguard for care data.
+
+### New DB helper (planned)
+
+`current_admission_ids()` — SECURITY DEFINER, mirrors `current_patient_ids()`:
+
+```sql
+-- returns admission ids belonging to the patients linked to auth.uid()
+select a.id
+from public.admissions a
+where a.patient_id in (select public.current_patient_ids());
+```
+
+Grant execute to `authenticated`; used by the new patient-side care-table RLS.
+
+### Commit checkpoints
+
+Phase 2 is delivered as five local commit checkpoints. Migrations continue at
+`00019`; order matters; do not reorder. Remote applies happen only with explicit
+approval.
+
+**Checkpoint 1 — schema additions and backfill — APPLIED 2026-07-03**
+
+| File | Type | Status | Purpose |
+|------|------|--------|---------|
+| `00019_care_admission_columns.sql` | Additive DDL | Applied | Nullable `admission_id uuid → admissions(id) on delete cascade` on all four care tables + admission-keyed indexes. Table grants already cover new columns. |
+| `00020_care_admission_backfill.sql` | Data (idempotent) | Applied | Set `admission_id` from `care.patient_id` (= `profiles.id`) → `patient_account_links.user_id` → `patient_id` → that patient's `active` admission. Only where `admission_id is null`. |
+
+Verified: `patient_checkins` 2/2, `patient_questions` 3/3 backfilled; `patient_context` 1/3 (the 2 nulls are the known staff/self orphan rows `0bde471c`, `0c90b156` — cleanup deferred); `patient_participation_evaluations` 0 rows. Advisors: only the expected Phase 1 notices. `tsc --noEmit` passes.
+
+**Checkpoint 2 — helper functions and RLS preparation (Planned)**
+
+| File | Type | Purpose |
+|------|------|---------|
+| `00021_current_admission_ids.sql` | DDL (function) | Add SECURITY DEFINER `current_admission_ids()` (mirrors `current_patient_ids()`); grant execute to `authenticated`. |
+| `00022_care_admission_rls.sql` | Additive RLS | Add patient policies scoped by `admission_id in (select public.current_admission_ids())` **alongside** the existing `patient_id = auth.uid()` policies (both active during transition). Caregiver policies unchanged. |
+
+**Checkpoint 3 — service and route updates (Planned)** — dual-write `admission_id` in patient services; bridge caregiver read path (`list_care_patients()` → clinical `patients` + active admission; `/care/patients/[patientId]` keyed by `patients.id`). Reads still function under old + new RLS.
+
+**Checkpoint 4 — RLS cutover and verification (Planned)** — `00023_care_retire_old_policies.sql`: switch reads/writes fully to `admission_id`; **drop the `patient_id = auth.uid()` care policies**. Keep old `patient_id` columns (provenance) and leave `admission_id` **nullable** (NOT NULL deferred until orphan cleanup). Verify isolation with a second seeded patient.
+
+**Checkpoint 5 — documentation cleanup (Planned)** — reconcile `docs/*`, `DEFERRED.md`, and this plan to the shipped state.
+
+**Deferred beyond Phase 2 (do not do now):** drop old care `patient_id` columns; `admission_id` NOT NULL flip; clean orphaned `patient_context` rows (`0c90b156`, `0bde471c`); rename `patient_context.updated_by` → `updated_by_staff_id`.
+
+### Audit-field decision (updated_by)
+
+`patient_context.updated_by` is **kept as-is** in Phase 2. It currently acts as the
+staff audit field (the acting caregiver, `references profiles(id)`). It should
+later be renamed to / replaced by `updated_by_staff_id` during a dedicated
+care-table audit refactor — done as add-new + backfill + switch + drop, never an
+in-place rename. No rename or backfill of this column happens in Phase 2.
+
+### Runtime code touch list
+
+- `lib/services/patient-checkins.ts`, `patient-questions.ts`, `patient-participation-evaluations.ts`: add `admission_id` + audit fields on writes; reads move from implicit `auth.uid()` scoping to admission scoping (RLS handles it).
+- `lib/services/patient-context.ts`: key context on `admission_id`; `getPatientContext(patientId)` becomes admission-based; keep writing `updated_by` (staff audit field, unchanged this phase); update `list_care_patients()` consumer to the new patient-entity shape.
+- `hooks/use-care-patients.ts`, `components/dashboard/care-patient-shell.tsx`, `components/dashboard/care-patient-detail-view.tsx`: consume clinical `patients` + active admission.
+- `app/care/patients/[patientId]/…`: `patientId` now = clinical `patients.id`.
+- Patient dashboard: resolve the caller's active admission (via a small `getActiveAdmission()` helper using `current_admission_ids()`).
+
+### Testing strategy
+
+- Seed a **second** clinical patient + admission + linked account (current data has only one) to actually exercise cross-patient isolation.
+- Verify: patient A cannot read/write patient B's care rows; caregiver can read both; staff never becomes an owner; `code_hash` still unreadable.
+- Run `get_advisors` (security) after each DDL step; `tsc --noEmit` after each type regen.
+
+### Risks / watch-outs
+
+- **Caregiver route key change** (`profiles.id` → `patients.id`) is the riskiest step; ship 2.6 as its own commit and smoke-test `/care/patients/*`.
+- **`updated_by` rename** is deferred beyond Phase 2; when done, use add-new + backfill + switch + drop, never an in-place rename.
+- **NOT NULL flip** on `admission_id` is deferred beyond Phase 2 (blocked on orphan-row cleanup); `admission_id` stays nullable this phase.
+- Migration version divergence: remote records timestamped versions; apply via MCP `apply_migration` (not `db push`), consistent with Phase 1.
+
+### Out of scope for Phase 2 (future / Phase 3)
+
+- Organizational caregiver access (department/team/admission-scoped) — caregiver RLS stays global `has_role('caregiver')` for now.
+- Multi-admission history UI, discharge workflows, proxy/family access.
+- Dropping the care `patient_id` columns entirely (kept temporarily for provenance).

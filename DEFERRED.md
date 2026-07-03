@@ -93,12 +93,12 @@ erDiagram
 - Types + services + minimal UI: extend `types/database.ts`; add patients/admissions/redeem services + hooks; staff UI to create patient + admission and generate a link code; optional patient onboarding to redeem; bridge `list_care_patients()` to the new entities.
 - Docs: update `docs/domain-model.md` "Identity and access"; move this entry to "in progress" once Phase 1 lands.
 
-**Phase 2 (follow-up, not the foundation branch)**
+**Phase 2 (follow-up, not the foundation branch)** — detailed, sequenced plan now lives in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md) under "Phase 2 plan". Summary:
 
-- Add `admission_id` (and/or `patient_entity_id`) to `patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`; backfill; dual-write.
-- Standardize `created_by_staff_id` + `updated_by_staff_id` across care tables (rename `patient_context.updated_by`).
-- Rewrite care-table RLS from `patient_id = auth.uid()` to `admission_id in (select ... from current_patient_ids())`.
-- Flip reads/writes to admission ownership; retire the `patient_id = auth.uid()` assumption and `requireRole("patient")`-only protection.
+- Add `admission_id` (nullable) to `patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`; add `current_admission_ids()`; backfill from links → active admission; dual-write.
+- Standardize `created_by_staff_id` + `updated_by_staff_id` across care tables (add `updated_by_staff_id`, backfill, then drop `patient_context.updated_by` — never in-place rename).
+- Add admission-scoped care RLS alongside the old policies, then cut over and drop `patient_id = auth.uid()` policies; retire `requireRole("patient")`-only protection.
+- Bridge caregiver read path: `list_care_patients()` returns clinical `patients` + active admission; `/care/patients/[patientId]` keyed by `patients.id`.
 - Clean up orphaned `patient_context` rows on `caregiver@test.com` (`0c90b156`) and `staff@test.com` (`0bde471c`) — only after confirmation.
 
 **Risks/guardrails:** Do not weaken existing RLS or expose `user_roles`/`code_hash`. Security-definer functions and migrations are high-impact remote writes (each apply needs approval). Store the 6-digit code hashed with short TTL.
