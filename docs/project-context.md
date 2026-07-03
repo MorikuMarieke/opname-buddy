@@ -26,6 +26,36 @@ Caregivers and activity coordinators gain structured visibility into how patient
 
 ---
 
+## Current development priority
+
+**Branch focus has changed.** Before building more patient and caregiver features, OpnameBuddy first refactors its **account and domain model**.
+
+The current setup still blurs the difference between:
+
+- **auth accounts** (login identity),
+- **patient entities** (clinical identity),
+- **staff accounts** (actors), and
+- **patient-owned care data** (owned by a patient/admission).
+
+This refactor has been **moved forward ahead of other feature work** because the domain model directly affects future patient and caregiver functionality. Continuing to build on a conflated model would compound the problem in every later branch.
+
+> **Scope note:** This is a documentation-only update. No database changes and no migrations are applied yet. Implementation follows once the domain model is agreed.
+
+### Identity and domain model principles
+
+The refactor must make the following distinctions explicit throughout the system:
+
+- **OpnameBuddy distinguishes login identity from clinical patient identity.** A logged-in account is *who is acting*; a clinical patient is *who the care data is about*. These are not the same concept.
+- **`profiles` / `auth.users` represent login accounts.** They model authentication and app-level user records, not clinical patients.
+- **`roles` / `user_roles` determine what an account may do.** Authorization is derived from role assignments on the account, kept separate from domain data.
+- **`patients` should represent the clinical patient entity.** The clinical patient is a first-class entity, distinct from any login account.
+- **Staff and caregiver accounts are actors, not owners of patient-owned care data.** A staff login never *owns* a patient's care records; it acts on them within its role.
+- **Patient-owned care data belongs to a patient or admission — not to the logged-in staff user.** This includes care restrictions, care context, check-ins, questions, daily plans, and AI advice. Ownership is by clinical patient/admission, regardless of which staff account created or edited a row.
+- **Staff users may appear only in audit fields.** Staff attribution is recorded via fields such as `created_by_staff_id` or `updated_by_staff_id`, never as the owner of the record.
+- **Patient accounts may later be linked to existing patient records** through a secure linking flow, so a patient login can be connected to the clinical patient entity that already exists for them.
+
+---
+
 ## Who uses it
 
 | Role | Primary route | Typical responsibilities |
@@ -118,10 +148,11 @@ The MVP delivers four role-specific dashboards, patient and staff CRUD flows, pl
 ### Security principles
 
 - **RLS** is the primary database security layer.
-- Patient-owned data is scoped by `patient_id = auth.uid()`.
+- Patient-owned data is scoped to the **clinical patient / admission** it belongs to — not to the acting staff account. (The current `patient_id = auth.uid()` scoping conflates login identity with clinical identity and is a target of the account/domain model refactor; see **Current development priority**.)
+- Staff actors are recorded only through audit fields (e.g. `created_by_staff_id`, `updated_by_staff_id`), never as owners of patient-owned data.
 - Use **explicit GRANT migrations** for Data API access (new Supabase projects do not auto-grant table privileges).
 - Use **UUID primary keys**, not SERIAL/BIGSERIAL.
-- Keep authentication/authorization separate from domain logic.
+- Keep authentication/authorization separate from domain logic; login identity, role/authorization, and clinical patient identity are distinct concerns.
 
 ---
 
@@ -185,9 +216,12 @@ The `feature/supabase-auth-roles` branch established:
 
 Work proceeds in small vertical slices on feature branches:
 
+> **Priority change:** The **account/domain model refactor** has been pulled forward as the current focus (see **Current development priority**). It must land before continuing further patient/caregiver feature work, because it reshapes ownership and identity for every later branch. Documentation only for now — no schema changes or migrations yet.
+
 | # | Branch | Focus |
 |---|--------|-------|
 | 1 | `feature/supabase-auth-roles` | Auth, profiles, roles — **completed** |
+| — | `feature/account-domain-model` | **Current focus** — separate login identity (`profiles`/`auth.users`), authorization (`roles`/`user_roles`), and clinical patient identity (`patients`); make patient-owned care data owned by patient/admission with staff only in audit fields; plan secure patient↔record linking. Docs-only for now |
 | 2 | `feature/patient-checkins-questions` | Patient check-ins and questions CRUD |
 | 3 | `feature/care-restrictions-context` | Zorgcontext (`patient_context`), caregiver patient data access |
 | 4 | `feature/planning-activities` | Activities, sessions, volunteers, calendar |
@@ -206,6 +240,7 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | Document | Purpose |
 |----------|---------|
 | [`docs/domain-model.md`](domain-model.md) | Entities, relationships, business rules, database blueprint |
+| [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md) | Account/domain model refactor plan (current focus) |
 | [`docs/branch-plans/branch-02-patient-checkins-questions.md`](branch-plans/branch-02-patient-checkins-questions.md) | Branch 2 implementation plan |
 | [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan |
 | [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) | Deferred admin, staff accounts, role assignment (branch 5) |

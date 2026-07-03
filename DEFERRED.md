@@ -52,10 +52,11 @@ alter default privileges in schema public
 
 ---
 
-## Patient entity vs account: `feature/patient-entity-account-linking`
+## Patient entity vs account: `feature/account-domain-model`
 
-**Status:** Parked — MVP conflates patient with login account  
-**Added:** 2026-07-02  
+**Status:** In progress — foundation branch started (docs/scaffolding only; no migrations applied)  
+**Added:** 2026-07-02 · **Started:** 2026-07-03  
+**Branch plan:** [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)  
 **Trigger:** Multiple patients per admission, patients existing before they have a login, cross-account patient data ownership, or hardening RLS beyond `patient_id = auth.uid()`.
 
 **Context:** Today `patient_id` on every patient-owned table (`patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`) is a direct FK to `profiles.id`, and RLS enforces `patient_id = auth.uid()`. This means the login account *is* the patient — there is no separate patient/admission entity, and staff accounts can end up owning care data.

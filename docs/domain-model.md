@@ -20,9 +20,24 @@ For each area:
 
 ## Identity and access
 
+> **Upcoming refactor (current priority — docs only, not yet implemented):**
+> The account/domain model is being refactored to separate three concerns that the current schema still blurs. See **Current development priority** in [`docs/project-context.md`](project-context.md).
+>
+> - **Login identity vs clinical patient identity are distinct.** `profiles` / `auth.users` model **login accounts**; a new **`patients`** entity will model the **clinical patient**.
+> - **`roles` / `user_roles` determine what an account may do** and stay separate from domain data.
+> - **Patient-owned care data belongs to a patient/admission, not to a staff login.** Care restrictions, care context, check-ins, questions, daily plans, and AI advice are owned by the clinical patient/admission. Staff appear only through audit fields such as `created_by_staff_id` / `updated_by_staff_id`.
+> - **Staff/caregiver accounts are actors, not owners** of patient-owned data.
+> - **Patient accounts may later be linked to existing patient records** via a secure linking flow.
+>
+> Blueprints below still describe the pre-refactor shape (e.g. `patient_id` referencing `profiles` / `auth.uid()`). They will be revised as the refactor lands. No migrations are applied for this refactor yet.
+>
+> **Foundation branch:** the ownership map, table inventory, and planned migration sequence for this refactor live in [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md). The four care tables (`patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`) still use the profile-based model (`patient_id → profiles`, RLS `patient_id = auth.uid()`) and are unchanged in this commit.
+
 ### User / problem
 
 Everyone using OpnameBuddy authenticates via Supabase Auth. The app needs display names, language preference, and role-based module access without exposing the `auth` schema to client queries.
+
+The refactor adds a further requirement: the system must also represent the **clinical patient** as its own entity, distinct from the login account that authenticates. A login identity is *who is acting*; a clinical patient is *who the care data is about*.
 
 ### Entity: Profile
 
