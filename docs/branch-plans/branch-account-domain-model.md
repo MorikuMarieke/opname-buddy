@@ -129,12 +129,14 @@ approval.
 
 Verified: `patient_checkins` 2/2, `patient_questions` 3/3 backfilled; `patient_context` 1/3 (the 2 nulls are the known staff/self orphan rows `0bde471c`, `0c90b156` — cleanup deferred); `patient_participation_evaluations` 0 rows. Advisors: only the expected Phase 1 notices. `tsc --noEmit` passes.
 
-**Checkpoint 2 — helper functions and RLS preparation (Planned)**
+**Checkpoint 2 — helper functions and RLS preparation — APPLIED 2026-07-03**
 
-| File | Type | Purpose |
-|------|------|---------|
-| `00021_current_admission_ids.sql` | DDL (function) | Add SECURITY DEFINER `current_admission_ids()` (mirrors `current_patient_ids()`); grant execute to `authenticated`. |
-| `00022_care_admission_rls.sql` | Additive RLS | Add patient policies scoped by `admission_id in (select public.current_admission_ids())` **alongside** the existing `patient_id = auth.uid()` policies (both active during transition). Caregiver policies unchanged. |
+| File | Type | Status | Purpose |
+|------|------|--------|---------|
+| `00021_current_admission_ids.sql` | DDL (function) | Applied | SECURITY DEFINER `current_admission_ids()` (mirrors `current_patient_ids()`, returns all stays); execute granted to `authenticated`. |
+| `00022_care_admission_rls.sql` | Additive RLS | Applied | Patient policies scoped by `admission_id in (select public.current_admission_ids())` added **alongside** the existing `patient_id = auth.uid()` policies (both active during transition). Caregiver/coordinator policies unchanged. |
+
+Verified via `pg_policies`: every care table has both the old `_own` and new `_own_admission` policies per command (nothing dropped). Helper mapping confirmed for the seeded patient (`328d194e` → patient `b7011787` → admission `4f315e8c`, matching backfilled `admission_id`). Advisors: only expected notices plus `current_admission_ids` as an authenticated SECURITY DEFINER function (by design, same as `current_patient_ids`). `tsc --noEmit` passes.
 
 **Checkpoint 3 — service and route updates (Planned)** — dual-write `admission_id` in patient services; bridge caregiver read path (`list_care_patients()` → clinical `patients` + active admission; `/care/patients/[patientId]` keyed by `patients.id`). Reads still function under old + new RLS.
 

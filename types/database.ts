@@ -534,6 +534,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_admission_ids: { Args: never; Returns: string[] }
       current_patient_ids: { Args: never; Returns: string[] }
       has_role: { Args: { role_name: string }; Returns: boolean }
       list_care_patients: {
