@@ -69,7 +69,7 @@ function toDbPayload(
     additional_attention_points: values.additional_attention_points,
     additional_attention_notes: values.additional_attention_notes || null,
     notes: values.notes || null,
-    updated_by: updatedBy,
+    updated_by_staff_id: updatedBy,
   };
 }
 
@@ -99,7 +99,7 @@ export async function getPatientContextByAdmission(
 
   const { data, error } = await supabase
     .from("patient_context")
-    .select("*, updater:profiles!patient_context_updated_by_fkey(full_name)")
+    .select("*, updater:profiles!patient_context_updated_by_staff_id_fkey(full_name)")
     .eq("admission_id", admissionId)
     .maybeSingle();
 
@@ -123,7 +123,7 @@ export async function getPatientContextByAdmission(
 /**
  * Caregiver upsert of a patient's Zorgcontext, keyed by the owning admission.
  * The row is matched/created by `admission_id` (the sole ownership key).
- * `updated_by` records the acting staff account. `patientUserId` is still
+ * `updated_by_staff_id` records the acting staff account. `patientUserId` is still
  * required so context is only saved for patients that have a linked account.
  */
 export async function upsertPatientContextByAdmission(

@@ -185,7 +185,7 @@ export type Database = {
           room_restriction: string
           transfer_support: string
           updated_at: string
-          updated_by: string | null
+          updated_by_staff_id: string | null
         }
         Insert: {
           additional_attention_notes?: string | null
@@ -203,7 +203,7 @@ export type Database = {
           room_restriction?: string
           transfer_support?: string
           updated_at?: string
-          updated_by?: string | null
+          updated_by_staff_id?: string | null
         }
         Update: {
           additional_attention_notes?: string | null
@@ -221,7 +221,7 @@ export type Database = {
           room_restriction?: string
           transfer_support?: string
           updated_at?: string
-          updated_by?: string | null
+          updated_by_staff_id?: string | null
         }
         Relationships: [
           {
@@ -232,8 +232,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "patient_context_updated_by_fkey"
-            columns: ["updated_by"]
+            foreignKeyName: "patient_context_updated_by_staff_id_fkey"
+            columns: ["updated_by_staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
