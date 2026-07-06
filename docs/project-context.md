@@ -180,7 +180,7 @@ Organizes the patient’s **open questions into a daily summary** — grouped by
 
 Must **not** answer medical questions. Medical content is redirected back to the caregiver conversation. Answers live in caregiver `answer_notes` (branch 3), not in AI output.
 
-**Deferred until branch 8:** [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md)
+**Deferred until branch 10:** [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md)
 
 ### Agent implementation requirements (project-wide)
 
@@ -203,22 +203,29 @@ The `feature/supabase-auth-roles` branch established:
 
 ---
 
-## Branch roadmap
+## Development roadmap
 
-Work proceeds in small vertical slices on feature branches. The account/domain model refactor has shipped (see [Current architectural priority](#current-architectural-priority)).
+The project is developed incrementally using feature branches. Each branch introduces a complete vertical slice or architectural improvement before moving to the next feature.
 
 | # | Branch | Focus |
 |---|--------|-------|
-| 1 | `feature/supabase-auth-roles` | Auth, profiles, roles — **completed** |
-| — | `feature/account-domain-model` | **Shipped (Phase 1–3)** — clinical `patients` and `admissions`, admission-owned care data (legacy `patient_id` dropped, `admission_id` `NOT NULL`), staff in audit fields, secure patient↔record linking. Remaining deferral (org-based caregiver access) in the [branch plan](branch-plans/branch-account-domain-model.md) |
-| 2 | `feature/patient-checkins-questions` | Patient check-ins and questions CRUD |
-| 3 | `feature/care-restrictions-context` | Zorgcontext (`patient_context`), caregiver patient data access |
-| 4 | `feature/planning-activities` | Activities, sessions, volunteers, calendar |
-| 5 | `feature/admin-users-roles` | User management, role assignment, staff profiles — see [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) |
-| 6 | `feature/dagbuddy-agent` | DailyBuddy agent, tools, streaming, advice storage |
-| 7 | `feature/activity-feedback` | Patient activity plans and feedback |
-| 8 | `feature/questionbuddy-agent` | QuestionBuddy agent |
-| 9 | `feature/final-polish-docs` | Responsive polish, accessibility, README, deployment, QA |
+| 1 | `feature/supabase-auth-roles` | Authentication, profiles and role-based authorization |
+| 2 | `feature/patient-checkins-questions` | Patient check-ins, questions and core patient interaction |
+| 3 | `feature/care-restrictions-context` | Caregiver-managed care context (`patient_context`) and recovery boundaries |
+| 4 | `feature/account-domain-model` | Clinical domain refactor introducing `patients`, `admissions`, admission-owned care data and secure patient account linking |
+| 5 | `feature/admin-account-management` | Administrative management of staff accounts, user roles and account lifecycle |
+| 6 | `feature/patient-admission-management` | Caregiver workflow for creating clinical patients, admissions and generating patient linking codes |
+| 7 | `feature/planning-activities` | Activities, sessions, volunteers and recovery planning |
+| 8 | `feature/dagbuddy-agent` | DailyBuddy AI agent, tool calling, streaming and advice generation |
+| 9 | `feature/activity-feedback` | Patient activity participation, progress tracking and AI-supported recovery feedback |
+| 10 | `feature/questionbuddy-agent` | QuestionBuddy AI assistant for patient questions |
+| 11 | `feature/final-polish-docs` | UI polish, accessibility, documentation, deployment and final QA |
+
+### Deferred
+
+| Branch | Focus |
+|--------|-------|
+| Future | Organizational caregiver access (departments, teams and admission-based assignment), proxy/family access, multi-admission history, discharge workflows. |
 
 Detailed implementation plans live in `docs/branch-plans/`. The living data blueprint lives in `docs/domain-model.md`.
 
@@ -229,11 +236,11 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | Document | Purpose |
 |----------|---------|
 | [`docs/domain-model.md`](domain-model.md) | Entities, relationships, business rules, database blueprint |
-| [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md) | Account/domain model refactor plan (current focus) |
+| [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md) | Account/domain model refactor plan (branch 4 — shipped) |
 | [`docs/branch-plans/branch-02-patient-checkins-questions.md`](branch-plans/branch-02-patient-checkins-questions.md) | Branch 2 implementation plan |
 | [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan |
-| [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) | Deferred admin, staff accounts, role assignment (branch 5) |
+| [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) | Admin account management design notes (branch 5 — `feature/admin-account-management`) |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
-| [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 8) |
+| [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 10) |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |
 | `AGENTS.md` | Next.js 16 project notes for agents |

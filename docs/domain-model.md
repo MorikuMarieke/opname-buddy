@@ -46,7 +46,7 @@ App-specific user record, 1:1 with `auth.users`.
 | Concern | Detail |
 |---------|--------|
 | Ownership | Each user owns their profile row |
-| Relationships | Referenced by all `patient_id` and staff attribution fields |
+| Relationships | Referenced by role/account links and staff audit fields (e.g. `updated_by_staff_id`) |
 
 **Business rules**
 
@@ -365,8 +365,8 @@ Patient response to a completed or offered activity.
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | Patient-owned |
-| Relationships | Links patient, activity or session |
+| Ownership | `admission_id` → the clinical patient's admission |
+| Relationships | Belongs to an `admissions` row (→ `patients`); links to an `activity_session` when scheduled sessions exist |
 
 **Business rules**
 
@@ -378,8 +378,8 @@ Patient response to a completed or offered activity.
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK | |
-| `activity_session_id` | uuid FK | |
+| `admission_id` | uuid FK → admissions | **NOT NULL** ownership key |
+| `activity_session_id` | uuid FK | Optional; nullable until sessions exist |
 | `outcome` | text | completed, skipped |
 | `difficulty` | smallint | Scale TBD |
 | `enjoyment` | smallint | Scale TBD |
@@ -398,14 +398,14 @@ Patients benefit from a short, readable daily summary that combines their input 
 
 #### Entity: DailyAdvice
 
-Stored output from DailyBuddy for a patient on a given day.
+Stored output from DailyBuddy for a clinical patient's admission on a given day.
 
 #### Blueprint: `daily_advice` (branch 6)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK | |
+| `admission_id` | uuid FK → admissions | **NOT NULL** ownership key |
 | `advice_date` | date | |
 | `context_summary` | text | Compact interpreted context |
 | `motivation` | text | |
@@ -420,17 +420,18 @@ Stored output from DailyBuddy for a patient on a given day.
 
 ```mermaid
 erDiagram
-  profiles ||--o{ patient_checkins : owns
-  profiles ||--o{ patient_questions : owns
-  profiles ||--o{ patient_participation_evaluations : owns
-  profiles ||--o| patient_context : has
   profiles ||--o{ user_roles : has
   roles ||--o{ user_roles : assigned
+  patients ||--o{ admissions : has
+  admissions ||--o{ patient_checkins : has
+  admissions ||--o{ patient_questions : has
+  admissions ||--o{ patient_participation_evaluations : has
+  admissions ||--o| patient_context : has
   activities ||--o{ activity_sessions : schedules
   activities ||--o{ volunteer_slots : supports
   activity_sessions ||--o{ activity_feedback : receives
-  profiles ||--o{ activity_feedback : gives
-  profiles ||--o{ daily_advice : receives
+  admissions ||--o{ activity_feedback : has
+  admissions ||--o{ daily_advice : has
 ```
 
 *Dashed conceptual entities (restrictions, activities, advice) are future branches.*
