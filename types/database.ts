@@ -1,8 +1,8 @@
-/**
+﻿/**
  * Supabase database types for OpnameBuddy.
  *
  * Regenerate when the schema changes:
- * - Dashboard: Project Settings → API → Generate types
+ * - Dashboard: Project Settings â†’ API â†’ Generate types
  * - CLI (remote, no Docker): npx supabase gen types typescript --project-id <ref>
  *
  * Custom convenience aliases and the RoleName union are appended at the bottom
@@ -72,6 +72,48 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      account_audit_events: {
+        Row: {
+          action: string
+          actor_user_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_audit_events_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_audit_events_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -662,3 +704,7 @@ export type RoleName =
   | "caregiver"
   | "activity_coordinator"
   | "admin";
+
+
+export type AccountAuditEventRow = Tables<"account_audit_events">;
+
