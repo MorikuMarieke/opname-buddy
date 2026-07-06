@@ -31,6 +31,8 @@ For each area:
 >
 > **What shipped (Phase 1–3):** `patients`, `admissions`, `patient_account_links`, `patient_link_codes` (`00015`–`00018`); the four care tables are owned via a **`NOT NULL` `admission_id`** with admission-scoped RLS (`current_admission_ids()`) as the sole patient-side guard; the legacy `patient_id` columns and their `patient_id = auth.uid()` policies have been **dropped** (`00019`–`00026`); `patient_context` is now one row per admission (`UNIQUE(admission_id)`) and its staff audit field is **`updated_by_staff_id`** (`00027`). The caregiver read path (`list_care_patients()`, `/care/patients/[patientId]`) is keyed by `patients.id`.
 >
+> **Admin account management — implemented (branch 5):** Staff accounts are profiles with staff roles in user_roles (no staff_accounts table). Admins manage staff lifecycle and role assignment via server actions + service role (00028-00030). Self-registration assigns the patient role automatically. account_audit_events records admin actions (append-only). Patient-linked accounts are admin-readable only; linking flow remains branch 6. Plan: docs/branch-plans/branch-admin-account-management.md.
+>
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
 
 ### User / problem
@@ -76,7 +78,8 @@ Canonical role names and assignments.
 |-------|------------|--------|
 | `profiles` | `id`, `full_name`, `preferred_language`, timestamps | Implemented |
 | `roles` | `id`, `name` | Implemented |
-| `user_roles` | `user_id`, `role_id`, `created_at` | Implemented |
+| `user_roles` | `user_id`, `role_id`, `created_at` | Implemented (admin-managed via server) |
+| `account_audit_events` | `actor_user_id`, `target_user_id`, `action`, `metadata` | Implemented (append-only, service role) |
 
 ---
 
