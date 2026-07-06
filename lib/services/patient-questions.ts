@@ -1,3 +1,4 @@
+import { getActiveAdmissionId } from "@/lib/services/admissions";
 import { createClient } from "@/lib/supabase/client";
 import type { PatientQuestionFormValues } from "@/lib/validations/patient-question";
 import type { PatientQuestion } from "@/types/patient";
@@ -71,10 +72,18 @@ export async function createQuestion(
     throw new Error("Je bent niet ingelogd.");
   }
 
+  const admissionId = await getActiveAdmissionId();
+
+  if (!admissionId) {
+    throw new Error(
+      "Er is nog geen actieve opname voor je account. Neem contact op met je zorgteam.",
+    );
+  }
+
   const { data, error } = await supabase
     .from("patient_questions")
     .insert({
-      patient_id: user.id,
+      admission_id: admissionId,
       question_text: input.question_text,
       target_type: input.target_type,
       status: "open",

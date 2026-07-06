@@ -19,6 +19,8 @@ export const queryKeys = {
     all: ["patient-context"] as const,
     byPatient: (patientId: string) =>
       [...queryKeys.patientContext.all, patientId] as const,
+    byAdmission: (admissionId: string) =>
+      [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
   },
   carePatients: {

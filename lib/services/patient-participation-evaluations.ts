@@ -1,3 +1,4 @@
+import { getActiveAdmissionId } from "@/lib/services/admissions";
 import { createClient } from "@/lib/supabase/client";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import type { PatientParticipationEvaluationFormValues } from "@/lib/validations/patient-participation-evaluation";
@@ -77,10 +78,18 @@ export async function createParticipationEvaluation(
     throw new Error("Je bent niet ingelogd.");
   }
 
+  const admissionId = await getActiveAdmissionId();
+
+  if (!admissionId) {
+    throw new Error(
+      "Er is nog geen actieve opname voor je account. Neem contact op met je zorgteam.",
+    );
+  }
+
   const { data, error } = await supabase
     .from("patient_participation_evaluations")
     .insert({
-      patient_id: user.id,
+      admission_id: admissionId,
       evaluation_date: input.evaluation_date,
       activity_title: input.activity_title,
       activity_session_id: input.activity_session_id ?? null,

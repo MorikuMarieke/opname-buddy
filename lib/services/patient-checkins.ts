@@ -1,3 +1,4 @@
+import { getActiveAdmissionId } from "@/lib/services/admissions";
 import { createClient } from "@/lib/supabase/client";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import type { PatientCheckinFormValues } from "@/lib/validations/patient-checkin";
@@ -79,10 +80,18 @@ export async function createCheckIn(
     throw new Error("Je bent niet ingelogd.");
   }
 
+  const admissionId = await getActiveAdmissionId();
+
+  if (!admissionId) {
+    throw new Error(
+      "Er is nog geen actieve opname voor je account. Neem contact op met je zorgteam.",
+    );
+  }
+
   const { data, error } = await supabase
     .from("patient_checkins")
     .insert({
-      patient_id: user.id,
+      admission_id: admissionId,
       check_in_date: input.check_in_date,
       pain_score: input.pain_score,
       energy_level: input.energy_level,

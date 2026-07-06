@@ -6,17 +6,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/constants/query-keys";
 import {
   getOwnPatientContext,
-  getPatientContext,
-  upsertPatientContext,
+  getPatientContextByAdmission,
+  upsertPatientContextByAdmission,
 } from "@/lib/services/patient-context";
 import { createClient } from "@/lib/supabase/client";
 import type { PatientContextFormValues } from "@/lib/validations/patient-context";
 
-export function usePatientContext(patientId: string) {
+export function usePatientContext(admissionId: string | null) {
   return useQuery({
-    queryKey: queryKeys.patientContext.byPatient(patientId),
-    queryFn: () => getPatientContext(patientId),
-    enabled: Boolean(patientId),
+    queryKey: queryKeys.patientContext.byAdmission(admissionId ?? "none"),
+    queryFn: () => getPatientContextByAdmission(admissionId as string),
+    enabled: Boolean(admissionId),
   });
 }
 
@@ -61,12 +61,19 @@ export function useOwnPatientContextRealtime() {
   }, [queryClient]);
 }
 
-export function useUpsertPatientContext(patientId: string) {
+export function useUpsertPatientContext(
+  admissionId: string | null,
+  patientUserId: string | null,
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: PatientContextFormValues) =>
-      upsertPatientContext(patientId, input),
+      upsertPatientContextByAdmission(
+        admissionId as string,
+        patientUserId,
+        input,
+      ),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.patientContext.all,

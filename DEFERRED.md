@@ -52,10 +52,11 @@ alter default privileges in schema public
 
 ---
 
-## Patient entity vs account: `feature/patient-entity-account-linking`
+## Patient entity vs account: `feature/account-domain-model`
 
-**Status:** Parked — MVP conflates patient with login account  
-**Added:** 2026-07-02  
+**Status:** Phase 1–3 applied 2026-07-03 (`00015`–`00027` on remote; types regenerated). Care schema fully hardened onto admission ownership; only organizational caregiver access remains.  
+**Added:** 2026-07-02 · **Started:** 2026-07-03  
+**Branch plan:** [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)  
 **Trigger:** Multiple patients per admission, patients existing before they have a login, cross-account patient data ownership, or hardening RLS beyond `patient_id = auth.uid()`.
 
 **Context:** Today `patient_id` on every patient-owned table (`patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`) is a direct FK to `profiles.id`, and RLS enforces `patient_id = auth.uid()`. This means the login account *is* the patient — there is no separate patient/admission entity, and staff accounts can end up owning care data.
@@ -92,13 +93,21 @@ erDiagram
 - Types + services + minimal UI: extend `types/database.ts`; add patients/admissions/redeem services + hooks; staff UI to create patient + admission and generate a link code; optional patient onboarding to redeem; bridge `list_care_patients()` to the new entities.
 - Docs: update `docs/domain-model.md` "Identity and access"; move this entry to "in progress" once Phase 1 lands.
 
-**Phase 2 (follow-up, not the foundation branch)**
+**Phase 2 — SHIPPED 2026-07-03** (`00019`–`00024`; full checkpoint log in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)):
 
-- Add `admission_id` (and/or `patient_entity_id`) to `patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`; backfill; dual-write.
-- Standardize `created_by_staff_id` + `updated_by_staff_id` across care tables (rename `patient_context.updated_by`).
-- Rewrite care-table RLS from `patient_id = auth.uid()` to `admission_id in (select ... from current_patient_ids())`.
-- Flip reads/writes to admission ownership; retire the `patient_id = auth.uid()` assumption and `requireRole("patient")`-only protection.
-- Clean up orphaned `patient_context` rows on `caregiver@test.com` (`0c90b156`) and `staff@test.com` (`0bde471c`) — only after confirmation.
+- Added `admission_id` (nullable) to all four care tables + `current_admission_ids()`; backfilled from links → active admission; patient services dual-write it.
+- Added admission-scoped care RLS, then cut over and **dropped the `patient_id = auth.uid()` care policies** (admission ownership is now the sole patient-side guard; verified by RLS simulation).
+- Caregiver read path re-keyed: `list_care_patients()` returns clinical `patients` + active admission + linked account; `/care/patients/[patientId]` is `patients.id`; `patient_context` read/written by admission.
+
+**Phase 3 — SHIPPED 2026-07-03** (`00025`–`00027`; full checkpoint log in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)):
+
+- Cleaned the orphaned `patient_context` rows (`caregiver@test.com`, `staff@test.com`) after a defensive backfill.
+- Dropped the legacy care `patient_id` columns (and their FKs/indexes/unique), added `UNIQUE(admission_id)` on `patient_context`, and flipped `admission_id` to `NOT NULL` on all four care tables. Patient write services and the patient's own-context read no longer touch `patient_id`.
+- Renamed `patient_context.updated_by` → `updated_by_staff_id` (add + backfill + recreate caregiver policies + drop).
+
+**Still deferred (later branch):**
+
+- Organizational (department/team/admission) caregiver access instead of the global `caregiver` role; retire `requireRole("patient")`-only reliance. This is a larger feature (new assignment tables + care-RLS rewrite), tracked as its own future branch rather than part of this refactor.
 
 **Risks/guardrails:** Do not weaken existing RLS or expose `user_roles`/`code_hash`. Security-definer functions and migrations are high-impact remote writes (each apply needs approval). Store the 6-digit code hashed with short TTL.
 

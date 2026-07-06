@@ -5,6 +5,7 @@ import { PatientContextAuditMeta } from "@/components/dashboard/patient-context-
 import { PatientContextCompletenessIndicator } from "@/components/dashboard/patient-context-completeness-indicator";
 import { PatientContextForm } from "@/components/dashboard/patient-context-form";
 import { PatientContextMissingFields } from "@/components/dashboard/patient-context-missing-fields";
+import { useCarePatients } from "@/hooks/use-care-patients";
 import { usePatientContext } from "@/hooks/use-patient-context";
 import { PATIENT_CONTEXT_COPY } from "@/lib/constants/patient-context-copy";
 import { getPatientContextCompleteness } from "@/lib/patient-context/completeness";
@@ -14,13 +15,49 @@ interface PatientContextViewProps {
 }
 
 export function PatientContextView({ patientId }: PatientContextViewProps) {
-  const { data: context, isLoading, isError, refetch } = usePatientContext(patientId);
+  const {
+    data: patients,
+    isLoading: patientsLoading,
+    isError: patientsError,
+  } = useCarePatients();
+
+  const patient = patients?.find((item) => item.id === patientId);
+  const admissionId = patient?.admission_id ?? null;
+  const patientUserId = patient?.user_id ?? null;
+
+  const {
+    data: context,
+    isLoading: contextLoading,
+    isError,
+    refetch,
+  } = usePatientContext(admissionId);
+
   const completeness = getPatientContextCompleteness(context ?? null);
 
-  if (isLoading) {
+  if (patientsLoading || (admissionId && contextLoading)) {
     return (
       <CarePatientShell patientId={patientId}>
         <p className="text-sm text-carbon-black-600">Zorgcontext laden...</p>
+      </CarePatientShell>
+    );
+  }
+
+  if (patientsError || (!patientsLoading && !patient)) {
+    return (
+      <CarePatientShell patientId={patientId}>
+        <p className="text-sm text-red-600" role="alert">
+          Patiënt kon niet worden gevonden.
+        </p>
+      </CarePatientShell>
+    );
+  }
+
+  if (!admissionId) {
+    return (
+      <CarePatientShell patientId={patientId}>
+        <p className="text-sm text-carbon-black-600">
+          Deze patiënt heeft nog geen actieve opname.
+        </p>
       </CarePatientShell>
     );
   }
@@ -60,7 +97,8 @@ export function PatientContextView({ patientId }: PatientContextViewProps) {
         />
 
         <PatientContextForm
-          patientId={patientId}
+          admissionId={admissionId}
+          patientUserId={patientUserId}
           existingContext={context ?? null}
           onSuccess={() => {
             void refetch();

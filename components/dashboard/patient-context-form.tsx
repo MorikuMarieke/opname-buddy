@@ -38,7 +38,8 @@ import {
 } from "@/types/patient-context";
 
 interface PatientContextFormProps {
-  patientId: string;
+  admissionId: string;
+  patientUserId: string | null;
   existingContext: PatientContext | null;
   onSuccess?: () => void;
 }
@@ -64,7 +65,8 @@ const compactTextareaClasses = cn(
 );
 
 export function PatientContextForm({
-  patientId,
+  admissionId,
+  patientUserId,
   existingContext,
   onSuccess,
 }: PatientContextFormProps) {
@@ -75,7 +77,7 @@ export function PatientContextForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
-  const upsertContext = useUpsertPatientContext(patientId);
+  const upsertContext = useUpsertPatientContext(admissionId, patientUserId);
   const showAidFields = mobilityStatusShowsAidFields(values.mobility_status);
   const showOtherNotes = values.additional_attention_points.includes("other");
 
