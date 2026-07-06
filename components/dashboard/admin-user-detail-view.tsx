@@ -13,6 +13,7 @@ import {
 } from "@/lib/constants/admin-account-copy";
 import type { StaffRoleName } from "@/lib/constants/admin-account-copy";
 import {
+  useAdminStaffAccountDetail,
   useSetAccountActive,
   useSetStaffRoles,
   useUpdateAccountProfile,
@@ -245,3 +246,4 @@ export function AdminUserDetailView({ userId }: AdminUserDetailViewProps) {
     </div>
   );
 }
+
