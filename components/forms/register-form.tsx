@@ -1,22 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
-import { createClient } from "@/lib/supabase/client";
+import { registerPatientAccount } from "@/lib/auth/register-actions";
 
 const inputClasses =
   "h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400 disabled:opacity-50";
-
-function getErrorMessage(message: string): string {
-  if (message.includes("User already registered")) {
-    return "Dit e-mailadres is al geregistreerd.";
-  }
-  if (message.includes("Password")) {
-    return "Het wachtwoord voldoet niet aan de vereisten (minimaal 6 tekens).";
-  }
-  return "Registreren is mislukt. Probeer het opnieuw.";
-}
 
 function handleEnterToSubmit(
   event: React.KeyboardEvent<HTMLFormElement>,
@@ -59,22 +49,18 @@ export function RegisterForm() {
     let isRedirecting = false;
 
     try {
-      const supabase = createClient();
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const result = await registerPatientAccount({
+        fullName,
         email,
         password,
-        options: {
-          data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
       });
 
-      if (signUpError) {
-        setError(getErrorMessage(signUpError.message));
+      if ("error" in result) {
+        setError(result.error);
         return;
       }
 
-      if (data.session) {
+      if (result.hasSession) {
         isRedirecting = true;
         window.location.assign("/auth/redirect");
         return;
