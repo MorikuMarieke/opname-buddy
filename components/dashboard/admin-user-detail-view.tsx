@@ -227,7 +227,8 @@ export function AdminUserDetailView({ userId }: AdminUserDetailViewProps) {
     );
   }
 
-  const formKey = `${account.id}-${account.roles.join(",")}-${account.isActive}-${account.fullName ?? ""}`;
+  const rolesKey = [...account.roles].sort().join(",");
+  const formKey = `${account.id}-${rolesKey}-${account.isActive}-${account.fullName ?? ""}`;
 
   return (
     <div className="space-y-4">

@@ -220,7 +220,11 @@ function toStaffSummary(
   context: AccountContext,
 ): StaffAccountSummary | null {
   const roles = context.rolesByUserId.get(userId) ?? [];
-  const staffRoles = roles.filter(isStaffRole);
+  const staffRoles = roles
+    .filter(isStaffRole)
+    .sort(
+      (a, b) => STAFF_ROLE_NAMES.indexOf(a) - STAFF_ROLE_NAMES.indexOf(b),
+    );
 
   if (staffRoles.length === 0) {
     return null;
