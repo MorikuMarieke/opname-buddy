@@ -1,4 +1,14 @@
 /**
+ * Date utilities for OpnameBuddy (Europe/Amsterdam).
+ *
+ * Storage and form values use ISO calendar dates (YYYY-MM-DD).
+ * User-facing display uses Dutch numeric format (dd-MM-yyyy).
+ *
+ * Native `<input type="date">` picker appearance may follow browser/OS locale;
+ * only displayed values and stored ISO strings are guaranteed Dutch/ISO respectively.
+ */
+
+/**
  * Returns today's calendar date in Europe/Amsterdam as YYYY-MM-DD.
  */
 export function getAmsterdamDateString(date = new Date()): string {
@@ -6,7 +16,7 @@ export function getAmsterdamDateString(date = new Date()): string {
 }
 
 /**
- * Formats an ISO date string for Dutch display.
+ * Formats an ISO date string (YYYY-MM-DD) for Dutch display as dd-MM-yyyy.
  */
 export function formatDutchDate(dateString: string): string {
   const [year, month, day] = dateString.split("-").map(Number);
@@ -17,15 +27,19 @@ export function formatDutchDate(dateString: string): string {
 
   const date = new Date(year, month - 1, day);
 
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
+  }
+
   return date.toLocaleDateString("nl-NL", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 }
 
 /**
- * Formats an ISO timestamp for Dutch display in Europe/Amsterdam.
+ * Formats an ISO timestamp for Dutch display in Europe/Amsterdam (dd-MM-yyyy, HH:mm).
  */
 export function formatDutchDateTime(isoString: string): string {
   const date = new Date(isoString);
@@ -34,14 +48,20 @@ export function formatDutchDateTime(isoString: string): string {
     return isoString;
   }
 
-  return date.toLocaleString("nl-NL", {
+  const datePart = date.toLocaleDateString("nl-NL", {
     timeZone: "Europe/Amsterdam",
-    day: "numeric",
-    month: "long",
+    day: "2-digit",
+    month: "2-digit",
     year: "numeric",
+  });
+
+  const timePart = date.toLocaleTimeString("nl-NL", {
+    timeZone: "Europe/Amsterdam",
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  return `${datePart}, ${timePart}`;
 }
 
 /**
@@ -67,19 +87,11 @@ export function formatAdminAuditTimestamp(isoString: string): string {
     return `Vandaag om ${time}`;
   }
 
-  const nowYear = new Date().getFullYear();
-  const eventYear = Number(
-    date.toLocaleDateString("en-CA", {
-      timeZone: "Europe/Amsterdam",
-      year: "numeric",
-    }),
-  );
-
   const datePart = date.toLocaleDateString("nl-NL", {
     timeZone: "Europe/Amsterdam",
-    day: "numeric",
-    month: "long",
-    ...(eventYear !== nowYear ? { year: "numeric" } : {}),
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 
   return `${datePart} om ${time}`;

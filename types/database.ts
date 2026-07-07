@@ -72,10 +72,12 @@ export type Database = {
           admitted_on: string
           created_at: string
           created_by_staff_id: string | null
+          department_id: string | null
           discharged_on: string | null
+          expected_discharge_on: string | null
           id: string
-          location: string | null
           patient_id: string
+          room_number: string | null
           status: string
           updated_at: string
         }
@@ -83,10 +85,12 @@ export type Database = {
           admitted_on?: string
           created_at?: string
           created_by_staff_id?: string | null
+          department_id?: string | null
           discharged_on?: string | null
+          expected_discharge_on?: string | null
           id?: string
-          location?: string | null
           patient_id: string
+          room_number?: string | null
           status?: string
           updated_at?: string
         }
@@ -94,10 +98,12 @@ export type Database = {
           admitted_on?: string
           created_at?: string
           created_by_staff_id?: string | null
+          department_id?: string | null
           discharged_on?: string | null
+          expected_discharge_on?: string | null
           id?: string
-          location?: string | null
           patient_id?: string
+          room_number?: string | null
           status?: string
           updated_at?: string
         }
@@ -110,6 +116,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admissions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "admissions_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
@@ -117,6 +130,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      departments: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       patient_account_links: {
         Row: {
@@ -427,8 +470,10 @@ export type Database = {
           created_at: string
           created_by_staff_id: string | null
           external_ref: string | null
-          full_name: string
+          first_name: string
           id: string
+          last_name: string
+          sex: string | null
           updated_at: string
         }
         Insert: {
@@ -436,8 +481,10 @@ export type Database = {
           created_at?: string
           created_by_staff_id?: string | null
           external_ref?: string | null
-          full_name: string
+          first_name: string
           id?: string
+          last_name: string
+          sex?: string | null
           updated_at?: string
         }
         Update: {
@@ -445,8 +492,10 @@ export type Database = {
           created_at?: string
           created_by_staff_id?: string | null
           external_ref?: string | null
-          full_name?: string
+          first_name?: string
           id?: string
+          last_name?: string
+          sex?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -539,13 +588,21 @@ export type Database = {
       current_admission_ids: { Args: never; Returns: string[] }
       current_patient_ids: { Args: never; Returns: string[] }
       has_role: { Args: { role_name: string }; Returns: boolean }
+      issue_patient_link_code: {
+        Args: { p_created_by_staff_id: string; p_patient_id: string }
+        Returns: Json
+      }
       list_care_patients: {
         Args: never
         Returns: {
-          admission_id: string
-          full_name: string
+          admission_id: string | null
+          birth_date: string | null
+          expected_discharge_on: string | null
+          first_name: string
           id: string
-          user_id: string
+          last_name: string
+          sex: string | null
+          user_id: string | null
         }[]
       }
       redeem_patient_link_code: { Args: { p_code: string }; Returns: string }

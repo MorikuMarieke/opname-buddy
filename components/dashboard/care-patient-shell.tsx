@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { SectionHeader } from "@/components/ui/section-header";
 import { useCarePatients } from "@/hooks/use-care-patients";
 import { getCarePatientSubNavItems } from "@/lib/constants/navigation";
+import { formatPatientDisplayName } from "@/lib/utils/patient-greeting";
 import { cn } from "@/lib/utils/cn";
 
 interface CarePatientShellProps {
@@ -17,7 +18,7 @@ export function CarePatientShell({ patientId, children }: CarePatientShellProps)
   const pathname = usePathname();
   const { data: patients } = useCarePatients();
   const patient = patients?.find((item) => item.id === patientId);
-  const patientName = patient?.full_name?.trim() || "Patiënt";
+  const patientName = patient ? formatPatientDisplayName(patient) : "Patiënt";
   const subNavItems = getCarePatientSubNavItems(patientId);
 
   return (

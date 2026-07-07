@@ -31,7 +31,9 @@ For each area:
 >
 > **What shipped (Phase 1–3):** `patients`, `admissions`, `patient_account_links`, `patient_link_codes` (`00015`–`00018`); the four care tables are owned via a **`NOT NULL` `admission_id`** with admission-scoped RLS (`current_admission_ids()`) as the sole patient-side guard; the legacy `patient_id` columns and their `patient_id = auth.uid()` policies have been **dropped** (`00019`–`00026`); `patient_context` is now one row per admission (`UNIQUE(admission_id)`) and its staff audit field is **`updated_by_staff_id`** (`00027`). The caregiver read path (`list_care_patients()`, `/care/patients/[patientId]`) is keyed by `patients.id`.
 >
-> **Admin account management — implemented (branch 5):** Staff accounts are profiles with staff roles in user_roles (no staff_accounts table). Admins manage staff lifecycle and role assignment via server actions + service role (00028-00030). Self-registration assigns the patient role automatically. account_audit_events records admin actions (append-only). Patient-linked accounts are admin-readable only; linking flow remains branch 6. Plan: docs/branch-plans/branch-admin-account-management.md.
+> **Admin account management — implemented (branch 5):** Staff accounts are profiles with staff roles in user_roles (no staff_accounts table). Admins manage staff lifecycle and role assignment via server actions + service role (00028-00030). Self-registration assigns the patient role automatically. account_audit_events records admin actions (append-only). Patient-linked accounts are admin-readable only.
+>
+> **Patient admission management — implemented (branch 6):** Caregiver workflows for Patiënt opnemen, Nieuwe opname, Ontslag, demographics edit, expected discharge date, duplicate-prevention search, and patient link-code redemption. Plan: [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md).
 >
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
 
@@ -419,6 +421,42 @@ Stored output from DailyBuddy for a clinical patient's admission on a given day.
 
 ---
 
+## Clinical patient (branch 6 — **Implemented**)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | uuid PK | |
+| `first_name` | text NOT NULL | |
+| `last_name` | text NOT NULL | |
+| `birth_date` | date | nullable in DB; required on admit in app |
+| `sex` | text | CHECK: M, F, X |
+| `external_ref` | text | optional hospital ref |
+| `created_by_staff_id` | uuid | audit |
+
+### Admission extensions (branch 6)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `expected_discharge_on` | date | nullable; indicative only (“Verwachte ontslagdatum”) |
+| `department_id` | uuid FK → departments | nullable for legacy rows; required on new admits in app |
+| `room_number` | text | nullable; e.g. `312A`, `IC-05` (replaces legacy `location`) |
+
+### Departments (branch 6 refinement)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | uuid PK | |
+| `name` | text NOT NULL | admin-managed |
+| `code` | text | optional short code |
+| `is_active` | boolean | deactivate merged departments instead of delete |
+| `sort_order` | int | list ordering |
+
+Department-scoped caregiver RLS and staff-to-department assignment remain **deferred**.
+
+Duplicate prevention: workflow + name/DOB matching only — no BSN, no MPI, no unique constraint on demographics.
+
+---
+
 ## Entity relationship overview
 
 ```mermaid
@@ -426,6 +464,7 @@ erDiagram
   profiles ||--o{ user_roles : has
   roles ||--o{ user_roles : assigned
   patients ||--o{ admissions : has
+  departments ||--o{ admissions : hosts
   admissions ||--o{ patient_checkins : has
   admissions ||--o{ patient_questions : has
   admissions ||--o{ patient_participation_evaluations : has
@@ -456,7 +495,7 @@ Always pair new tables with **explicit GRANT migrations** for `authenticated` an
 
 ### Caregiver patient list must be database-filtered
 
-The caregiver patient list uses the `list_care_patients()` SECURITY DEFINER RPC, **not** a direct `profiles` select. Since Phase 2 (migration `00023`) it returns **clinical patients** (`patients` rows) with each patient's active `admission_id` and linked login account (`user_id`), so the caregiver UI keys routes by `patients.id` and reads/writes care data by admission. It runs `security definer` because it resolves admissions and account links a caregiver cannot read row-by-row, and only returns rows to `has_role('caregiver')`. Staff/self accounts never appear (they are not in `patients`).
+The caregiver patient list uses the `list_care_patients()` SECURITY DEFINER RPC, **not** a direct `profiles` select. Since migration `00033` it returns **clinical patients** with `first_name`, `last_name`, `birth_date`, `sex`, active `admission_id`, `expected_discharge_on`, and linked `user_id`. The caregiver UI keys routes by `patients.id` and reads/writes care data by admission.
 
 ---
 
