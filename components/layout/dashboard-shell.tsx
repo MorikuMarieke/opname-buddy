@@ -6,6 +6,7 @@ import { SidebarNavigation } from "@/components/layout/sidebar-navigation";
 import { TopNavigation } from "@/components/layout/top-navigation";
 import { PatientBottomNavigation } from "@/components/layout/patient-bottom-navigation";
 import type { NavItem } from "@/types/navigation";
+import type { DashboardUserHeader } from "@/lib/utils/dashboard-user-header";
 
 interface DashboardShellProps {
   variant: "patient" | "professional";
@@ -16,6 +17,7 @@ interface DashboardShellProps {
   sidebarFooter?: React.ReactNode;
   rightPanel?: React.ReactNode;
   showSearch?: boolean;
+  userHeader?: DashboardUserHeader;
 }
 
 export function DashboardShell({
@@ -27,6 +29,7 @@ export function DashboardShell({
   sidebarFooter,
   rightPanel,
   showSearch = true,
+  userHeader,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -57,6 +60,7 @@ export function DashboardShell({
           pageTitle={pageTitle}
           onMenuClick={() => setSidebarOpen(true)}
           showSearch={showSearch}
+          userHeader={userHeader}
         />
 
         <div className="flex min-h-0 flex-1 overflow-y-auto">

@@ -4,12 +4,14 @@ import { usePathname } from "next/navigation";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { PlanningOverviewRightPanel } from "@/components/dashboard/planning-overview-view";
 import { planningNavItems } from "@/lib/constants/navigation";
+import type { DashboardUserHeader } from "@/lib/utils/dashboard-user-header";
 
 interface PlanningShellProps {
   children: React.ReactNode;
+  userHeader: DashboardUserHeader;
 }
 
-export function PlanningShell({ children }: PlanningShellProps) {
+export function PlanningShell({ children, userHeader }: PlanningShellProps) {
   const pathname = usePathname();
   const rightPanel =
     pathname === "/planning" ? <PlanningOverviewRightPanel /> : undefined;
@@ -20,6 +22,7 @@ export function PlanningShell({ children }: PlanningShellProps) {
       navItems={planningNavItems}
       pageTitle="Planning"
       rightPanel={rightPanel}
+      userHeader={userHeader}
     >
       {children}
     </DashboardShell>

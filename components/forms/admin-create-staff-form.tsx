@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DashboardCard } from "@/components/ui/dashboard-card";
+import { PasswordInput } from "@/components/ui/password-input";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import {
@@ -93,14 +94,14 @@ export function AdminCreateStaffForm() {
             <label htmlFor="password" className="block text-sm font-medium">
               Tijdelijk wachtwoord
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               required
               minLength={8}
+              autoComplete="new-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className={inputClasses}
+              disabled={createStaff.isPending}
             />
           </div>
 

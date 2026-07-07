@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { registerPatientAccount } from "@/lib/auth/register-actions";
 
 const inputClasses =
@@ -148,9 +149,8 @@ export function RegisterForm() {
         >
           Wachtwoord
         </label>
-        <input
+        <PasswordInput
           id="password"
-          type="password"
           required
           minLength={6}
           autoComplete="new-password"
@@ -159,7 +159,6 @@ export function RegisterForm() {
           onChange={(event) => setPassword(event.target.value)}
           disabled={isLoading}
           placeholder="••••••••"
-          className={inputClasses}
         />
       </div>
 
