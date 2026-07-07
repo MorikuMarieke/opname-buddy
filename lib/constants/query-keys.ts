@@ -25,10 +25,17 @@
   },
   adminAccounts: {
     all: ["admin-accounts"] as const,
-    staff: (filters?: { search?: string; status?: string }) =>
-      [...queryKeys.adminAccounts.all, "staff", filters ?? {}] as const,
-    patients: (filters?: { linkStatus?: string }) =>
-      [...queryKeys.adminAccounts.all, "patients", filters ?? {}] as const,
+    staff: (filters?: { search?: string; status?: string }) => {
+      const search = filters?.search?.trim() ?? "";
+      const status = filters?.status ?? "all";
+
+      return [...queryKeys.adminAccounts.all, "staff", search, status] as const;
+    },
+    patients: (filters?: { linkStatus?: string }) => {
+      const linkStatus = filters?.linkStatus ?? "all";
+
+      return [...queryKeys.adminAccounts.all, "patients", linkStatus] as const;
+    },
     detail: (userId: string) =>
       [...queryKeys.adminAccounts.all, "detail", userId] as const,
   },
