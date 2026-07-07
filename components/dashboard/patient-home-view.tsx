@@ -7,7 +7,9 @@ import {
   Sun,
 } from "lucide-react";
 
+import { PatientAdmissionLocationCard } from "@/components/dashboard/patient-admission-location-card";
 import { PatientHomeSummary } from "@/components/dashboard/patient-home-summary";
+import { PatientNoAdmissionNotice } from "@/components/dashboard/patient-no-admission-notice";
 import { ActionTile } from "@/components/ui/action-tile";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 
@@ -30,6 +32,8 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
 
   return (
     <div className="space-y-6">
+      <PatientNoAdmissionNotice />
+      <PatientAdmissionLocationCard />
       <DashboardCard density="comfortable" padding="lg">
         <p className="text-sm font-medium text-carbon-black-600">Ingelogd als</p>
         <p className="mt-1 text-lg font-semibold text-carbon-black-900">
