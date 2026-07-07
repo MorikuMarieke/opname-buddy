@@ -138,7 +138,10 @@ function DepartmentRow({
 
     if ("error" in result) {
       setErrors({ submit: result.error });
+      return;
     }
+
+    setErrors({});
   }
 
   if (isEditing) {
