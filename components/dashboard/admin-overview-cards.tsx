@@ -1,7 +1,9 @@
 ﻿"use client";
 
-import { DashboardCard } from "@/components/ui/dashboard-card";
+import { AdminRecentChanges } from "@/components/dashboard/admin-recent-changes";
+import { AdminOverviewStatCard } from "@/components/dashboard/admin-overview-stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { buildAdminUsersUrl } from "@/lib/admin/admin-users-url";
 import { useAdminOverview, useAdminRecentAudit } from "@/hooks/use-admin-overview";
 
 export function AdminOverviewCards() {
@@ -23,7 +25,10 @@ export function AdminOverviewCards() {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <DashboardCard density="compact">
+        <AdminOverviewStatCard
+          href={buildAdminUsersUrl({ tab: "staff" })}
+          ariaLabel="Bekijk staffaccounts"
+        >
           <p className="text-xs text-carbon-black-600">Staffaccounts</p>
           <p className="text-xl font-semibold text-carbon-black-900">
             {stats.staffTotal}
@@ -31,9 +36,12 @@ export function AdminOverviewCards() {
           <StatusBadge variant="positive" className="mt-1.5">
             {stats.staffActive} actief
           </StatusBadge>
-        </DashboardCard>
+        </AdminOverviewStatCard>
 
-        <DashboardCard density="compact">
+        <AdminOverviewStatCard
+          href={buildAdminUsersUrl({ tab: "patients" })}
+          ariaLabel="Bekijk patiëntaccounts"
+        >
           <p className="text-xs text-carbon-black-600">Patiëntaccounts</p>
           <p className="text-xl font-semibold text-carbon-black-900">
             {stats.patientAccountsTotal}
@@ -41,44 +49,32 @@ export function AdminOverviewCards() {
           <p className="mt-1 text-xs text-carbon-black-600">
             {stats.patientAccountsLinked} gekoppeld
           </p>
-        </DashboardCard>
+        </AdminOverviewStatCard>
 
-        <DashboardCard density="compact">
+        <AdminOverviewStatCard
+          href={buildAdminUsersUrl({ tab: "staff", role: "caregiver" })}
+          ariaLabel="Bekijk zorgverleners"
+        >
           <p className="text-xs text-carbon-black-600">Zorgverleners</p>
           <p className="text-xl font-semibold text-carbon-black-900">
             {stats.roleCounts.caregiver}
           </p>
-        </DashboardCard>
+        </AdminOverviewStatCard>
 
-        <DashboardCard density="compact">
+        <AdminOverviewStatCard
+          href={buildAdminUsersUrl({ tab: "staff", role: "admin" })}
+          ariaLabel="Bekijk beheerders"
+        >
           <p className="text-xs text-carbon-black-600">Beheerders</p>
           <p className="text-xl font-semibold text-carbon-black-900">
             {stats.roleCounts.admin}
           </p>
-        </DashboardCard>
+        </AdminOverviewStatCard>
       </div>
 
       {auditEvents && auditEvents.length > 0 ? (
-        <DashboardCard density="compact">
-          <h2 className="mb-2 text-base font-semibold text-carbon-black-900">
-            Recente wijzigingen
-          </h2>
-          <ul className="space-y-2 text-sm text-carbon-black-700">
-            {auditEvents.map((event) => (
-              <li key={event.id} className="border-b border-dust-grey-100 pb-2 last:border-0">
-                <span className="font-medium">
-                  {event.actorName ?? "Beheerder"}
-                </span>
-                {" → "}
-                <span>{event.targetName ?? "Gebruiker"}</span>
-                {": "}
-                <span>{event.action}</span>
-              </li>
-            ))}
-          </ul>
-        </DashboardCard>
+        <AdminRecentChanges events={auditEvents} />
       ) : null}
     </div>
   );
 }
-

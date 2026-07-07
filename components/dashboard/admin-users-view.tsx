@@ -2,25 +2,100 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 import { AdminPatientAccountsView } from "@/components/dashboard/admin-patient-accounts-view";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  buildAdminUsersUrl,
+  parseAdminUsersFilters,
+  type AdminUsersStatus,
+  type AdminUsersTab,
+} from "@/lib/admin/admin-users-url";
 import { ROLE_LABELS } from "@/lib/constants/admin-account-copy";
 import { useAdminStaffAccounts } from "@/hooks/use-admin-staff-accounts";
 
-type UsersTab = "staff" | "patients";
+const STATUS_OPTIONS: { value: AdminUsersStatus | "all"; label: string }[] = [
+  { value: "all", label: "Alle staff" },
+  { value: "active", label: "Actief" },
+  { value: "inactive", label: "Inactief" },
+];
 
 export function AdminUsersView() {
-  const [tab, setTab] = useState<UsersTab>("staff");
-  const [search, setSearch] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const filters = parseAdminUsersFilters(searchParams);
+
+  const [searchInput, setSearchInput] = useState(filters.search ?? "");
+
+  useEffect(() => {
+    setSearchInput(filters.search ?? "");
+  }, [filters.search]);
+
+  const navigate = useCallback(
+    (next: Partial<typeof filters>) => {
+      router.replace(
+        buildAdminUsersUrl({
+          tab: next.tab ?? filters.tab,
+          role: "role" in next ? next.role : filters.role,
+          status: "status" in next ? next.status : filters.status,
+          search: "search" in next ? next.search : filters.search,
+        }),
+      );
+    },
+    [router, filters],
+  );
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      const trimmed = searchInput.trim();
+      const current = filters.search ?? "";
+
+      if (trimmed === current) {
+        return;
+      }
+
+      navigate({
+        search: trimmed || undefined,
+      });
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchInput, filters.search, navigate]);
+
   const { data: staffAccounts, isLoading, isError } = useAdminStaffAccounts({
-    search,
-    status: "all",
+    search: filters.search,
+    status: filters.status ?? "all",
+    role: filters.role,
   });
+
+  function setTab(tab: AdminUsersTab) {
+    if (tab === "patients") {
+      router.replace(buildAdminUsersUrl({ tab: "patients" }));
+      return;
+    }
+
+    router.replace(
+      buildAdminUsersUrl({
+        tab: "staff",
+        role: filters.role,
+        status: filters.status,
+        search: filters.search,
+      }),
+    );
+  }
+
+  function setStatus(status: AdminUsersStatus | "all") {
+    navigate({
+      status: status === "all" ? undefined : status,
+    });
+  }
+
+  const hasActiveFilters = Boolean(filters.role || filters.status);
 
   return (
     <div className="space-y-4">
@@ -29,7 +104,7 @@ export function AdminUsersView() {
         description="Beheer staffaccounts en bekijk patiëntaccounts."
         size="compact"
         action={
-          tab === "staff" ? (
+          filters.tab === "staff" ? (
             <PrimaryButton
               href="/admin/users/new"
               size="sm"
@@ -46,7 +121,7 @@ export function AdminUsersView() {
           type="button"
           onClick={() => setTab("staff")}
           className={
-            tab === "staff"
+            filters.tab === "staff"
               ? "rounded-full bg-copper-600 px-4 py-2 text-sm font-medium text-white"
               : "rounded-full bg-parchment-200 px-4 py-2 text-sm font-medium text-carbon-black-800"
           }
@@ -57,7 +132,7 @@ export function AdminUsersView() {
           type="button"
           onClick={() => setTab("patients")}
           className={
-            tab === "patients"
+            filters.tab === "patients"
               ? "rounded-full bg-copper-600 px-4 py-2 text-sm font-medium text-white"
               : "rounded-full bg-parchment-200 px-4 py-2 text-sm font-medium text-carbon-black-800"
           }
@@ -66,16 +141,64 @@ export function AdminUsersView() {
         </button>
       </div>
 
-      {tab === "patients" ? <AdminPatientAccountsView /> : null}
+      {filters.tab === "patients" ? <AdminPatientAccountsView /> : null}
 
-      {tab === "staff" ? (
+      {filters.tab === "staff" ? (
         <DashboardCard density="compact" className="space-y-3">
-          <label className="block px-3 pt-3">
+          <div className="flex flex-wrap gap-2 px-3 pt-3">
+            {STATUS_OPTIONS.map((option) => {
+              const isActive =
+                option.value === "all"
+                  ? !filters.status
+                  : filters.status === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setStatus(option.value)}
+                  className={
+                    isActive
+                      ? "rounded-full bg-pearl-aqua-200 px-3 py-1.5 text-xs font-medium text-blue-slate-800"
+                      : "rounded-full bg-parchment-200 px-3 py-1.5 text-xs font-medium text-carbon-black-700"
+                  }
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {hasActiveFilters ? (
+            <div className="flex flex-wrap items-center gap-2 px-3">
+              {filters.role ? (
+                <span className="rounded-full bg-parchment-200 px-3 py-1 text-xs text-carbon-black-700">
+                  Rol: {ROLE_LABELS[filters.role]}
+                </span>
+              ) : null}
+              {filters.status ? (
+                <span className="rounded-full bg-parchment-200 px-3 py-1 text-xs text-carbon-black-700">
+                  Status: {filters.status === "active" ? "Actief" : "Inactief"}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                onClick={() =>
+                  navigate({ role: undefined, status: undefined })
+                }
+                className="text-xs font-medium text-blue-slate-700 hover:underline"
+              >
+                Wis filters
+              </button>
+            </div>
+          ) : null}
+
+          <label className="block px-3">
             <span className="sr-only">Zoeken</span>
             <input
               type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Zoek op naam of e-mail"
               className="h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm"
             />

@@ -6,11 +6,13 @@ import {
   createStaffAccountAction,
   fetchStaffAccountsAction,
 } from "@/lib/auth/admin-actions";
+import type { StaffRoleName } from "@/lib/constants/admin-account-copy";
 import { queryKeys } from "@/lib/constants/query-keys";
 
 export function useAdminStaffAccounts(options?: {
   search?: string;
   status?: "active" | "inactive" | "all";
+  role?: StaffRoleName;
 }) {
   return useQuery({
     queryKey: queryKeys.adminAccounts.staff(options),

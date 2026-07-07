@@ -274,10 +274,12 @@ function toPatientSummary(
 export async function listStaffAccounts(options?: {
   search?: string;
   status?: "active" | "inactive" | "all";
+  role?: StaffRoleName;
 }): Promise<StaffAccountSummary[]> {
   const context = await loadAccountContext();
   const search = options?.search?.trim().toLowerCase() ?? "";
   const status = options?.status ?? "all";
+  const role = options?.role;
 
   let accounts: StaffAccountSummary[] = [];
 
@@ -302,6 +304,10 @@ export async function listStaffAccounts(options?: {
     accounts = accounts.filter((account) => account.isActive);
   } else if (status === "inactive") {
     accounts = accounts.filter((account) => !account.isActive);
+  }
+
+  if (role) {
+    accounts = accounts.filter((account) => account.roles.includes(role));
   }
 
   return accounts.sort((a, b) =>
@@ -571,12 +577,44 @@ export async function listRecentAuditEvents(
     throw new Error(error.message);
   }
 
-  const events = data ?? [];
+  return mapAuditRowsToEvents(data ?? []);
+}
 
+export async function listRecentAuditEventsForTargetUser(
+  targetUserId: string,
+  limit = 10,
+): Promise<AccountAuditEvent[]> {
+  const admin = createAdminClient();
+
+  const { data, error } = await admin
+    .from("account_audit_events")
+    .select("id, actor_user_id, target_user_id, action, metadata, created_at")
+    .eq("target_user_id", targetUserId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapAuditRowsToEvents(data ?? []);
+}
+
+async function mapAuditRowsToEvents(
+  events: {
+    id: string;
+    actor_user_id: string;
+    target_user_id: string;
+    action: string;
+    metadata: Json;
+    created_at: string;
+  }[],
+): Promise<AccountAuditEvent[]> {
   if (events.length === 0) {
     return [];
   }
 
+  const admin = createAdminClient();
   const profileIds = [
     ...new Set(
       events.flatMap((event) => [event.actor_user_id, event.target_user_id]),

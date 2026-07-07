@@ -30,6 +30,9 @@ export function useUpdateAccountProfile(userId: string) {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.adminAccounts.detail(userId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.adminOverview.all,
+      });
     },
   });
 }

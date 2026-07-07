@@ -13,6 +13,7 @@ interface TopNavigationProps {
   greeting?: string;
   pageTitle?: string;
   onMenuClick?: () => void;
+  showSearch?: boolean;
 }
 
 export function TopNavigation({
@@ -20,6 +21,7 @@ export function TopNavigation({
   greeting,
   pageTitle,
   onMenuClick,
+  showSearch = true,
 }: TopNavigationProps) {
   const pathname = usePathname();
 
@@ -91,16 +93,20 @@ export function TopNavigation({
         </div>
 
         <div className="relative hidden max-w-md flex-1 md:block">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-carbon-black-400"
-            aria-hidden
-          />
-          <input
-            type="search"
-            disabled
-            placeholder="Zoek patiënt..."
-            className="h-10 w-full rounded-xl border border-parchment-200 bg-white pl-10 pr-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
-          />
+          {showSearch ? (
+            <>
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-carbon-black-400"
+                aria-hidden
+              />
+              <input
+                type="search"
+                disabled
+                placeholder="Zoek patiënt..."
+                className="h-10 w-full rounded-xl border border-parchment-200 bg-white pl-10 pr-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
+              />
+            </>
+          ) : null}
         </div>
 
         <div className="ml-auto flex items-center gap-3">

@@ -25,11 +25,18 @@
   },
   adminAccounts: {
     all: ["admin-accounts"] as const,
-    staff: (filters?: { search?: string; status?: string }) => {
+    staff: (filters?: { search?: string; status?: string; role?: string }) => {
       const search = filters?.search?.trim() ?? "";
       const status = filters?.status ?? "all";
+      const role = filters?.role ?? "";
 
-      return [...queryKeys.adminAccounts.all, "staff", search, status] as const;
+      return [
+        ...queryKeys.adminAccounts.all,
+        "staff",
+        search,
+        status,
+        role,
+      ] as const;
     },
     patients: (filters?: { linkStatus?: string }) => {
       const linkStatus = filters?.linkStatus ?? "all";
@@ -38,6 +45,8 @@
     },
     detail: (userId: string) =>
       [...queryKeys.adminAccounts.all, "detail", userId] as const,
+    audit: (userId: string, limit: number) =>
+      [...queryKeys.adminAccounts.all, "audit", userId, limit] as const,
   },
   adminRoles: {
     all: ["admin-roles"] as const,

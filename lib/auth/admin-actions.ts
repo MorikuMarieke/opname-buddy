@@ -9,6 +9,7 @@ import {
   getStaffAccountById,
   listPatientAccounts,
   listRecentAuditEvents,
+  listRecentAuditEventsForTargetUser,
   listRolesWithCounts,
   listStaffAccounts,
   setAccountActive,
@@ -38,6 +39,7 @@ function revalidateAdminPaths() {
 export async function fetchStaffAccountsAction(options?: {
   search?: string;
   status?: "active" | "inactive" | "all";
+  role?: StaffRoleName;
 }): Promise<StaffAccountSummary[]> {
   await requireRole("admin");
   return listStaffAccounts(options);
@@ -72,6 +74,14 @@ export async function fetchRecentAuditEventsAction(
 ): Promise<AccountAuditEvent[]> {
   await requireRole("admin");
   return listRecentAuditEvents(limit);
+}
+
+export async function fetchRecentAuditEventsForTargetUserAction(
+  targetUserId: string,
+  limit = 10,
+): Promise<AccountAuditEvent[]> {
+  await requireRole("admin");
+  return listRecentAuditEventsForTargetUser(targetUserId, limit);
 }
 
 export async function createStaffAccountAction(

@@ -43,3 +43,44 @@ export function formatDutchDateTime(isoString: string): string {
     minute: "2-digit",
   });
 }
+
+/**
+ * Compact Dutch timestamp for admin audit lines (Europe/Amsterdam).
+ */
+export function formatAdminAuditTimestamp(isoString: string): string {
+  const date = new Date(isoString);
+
+  if (Number.isNaN(date.getTime())) {
+    return isoString;
+  }
+
+  const time = date.toLocaleTimeString("nl-NL", {
+    timeZone: "Europe/Amsterdam",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const today = getAmsterdamDateString();
+  const eventDay = getAmsterdamDateString(date);
+
+  if (eventDay === today) {
+    return `Vandaag om ${time}`;
+  }
+
+  const nowYear = new Date().getFullYear();
+  const eventYear = Number(
+    date.toLocaleDateString("en-CA", {
+      timeZone: "Europe/Amsterdam",
+      year: "numeric",
+    }),
+  );
+
+  const datePart = date.toLocaleDateString("nl-NL", {
+    timeZone: "Europe/Amsterdam",
+    day: "numeric",
+    month: "long",
+    ...(eventYear !== nowYear ? { year: "numeric" } : {}),
+  });
+
+  return `${datePart} om ${time}`;
+}

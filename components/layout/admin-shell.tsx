@@ -15,6 +15,7 @@ export function AdminShell({ children }: AdminShellProps) {
         variant="professional"
         navItems={adminNavItems}
         pageTitle="Beheer"
+        showSearch={false}
       >
         {children}
       </DashboardShell>

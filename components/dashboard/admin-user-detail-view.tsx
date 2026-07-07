@@ -18,6 +18,7 @@ import {
   useSetStaffRoles,
   useUpdateAccountProfile,
 } from "@/hooks/use-admin-account-detail";
+import { AdminUserAccountActivity } from "@/components/dashboard/admin-user-account-activity";
 import type { StaffAccountSummary } from "@/types/admin-account";
 
 const inputClasses =
@@ -244,6 +245,8 @@ export function AdminUserDetailView({ userId }: AdminUserDetailViewProps) {
       />
 
       <AdminUserDetailForm key={formKey} account={account} />
+
+      <AdminUserAccountActivity userId={account.id} />
     </div>
   );
 }
