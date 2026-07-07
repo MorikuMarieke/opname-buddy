@@ -6,6 +6,7 @@ import { Menu, Search } from "lucide-react";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { OpnameBuddyLogo } from "@/components/layout/opname-buddy-logo";
 import { patientBottomNavItems } from "@/lib/constants/navigation";
+import type { DashboardUserHeader } from "@/lib/utils/dashboard-user-header";
 import { cn } from "@/lib/utils/cn";
 
 interface TopNavigationProps {
@@ -13,6 +14,8 @@ interface TopNavigationProps {
   greeting?: string;
   pageTitle?: string;
   onMenuClick?: () => void;
+  showSearch?: boolean;
+  userHeader?: DashboardUserHeader;
 }
 
 export function TopNavigation({
@@ -20,6 +23,8 @@ export function TopNavigation({
   greeting,
   pageTitle,
   onMenuClick,
+  showSearch = true,
+  userHeader,
 }: TopNavigationProps) {
   const pathname = usePathname();
 
@@ -91,30 +96,36 @@ export function TopNavigation({
         </div>
 
         <div className="relative hidden max-w-md flex-1 md:block">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-carbon-black-400"
-            aria-hidden
-          />
-          <input
-            type="search"
-            disabled
-            placeholder="Zoek patiënt..."
-            className="h-10 w-full rounded-xl border border-parchment-200 bg-white pl-10 pr-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
-          />
+          {showSearch ? (
+            <>
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-carbon-black-400"
+                aria-hidden
+              />
+              <input
+                type="search"
+                disabled
+                placeholder="Zoek patiënt..."
+                className="h-10 w-full rounded-xl border border-parchment-200 bg-white pl-10 pr-4 text-sm text-carbon-black-900 placeholder:text-carbon-black-400"
+              />
+            </>
+          ) : null}
         </div>
 
         <div className="ml-auto flex items-center gap-3">
           <div className="hidden text-right sm:block">
             <p className="text-sm font-medium text-carbon-black-900">
-              Sanne de Vries
+              {userHeader?.displayName ?? "Gebruiker"}
             </p>
-            <p className="text-xs text-carbon-black-600">Verpleegkundige</p>
+            {userHeader?.roleLabel ? (
+              <p className="text-xs text-carbon-black-600">{userHeader.roleLabel}</p>
+            ) : null}
           </div>
           <div
             className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua-200 text-sm font-semibold text-pearl-aqua-800"
             aria-hidden
           >
-            SV
+            {userHeader?.initials ?? "?"}
           </div>
         </div>
       </div>

@@ -51,7 +51,6 @@ export const adminNavItems: NavItem[] = [
   { label: "Overzicht", href: "/admin", icon: LayoutDashboard },
   { label: "Gebruikers", href: "/admin/users", icon: Users },
   { label: "Rollen", href: "/admin/roles", icon: Shield },
-  { label: "Instellingen", href: "/admin", icon: Settings },
 ];
 
 export function getCarePatientSubNavItems(patientId: string): NavItem[] {

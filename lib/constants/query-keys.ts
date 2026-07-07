@@ -1,4 +1,4 @@
-export const queryKeys = {
+﻿export const queryKeys = {
   checkIns: {
     all: ["check-ins"] as const,
     today: () => [...queryKeys.checkIns.all, "today"] as const,
@@ -23,7 +23,41 @@ export const queryKeys = {
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
   },
+  adminAccounts: {
+    all: ["admin-accounts"] as const,
+    staff: (filters?: { search?: string; status?: string; role?: string }) => {
+      const search = filters?.search?.trim() ?? "";
+      const status = filters?.status ?? "all";
+      const role = filters?.role ?? "";
+
+      return [
+        ...queryKeys.adminAccounts.all,
+        "staff",
+        search,
+        status,
+        role,
+      ] as const;
+    },
+    patients: (filters?: { linkStatus?: string }) => {
+      const linkStatus = filters?.linkStatus ?? "all";
+
+      return [...queryKeys.adminAccounts.all, "patients", linkStatus] as const;
+    },
+    detail: (userId: string) =>
+      [...queryKeys.adminAccounts.all, "detail", userId] as const,
+    audit: (userId: string, limit: number) =>
+      [...queryKeys.adminAccounts.all, "audit", userId, limit] as const,
+  },
+  adminRoles: {
+    all: ["admin-roles"] as const,
+  },
+  adminOverview: {
+    all: ["admin-overview"] as const,
+    audit: (limit: number) =>
+      [...queryKeys.adminOverview.all, "audit", limit] as const,
+  },
   carePatients: {
     all: ["care-patients"] as const,
   },
 } as const;
+

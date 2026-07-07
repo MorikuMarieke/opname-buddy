@@ -31,6 +31,8 @@ For each area:
 >
 > **What shipped (Phase 1–3):** `patients`, `admissions`, `patient_account_links`, `patient_link_codes` (`00015`–`00018`); the four care tables are owned via a **`NOT NULL` `admission_id`** with admission-scoped RLS (`current_admission_ids()`) as the sole patient-side guard; the legacy `patient_id` columns and their `patient_id = auth.uid()` policies have been **dropped** (`00019`–`00026`); `patient_context` is now one row per admission (`UNIQUE(admission_id)`) and its staff audit field is **`updated_by_staff_id`** (`00027`). The caregiver read path (`list_care_patients()`, `/care/patients/[patientId]`) is keyed by `patients.id`.
 >
+> **Admin account management — implemented (branch 5):** Staff accounts are profiles with staff roles in user_roles (no staff_accounts table). Admins manage staff lifecycle and role assignment via server actions + service role (00028-00030). Self-registration assigns the patient role automatically. account_audit_events records admin actions (append-only). Patient-linked accounts are admin-readable only; linking flow remains branch 6. Plan: docs/branch-plans/branch-admin-account-management.md.
+>
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
 
 ### User / problem
@@ -46,7 +48,7 @@ App-specific user record, 1:1 with `auth.users`.
 | Concern | Detail |
 |---------|--------|
 | Ownership | Each user owns their profile row |
-| Relationships | Referenced by all `patient_id` and staff attribution fields |
+| Relationships | Referenced by role/account links and staff audit fields (e.g. `updated_by_staff_id`) |
 
 **Business rules**
 
@@ -76,7 +78,8 @@ Canonical role names and assignments.
 |-------|------------|--------|
 | `profiles` | `id`, `full_name`, `preferred_language`, timestamps | Implemented |
 | `roles` | `id`, `name` | Implemented |
-| `user_roles` | `user_id`, `role_id`, `created_at` | Implemented |
+| `user_roles` | `user_id`, `role_id`, `created_at` | Implemented (admin-managed via server) |
+| `account_audit_events` | `actor_user_id`, `target_user_id`, `action`, `metadata` | Implemented (append-only, service role) |
 
 ---
 
@@ -365,8 +368,8 @@ Patient response to a completed or offered activity.
 
 | Concern | Detail |
 |---------|--------|
-| Ownership | Patient-owned |
-| Relationships | Links patient, activity or session |
+| Ownership | `admission_id` → the clinical patient's admission |
+| Relationships | Belongs to an `admissions` row (→ `patients`); links to an `activity_session` when scheduled sessions exist |
 
 **Business rules**
 
@@ -378,8 +381,8 @@ Patient response to a completed or offered activity.
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK | |
-| `activity_session_id` | uuid FK | |
+| `admission_id` | uuid FK → admissions | **NOT NULL** ownership key |
+| `activity_session_id` | uuid FK | Optional; nullable until sessions exist |
 | `outcome` | text | completed, skipped |
 | `difficulty` | smallint | Scale TBD |
 | `enjoyment` | smallint | Scale TBD |
@@ -398,14 +401,14 @@ Patients benefit from a short, readable daily summary that combines their input 
 
 #### Entity: DailyAdvice
 
-Stored output from DailyBuddy for a patient on a given day.
+Stored output from DailyBuddy for a clinical patient's admission on a given day.
 
 #### Blueprint: `daily_advice` (branch 6)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `patient_id` | uuid FK | |
+| `admission_id` | uuid FK → admissions | **NOT NULL** ownership key |
 | `advice_date` | date | |
 | `context_summary` | text | Compact interpreted context |
 | `motivation` | text | |
@@ -420,17 +423,18 @@ Stored output from DailyBuddy for a patient on a given day.
 
 ```mermaid
 erDiagram
-  profiles ||--o{ patient_checkins : owns
-  profiles ||--o{ patient_questions : owns
-  profiles ||--o{ patient_participation_evaluations : owns
-  profiles ||--o| patient_context : has
   profiles ||--o{ user_roles : has
   roles ||--o{ user_roles : assigned
+  patients ||--o{ admissions : has
+  admissions ||--o{ patient_checkins : has
+  admissions ||--o{ patient_questions : has
+  admissions ||--o{ patient_participation_evaluations : has
+  admissions ||--o| patient_context : has
   activities ||--o{ activity_sessions : schedules
   activities ||--o{ volunteer_slots : supports
   activity_sessions ||--o{ activity_feedback : receives
-  profiles ||--o{ activity_feedback : gives
-  profiles ||--o{ daily_advice : receives
+  admissions ||--o{ activity_feedback : has
+  admissions ||--o{ daily_advice : has
 ```
 
 *Dashed conceptual entities (restrictions, activities, advice) are future branches.*

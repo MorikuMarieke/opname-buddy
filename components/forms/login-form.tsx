@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { createClient } from "@/lib/supabase/client";
 
 const inputClasses =
@@ -116,9 +117,8 @@ export function LoginForm() {
         >
           Wachtwoord
         </label>
-        <input
+        <PasswordInput
           id="password"
-          type="password"
           required
           autoComplete="current-password"
           enterKeyHint="go"
@@ -126,7 +126,6 @@ export function LoginForm() {
           onChange={(event) => setPassword(event.target.value)}
           disabled={isLoading}
           placeholder="••••••••"
-          className={inputClasses}
         />
       </div>
 
