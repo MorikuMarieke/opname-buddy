@@ -275,6 +275,8 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 ## Activities and planning
 
+> **Branch 7 (`feature/activity-planning-volunteers`) — in progress:** structured activity catalog, weekly recurring schedules, one-off sessions, volunteer availability, human approval workflow. Replaces the older `volunteer_slots` blueprint with `volunteer_recurring_availability` + `volunteer_availability_exceptions`. AI matching deferred to branch 8.
+
 ### Activity
 
 #### User / problem
@@ -297,17 +299,20 @@ Examples: short walk, breathing exercise, chair exercise, social coffee moment, 
 - Non-medical participation only
 - Properties may include type, intensity, location, supervision required, and where it can be done (bed, chair, room, ward, outside)
 
-#### Blueprint: `activities` (branch 4)
+#### Blueprint: `activities` (branch 7 — **Planned**)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `title`, `description` | text | |
-| `activity_type` | text | |
-| `intensity` | text | e.g. low, medium, high |
+| `title`, `description` | text | description **required** (AI context) |
+| `category` | text | creative, movement, social, relaxation, other |
+| `intensity` | text | low, medium, high |
 | `location` | text | Default location |
-| `requires_supervision` | boolean | |
-| `allowed_locations` | text[] or flags | bed, chair, room, ward, outside |
+| `allowed_settings` | text[] | bed, chair, room, ward, outside |
+| `requires_supervision`, `requires_volunteer` | boolean | Structured requirement flags |
+| `min_participants`, `max_participants` | int | Capacity on template |
+| `mobility_notes` | text | Optional supplement |
+| `is_active` | boolean | Soft deactivate |
 | timestamps | timestamptz | |
 
 ---
@@ -322,39 +327,41 @@ Patients and coordinators need scheduled instances of activities with time, plac
 
 A scheduled occurrence of an activity.
 
-#### Blueprint: `activity_sessions` (branch 4)
+#### Blueprint: `activity_sessions` (branch 7 — **Planned**)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
 | `activity_id` | uuid FK | |
-| `starts_at` | timestamptz | |
-| `location` | text | Override per session |
-| `capacity` | integer | |
-| `requires_volunteer` | boolean | Optional |
+| `recurring_schedule_id` | uuid FK | Nullable; null = one-off |
+| `session_kind` | text | recurring_instance, one_off |
+| `starts_at`, `ends_at` | timestamptz | |
+| `location` | text | Snapshot per session |
+| `min_participants`, `max_participants` | int | Snapshot |
+| `status` | text | draft, proposed, confirmed, completed, cancelled |
+| `confirmed_at`, `confirmed_by_staff_id` | timestamptz / uuid | Human approval audit |
 | timestamps | timestamptz | |
 
 ---
 
-### Volunteer slot
+### Volunteer availability
 
 #### User / problem
 
-Some activities need a volunteer. Coordinators register availability so DailyBuddy knows whether guided activities are feasible.
+Volunteers manage when they can help. Coordinators read availability when manually assigning volunteers to sessions. Future DagBuddy uses this structured data for feasibility checks.
 
-#### Entity: VolunteerSlot
+#### Entity: VolunteerRecurringAvailability / VolunteerAvailabilityException
 
-Availability window linked to activities or sessions.
+Weekly windows owned by the volunteer, plus one-off extras or unavailability blocks.
 
-#### Blueprint: `volunteer_slots` (branch 4)
+#### Blueprint: `volunteer_recurring_availability` + `volunteer_availability_exceptions` (branch 7 — **Planned**)
 
-| Field | Type (planned) | Notes |
-|-------|----------------|-------|
-| `id` | uuid PK | |
-| `activity_id` | uuid FK | |
-| `starts_at`, `ends_at` | timestamptz | |
-| `volunteer_name` or profile ref | text / uuid | TBD in branch 4 |
-| timestamps | timestamptz | |
+| Table | Key fields |
+|-------|------------|
+| `volunteer_recurring_availability` | `user_id`, `day_of_week`, `start_time`, `end_time`, `is_active` |
+| `volunteer_availability_exceptions` | `user_id`, `exception_date`, `start_time`, `end_time`, `kind` (extra \| unavailable) |
+
+**Deprecated blueprint:** `volunteer_slots` — superseded by volunteer-owned availability (branch 7).
 
 ---
 
