@@ -85,5 +85,12 @@
     all: ["departments"] as const,
     active: ["departments", "active"] as const,
   },
+  planning: {
+    activities: {
+      all: ["planning", "activities"] as const,
+      detail: (activityId: string) =>
+        ["planning", "activities", activityId] as const,
+    },
+  },
 } as const;
 
