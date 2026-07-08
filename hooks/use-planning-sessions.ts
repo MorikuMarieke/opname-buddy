@@ -22,6 +22,8 @@ export function usePlanningSessions(filters: ListPlanningSessionsFilters = {}) {
     queryKey: queryKeys.planning.sessions.list({
       status: filters.status ?? undefined,
       sessionKind: filters.sessionKind ?? undefined,
+      from: filters.from,
+      to: filters.to,
     }),
     queryFn: () => listPlanningSessions(filters),
   });

@@ -112,12 +112,16 @@
       list: (filters?: {
         status?: string;
         sessionKind?: string;
+        from?: string;
+        to?: string;
       }) =>
         [
           "planning",
           "sessions",
           filters?.status ?? "all",
           filters?.sessionKind ?? "all",
+          filters?.from ?? "default-from",
+          filters?.to ?? "default-to",
         ] as const,
       detail: (sessionId: string) =>
         ["planning", "sessions", sessionId] as const,
@@ -127,6 +131,9 @@
     },
     volunteers: {
       all: ["planning", "volunteers"] as const,
+    },
+    coordinatorVolunteers: {
+      all: ["planning", "coordinator-volunteers"] as const,
     },
   },
   volunteer: {

@@ -39,6 +39,66 @@ export function formatDutchDate(dateString: string): string {
 }
 
 /**
+ * Formats today's date for planning headers (Europe/Amsterdam), e.g. "dinsdag 9 juli 2026".
+ */
+export function formatDutchLongDate(date = new Date()): string {
+  return date.toLocaleDateString("nl-NL", {
+    timeZone: "Europe/Amsterdam",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+/**
+ * Returns true when an ISO timestamp falls on the given Amsterdam calendar date.
+ */
+export function isAmsterdamSameDay(
+  isoString: string,
+  dateString: string,
+): boolean {
+  return getAmsterdamDateString(new Date(isoString)) === dateString;
+}
+
+/**
+ * Formats a time range from ISO timestamps (Europe/Amsterdam, HH:mm).
+ */
+export function formatAmsterdamTimeRange(
+  startsAt: string,
+  endsAt: string,
+): string {
+  const timeFormatter = new Intl.DateTimeFormat("nl-NL", {
+    timeZone: "Europe/Amsterdam",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${timeFormatter.format(new Date(startsAt))} – ${timeFormatter.format(new Date(endsAt))}`;
+}
+
+/**
+ * Formats an ISO timestamp as HH:mm in Europe/Amsterdam.
+ */
+export function formatAmsterdamTime(isoOrTime: string): string {
+  if (/^\d{2}:\d{2}/.test(isoOrTime)) {
+    return isoOrTime.slice(0, 5);
+  }
+
+  const date = new Date(isoOrTime);
+
+  if (Number.isNaN(date.getTime())) {
+    return isoOrTime;
+  }
+
+  return date.toLocaleTimeString("nl-NL", {
+    timeZone: "Europe/Amsterdam",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
  * Formats an ISO timestamp for Dutch display in Europe/Amsterdam (dd-MM-yyyy, HH:mm).
  */
 export function formatDutchDateTime(isoString: string): string {

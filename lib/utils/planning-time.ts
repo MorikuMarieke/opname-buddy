@@ -2,6 +2,8 @@
  * Amsterdam wall-clock helpers for planning session timestamps.
  */
 
+import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
+
 function getTimeZoneOffsetMinutes(timeZone: string, date: Date): number {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -69,4 +71,68 @@ export function sessionOverlapsTimeWindow(
   const windowEnd = windowEndTime.slice(0, 5);
 
   return timeRangesOverlap(sessionStart, sessionEnd, windowStart, windowEnd);
+}
+
+/** Shift an Amsterdam calendar date by a number of days. */
+export function addDaysToAmsterdamDateString(
+  dateString: string,
+  days: number,
+): string {
+  const iso = combineAmsterdamDateAndTime(dateString, "12:00");
+  const next = new Date(new Date(iso).getTime() + days * 86_400_000);
+  return next.toLocaleDateString("en-CA", { timeZone: "Europe/Amsterdam" });
+}
+
+/** Day of week in Amsterdam (0 = Sunday, matches PostgreSQL dow). */
+export function getAmsterdamDayOfWeek(dateString: string): number {
+  const iso = combineAmsterdamDateAndTime(dateString, "12:00");
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Amsterdam",
+    weekday: "short",
+  }).format(new Date(iso));
+
+  const map: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+
+  return map[weekday] ?? 0;
+}
+
+/** Monday-first week of Amsterdam calendar dates containing the reference date. */
+export function getAmsterdamWeekDateStrings(
+  dateString = getAmsterdamDateString(),
+): string[] {
+  const dayOfWeek = getAmsterdamDayOfWeek(dateString);
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+  const monday = addDaysToAmsterdamDateString(dateString, -daysSinceMonday);
+
+  return Array.from({ length: 7 }, (_, index) =>
+    addDaysToAmsterdamDateString(monday, index),
+  );
+}
+
+export function getAmsterdamDayBoundsIso(
+  dateString = getAmsterdamDateString(),
+): { from: string; to: string } {
+  return {
+    from: combineAmsterdamDateAndTime(dateString, "00:00:00"),
+    to: combineAmsterdamDateAndTime(dateString, "23:59:59"),
+  };
+}
+
+export function getAmsterdamWeekBoundsIso(
+  dateString = getAmsterdamDateString(),
+): { from: string; to: string } {
+  const week = getAmsterdamWeekDateStrings(dateString);
+
+  return {
+    from: combineAmsterdamDateAndTime(week[0], "00:00:00"),
+    to: combineAmsterdamDateAndTime(week[6], "23:59:59"),
+  };
 }
