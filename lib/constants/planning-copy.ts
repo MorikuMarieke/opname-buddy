@@ -52,4 +52,26 @@ export const PLANNING_COPY = {
     ward: "Afdeling",
     outside: "Buiten",
   },
+  recurring: {
+    pageTitle: "Terugkerende planning",
+    pageDescription: "Wekelijkse activiteitenschema's die automatisch sessies aanmaken.",
+    newTitle: "Terugkerend schema toevoegen",
+    editTitle: "Terugkerend schema bewerken",
+    emptyTitle: "Nog geen terugkerende schema's",
+    emptyDescription:
+      "Plan bijvoorbeeld elke dinsdag schilderen van 10:00 tot 11:30.",
+    addButton: "Schema toevoegen",
+    saveButton: "Opslaan",
+    badge: "Terugkerend",
+    fields: {
+      activity: "Activiteit",
+      dayOfWeek: "Weekdag",
+      startTime: "Starttijd",
+      endTime: "Eindtijd",
+      location: "Locatie (optioneel)",
+      locationHint: "Overschrijft de standaardlocatie van de activiteit.",
+      minParticipants: "Min. deelnemers (optioneel)",
+      maxParticipants: "Max. deelnemers (optioneel)",
+    },
+  },
 } as const;

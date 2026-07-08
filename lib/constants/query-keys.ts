@@ -91,6 +91,11 @@
       detail: (activityId: string) =>
         ["planning", "activities", activityId] as const,
     },
+    recurringSchedules: {
+      all: ["planning", "recurring-schedules"] as const,
+      detail: (scheduleId: string) =>
+        ["planning", "recurring-schedules", scheduleId] as const,
+    },
   },
 } as const;
 
