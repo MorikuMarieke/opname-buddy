@@ -94,9 +94,10 @@ Example headlines:
 
 ### 4. Routes / UI (follow-up slices)
 
-- Evening form on `/dashboard/activities` or `/dashboard/checkin` (evening tab) — keep forms short
+- **Shipped (branch 7):** read-only confirmed upcoming sessions on `/dashboard/activities` (title, time, location, volunteer name when assigned)
+- Evening participation evaluation form — still deferred
 - Pre-fill `activity_title` from stored DailyBuddy advice (branch 8)
-- Link `activity_session_id` when activities exist (branch 7)
+- Link `activity_session_id` in participation evaluations when recording feedback (branch 9)
 
 ### 5. Optional database changes (only if needed)
 

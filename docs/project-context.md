@@ -215,7 +215,7 @@ The project is developed incrementally using feature branches. Each branch intro
 | 4 | `feature/account-domain-model` | Shipped | Clinical domain refactor introducing `patients`, `admissions`, admission-owned care data and secure patient account linking |
 | 5 | `feature/admin-account-management` | Shipped | Administrative management of staff accounts, user roles and account lifecycle |
 | 6 | `feature/patient-admission-management` | Shipped | Caregiver workflow for creating clinical patients, admissions and generating patient linking codes |
-| 7 | `feature/planning-activities-volunteers` | In progress | Activities, sessions, volunteers and recovery planning |
+| 7 | `feature/activity-planning-volunteers` | Shipped | Activities, sessions, volunteers, coordinator planning, patient read-only activities |
 | 8 | `feature/dagbuddy-agent` | Planned | DailyBuddy AI agent, tool calling, streaming and advice generation |
 | 9 | `feature/activity-feedback` | Planned | Patient activity participation, progress tracking and AI-supported recovery feedback |
 | 10 | `feature/questionbuddy-agent` | Planned | QuestionBuddy AI assistant for patient questions |
@@ -229,16 +229,20 @@ The project is developed incrementally using feature branches. Each branch intro
 
 Detailed implementation plans live in `docs/branch-plans/`. The living data blueprint lives in `docs/domain-model.md`.
 
-### Key routes (shipped through branch 6)
+### Key routes (shipped through branch 7)
 
 | Route | Purpose |
 |-------|---------|
 | `/dashboard/link` | Patient link-code redemption |
 | `/dashboard/context` | Patient read-only zorgcontext |
+| `/dashboard/activities` | Patient read-only confirmed upcoming activity sessions |
 | `/care/patients/admit` | New clinical patient + admission |
 | `/care/patients/[patientId]/admit` | Readmission for existing patient |
 | `/care/patients/[patientId]/edit` | Edit patient demographics |
 | `/admin/departments` | Department reference data management |
+| `/planning` | Coordinator activity planning overview |
+| `/planning/sessions` | Session planning and human approval workflow |
+| `/volunteer` | Volunteer assigned sessions and availability |
 
 ---
 
@@ -252,6 +256,7 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan (shipped) |
 | [`docs/branch-plans/branch-05-admin-account-management.md`](branch-plans/branch-05-admin-account-management.md) | Branch 5 implementation plan (shipped) |
 | [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md) | Branch 6 implementation plan (shipped) |
+| [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md) | Branch 7 implementation plan (shipped) |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 10) |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |

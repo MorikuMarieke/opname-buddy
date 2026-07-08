@@ -1,7 +1,7 @@
 # Branch plan — feature/activity-planning-volunteers
 
 **Branch:** `feature/activity-planning-volunteers`  
-**Status:** In progress  
+**Status:** Shipped  
 **Depends on:** branches 1–6 (auth, clinical domain, admin, patient admission)
 
 ## Design principle
@@ -21,8 +21,9 @@ Keep the domain model rich enough for future AI reasoning, while keeping user in
 - Session status workflow: draft → proposed → confirmed → completed | cancelled (human approval)
 - Patient (admission) and volunteer assignments
 - Volunteer role, portal (`/volunteer`), availability (recurring + exceptions)
-- Coordinator planning views (overview, sessions, volunteers)
-- SECURITY DEFINER RPCs for volunteer/patient read models
+- Coordinator planning views (overview, sessions, volunteers, calendar)
+- Patient read-only confirmed upcoming sessions
+- SECURITY DEFINER RPCs for volunteer/patient/coordinator read models
 
 ### Out of scope
 
@@ -30,8 +31,9 @@ Keep the domain model rich enough for future AI reasoning, while keeping user in
 - Notifications, external calendar sync
 - Complex recurrence, drag-and-drop calendar
 - `activity_feedback` (branch 9)
+- Patient signup/cancel for activities
 
-## Migrations (00038–00042)
+## Migrations (00038–00043)
 
 | File | Purpose |
 |------|---------|
@@ -40,16 +42,48 @@ Keep the domain model rich enough for future AI reasoning, while keeping user in
 | `00040_activity_schedules_sessions.sql` | Recurring schedules, sessions, materialize RPC |
 | `00041_activity_session_assignments.sql` | Participants + volunteer assignments |
 | `00042_volunteer_availability_planning_rpcs.sql` | Availability tables, planning RPCs, participation eval FK |
+| `00043_patient_activity_sessions_volunteers.sql` | Patient RPC: volunteer names on session list |
 
 ## Implementation phases
 
-1. Schema + enums + types
-2. Activity catalog CRUD
-3. Recurring schedules
-4. Sessions + assignments + status workflow
-5. Volunteer portal + admin accounts
-6. Coordinator overview + volunteer visibility
-7. Patient minimal activities list (optional)
-8. Docs + QA
+| # | Phase | Status |
+|---|-------|--------|
+| 1 | Schema + enums + types | Done |
+| 2 | Activity catalog CRUD | Done |
+| 3 | Recurring schedules | Done |
+| 4 | Sessions + assignments + status workflow | Done |
+| 5 | Volunteer portal + admin accounts | Done |
+| 6 | Coordinator overview + volunteer visibility | Done |
+| 7 | Patient minimal activities list | Done |
+| 8 | Docs + QA | Done |
 
-Full plan: see Cursor branch plan artifact or project discussion.
+## Key routes
+
+| Route | Role | Purpose |
+|-------|------|---------|
+| `/planning` | activity_coordinator | Today overview by location |
+| `/planning/activities` | activity_coordinator | Activity catalog CRUD |
+| `/planning/recurring` | activity_coordinator | Weekly recurring schedules |
+| `/planning/sessions` | activity_coordinator | Session list + detail + assignments |
+| `/planning/calendar` | activity_coordinator | Week calendar (read-only grid) |
+| `/planning/volunteers` | activity_coordinator | Volunteer availability visibility |
+| `/volunteer` | volunteer | Assigned sessions (proposed/confirmed) |
+| `/volunteer/availability` | volunteer | Own availability CRUD |
+| `/admin/users/new/volunteer` | admin | Create volunteer accounts |
+| `/dashboard/activities` | patient | Read-only confirmed upcoming sessions |
+
+## QA checklist (manual)
+
+- [ ] Coordinator: create activity → recurring schedule → materialized draft sessions
+- [ ] Coordinator: one-off session → assign patient + volunteer → propose → confirm
+- [ ] Volunteer: see assigned session on `/volunteer`; manage availability
+- [ ] Patient (linked + active admission): see confirmed session on `/dashboard/activities`
+- [ ] Admin: create volunteer account; appears in planning volunteer list
+
+## Known limitations (MVP)
+
+- No AI-assisted matching or auto-assignment
+- Calendar is a simple week grid, not drag-and-drop
+- Patient view shows confirmed sessions only; no description, feedback, or actions
+- Coordinator overview is day-centric on `/planning`; calendar is week-centric
+- Volunteer availability is not validated against session overlap in UI (coordinator assigns manually)

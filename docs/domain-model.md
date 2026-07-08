@@ -35,6 +35,8 @@ For each area:
 >
 > **Patient admission management — implemented (branch 6):** Caregiver workflows for Patiënt opnemen, Nieuwe opname, Ontslag, demographics edit, expected discharge date, duplicate-prevention search, and patient link-code redemption. Plan: [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md).
 >
+> **Activity planning and volunteers — implemented (branch 7):** Activity catalog, weekly recurring schedules, one-off sessions, human approval workflow, volunteer portal, coordinator planning views, and patient read-only confirmed sessions. Plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). AI matching and activity feedback remain deferred (branches 8–9).
+>
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
 
 ### User / problem
@@ -69,10 +71,11 @@ Canonical role names and assignments.
 
 **Business rules**
 
-- Role names: `patient`, `caregiver`, `activity_coordinator`, `admin`
+- Role names: `patient`, `caregiver`, `activity_coordinator`, `volunteer`, `admin`
 - Clients may read their own role assignments only
 - Clients cannot assign or remove roles (prevents privilege escalation)
 - Staff may have multiple roles; patients normally have only `patient`
+- Volunteer accounts use `account_type = volunteer` in auth metadata and the `volunteer` role only (admin-created)
 
 ### Blueprint: implemented tables
 
@@ -275,7 +278,7 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 ## Activities and planning
 
-> **Branch 7 (`feature/activity-planning-volunteers`) — in progress:** structured activity catalog, weekly recurring schedules, one-off sessions, volunteer availability, human approval workflow. Replaces the older `volunteer_slots` blueprint with `volunteer_recurring_availability` + `volunteer_availability_exceptions`. AI matching deferred to branch 8.
+> **Branch 7 (`feature/activity-planning-volunteers`) — implemented:** structured activity catalog, weekly recurring schedules, one-off sessions, volunteer availability, human approval workflow (`draft` → `proposed` → `confirmed` → `completed` \| `cancelled`), coordinator planning UI, volunteer portal, and patient read-only confirmed sessions. Replaces the older `volunteer_slots` blueprint with `volunteer_recurring_availability` + `volunteer_availability_exceptions`. SECURITY DEFINER RPCs expose role-scoped read models (`list_planning_sessions`, `list_volunteer_sessions`, `list_patient_activity_sessions`, etc.). AI matching deferred to branch 8; activity feedback deferred to branch 9.
 
 ### Activity
 
@@ -299,7 +302,7 @@ Examples: short walk, breathing exercise, chair exercise, social coffee moment, 
 - Non-medical participation only
 - Properties may include type, intensity, location, supervision required, and where it can be done (bed, chair, room, ward, outside)
 
-#### Blueprint: `activities` (branch 7 — **Planned**)
+#### Blueprint: `activities` (branch 7 — **Implemented**, migration `00039`)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
@@ -327,7 +330,7 @@ Patients and coordinators need scheduled instances of activities with time, plac
 
 A scheduled occurrence of an activity.
 
-#### Blueprint: `activity_sessions` (branch 7 — **Planned**)
+#### Blueprint: `activity_sessions` (branch 7 — **Implemented**, migration `00040`)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
@@ -354,7 +357,7 @@ Volunteers manage when they can help. Coordinators read availability when manual
 
 Weekly windows owned by the volunteer, plus one-off extras or unavailability blocks.
 
-#### Blueprint: `volunteer_recurring_availability` + `volunteer_availability_exceptions` (branch 7 — **Planned**)
+#### Blueprint: `volunteer_recurring_availability` + `volunteer_availability_exceptions` (branch 7 — **Implemented**, migration `00042`)
 
 | Table | Key fields |
 |-------|------------|
@@ -383,9 +386,9 @@ Patient response to a completed or offered activity.
 **Business rules**
 
 - Fields: completed/skipped, difficulty, enjoyment, optional note
-- Branch 7 implementation
+- Deferred to branch 9 (`feature/activity-feedback`)
 
-#### Blueprint: `activity_feedback` (branch 7)
+#### Blueprint: `activity_feedback` (branch 9 — **Planned**)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
@@ -476,14 +479,20 @@ erDiagram
   admissions ||--o{ patient_questions : has
   admissions ||--o{ patient_participation_evaluations : has
   admissions ||--o| patient_context : has
+  activities ||--o{ activity_recurring_schedules : repeats
   activities ||--o{ activity_sessions : schedules
-  activities ||--o{ volunteer_slots : supports
+  activity_recurring_schedules ||--o{ activity_sessions : materializes
+  activity_sessions ||--o{ activity_session_participants : includes
+  activity_sessions ||--o{ activity_session_volunteers : staffed_by
+  admissions ||--o{ activity_session_participants : assigned_via
+  profiles ||--o{ volunteer_recurring_availability : owns
+  profiles ||--o{ volunteer_availability_exceptions : owns
   activity_sessions ||--o{ activity_feedback : receives
   admissions ||--o{ activity_feedback : has
   admissions ||--o{ daily_advice : has
 ```
 
-*Dashed conceptual entities (restrictions, activities, advice) are future branches.*
+*`activity_feedback` and `daily_advice` are planned for later branches (9 and 8).*
 
 ---
 
