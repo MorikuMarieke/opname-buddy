@@ -94,3 +94,16 @@ export function canTransitionSessionStatus(
 ): boolean {
   return SESSION_STATUS_TRANSITIONS[from].includes(to);
 }
+
+export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
+  draft: "Concept",
+  proposed: "Voorstel",
+  confirmed: "Bevestigd",
+  completed: "Voltooid",
+  cancelled: "Geannuleerd",
+};
+
+export const SESSION_KIND_LABELS: Record<SessionKind, string> = {
+  recurring_instance: "Terugkerend",
+  one_off: "Eenmalig",
+};

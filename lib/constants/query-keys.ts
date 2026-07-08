@@ -96,6 +96,27 @@
       detail: (scheduleId: string) =>
         ["planning", "recurring-schedules", scheduleId] as const,
     },
+    sessions: {
+      all: ["planning", "sessions"] as const,
+      list: (filters?: {
+        status?: string;
+        sessionKind?: string;
+      }) =>
+        [
+          "planning",
+          "sessions",
+          filters?.status ?? "all",
+          filters?.sessionKind ?? "all",
+        ] as const,
+      detail: (sessionId: string) =>
+        ["planning", "sessions", sessionId] as const,
+    },
+    patients: {
+      all: ["planning", "patients"] as const,
+    },
+    volunteers: {
+      all: ["planning", "volunteers"] as const,
+    },
   },
 } as const;
 
