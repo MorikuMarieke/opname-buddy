@@ -20,7 +20,7 @@
 -- APPLIED 2026-07-03 (with approval). Depends on 00019–00026.
 --
 -- Idempotent: add/drop column if [not] exists; drop policy if exists.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 3 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 3 plan).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

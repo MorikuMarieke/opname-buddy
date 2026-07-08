@@ -11,7 +11,7 @@
 -- patient_id = auth.uid() model until Phase 2.
 --
 -- Idempotent: safe to re-run (uses IF NOT EXISTS, DROP IF EXISTS).
--- See docs/branch-plans/branch-account-domain-model.md
+-- See docs/branch-plans/branch-04-account-domain-model.md
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

@@ -62,19 +62,3 @@ export function getPatientContextCompleteness(
     unknownCriticalFieldLabels: [],
   };
 }
-
-export function isCriticalFieldUnknown(
-  context: PatientContext | null,
-  field: string,
-): boolean {
-  if (!context) {
-    return CRITICAL_CONTEXT_FIELDS.includes(field as CriticalContextField);
-  }
-
-  const criticalFields = getCriticalFieldsForContext(context);
-  if (!criticalFields.includes(field as CriticalContextField | "mobility_aid_available")) {
-    return false;
-  }
-
-  return isUnknown(context[field as keyof PatientContext] as string);
-}

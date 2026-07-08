@@ -17,8 +17,6 @@
   },
   patientContext: {
     all: ["patient-context"] as const,
-    byPatient: (patientId: string) =>
-      [...queryKeys.patientContext.all, patientId] as const,
     byAdmission: (admissionId: string) =>
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
@@ -58,8 +56,6 @@
   },
   carePatients: {
     all: ["care-patients"] as const,
-    detail: (patientId: string) =>
-      [...queryKeys.carePatients.all, "detail", patientId] as const,
     search: (filters: { firstName: string; lastName: string; birthDate?: string }) =>
       [
         ...queryKeys.carePatients.all,

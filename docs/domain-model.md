@@ -35,7 +35,7 @@ For each area:
 >
 > **Patient admission management — implemented (branch 6):** Caregiver workflows for Patiënt opnemen, Nieuwe opname, Ontslag, demographics edit, expected discharge date, duplicate-prevention search, and patient link-code redemption. Plan: [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md).
 >
-> **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
+> **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
 
 ### User / problem
 

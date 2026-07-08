@@ -16,7 +16,7 @@
 --
 -- Idempotent: re-running skips accounts that already have a link (unique user_id).
 -- No data is deleted.
--- See docs/branch-plans/branch-account-domain-model.md
+-- See docs/branch-plans/branch-04-account-domain-model.md
 -- =============================================================================
 
 do $$

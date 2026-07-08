@@ -20,7 +20,7 @@
 --
 -- IMPORTANT: AUTHORED but NOT YET APPLIED. Requires explicit approval before
 -- running. Depends on 00019 (columns) and Phase 1 links/admissions (00016/00018).
--- See docs/branch-plans/branch-account-domain-model.md (Phase 2 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 2 plan).
 -- =============================================================================
 
 update public.patient_context c

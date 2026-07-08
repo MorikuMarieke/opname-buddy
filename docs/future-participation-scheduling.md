@@ -95,15 +95,15 @@ Example headlines:
 ### 4. Routes / UI (follow-up slices)
 
 - Evening form on `/dashboard/activities` or `/dashboard/checkin` (evening tab) — keep forms short
-- Pre-fill `activity_title` from stored DailyBuddy advice (branch 6)
-- Link `activity_session_id` when activities exist (branch 4)
+- Pre-fill `activity_title` from stored DailyBuddy advice (branch 8)
+- Link `activity_session_id` when activities exist (branch 7)
 
 ### 5. Optional database changes (only if needed)
 
 - `UNIQUE (patient_id, check_in_date)` on `patient_checkins` — enforce one morning check-in per day
 - No schema change required for time windows — scheduling stays in app layer unless notifications need persisted schedule preferences
 
-### 6. DagBuddy (branch 6)
+### 6. DagBuddy (branch 8)
 
 Agent tools should read:
 

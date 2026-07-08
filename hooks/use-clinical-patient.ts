@@ -3,25 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/constants/query-keys";
-import {
-  getActiveAdmissionForPatient,
-  getPatientById,
-  updatePatient,
-} from "@/lib/services/patients";
+import { getPatientById, updatePatient } from "@/lib/services/patients";
 import type { PatientDemographicsInput } from "@/types/clinical-patient";
 
 export function useClinicalPatient(patientId: string) {
   return useQuery({
     queryKey: queryKeys.clinicalPatients.detail(patientId),
     queryFn: () => getPatientById(patientId),
-    enabled: Boolean(patientId),
-  });
-}
-
-export function usePatientAdmission(patientId: string) {
-  return useQuery({
-    queryKey: queryKeys.clinicalPatients.admission(patientId),
-    queryFn: () => getActiveAdmissionForPatient(patientId),
     enabled: Boolean(patientId),
   });
 }

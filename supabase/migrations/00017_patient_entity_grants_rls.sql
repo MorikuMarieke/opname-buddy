@@ -15,7 +15,7 @@
 --   * created_by_staff_id records the acting staff account (audit, not owner).
 --
 -- Idempotent: safe to re-run.
--- See docs/branch-plans/branch-account-domain-model.md
+-- See docs/branch-plans/branch-04-account-domain-model.md
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

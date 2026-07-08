@@ -2,14 +2,11 @@ import { createClient } from "@/lib/supabase/client";
 import { getActiveAdmissionId } from "@/lib/services/admissions";
 import { resetAidFieldsWhenHidden } from "@/lib/patient-context/mobility-aid";
 import type { PatientContextFormValues } from "@/lib/validations/patient-context";
-import { formatPatientDisplayName } from "@/lib/utils/patient-greeting";
 import type { PatientSex } from "@/types/clinical-patient";
 import type {
   PatientContext,
   PatientContextWithAudit,
 } from "@/types/patient-context";
-
-export { formatPatientDisplayName };
 
 export interface CarePatientSummary {
   /** Clinical patient id (patients.id) — the caregiver route key. */

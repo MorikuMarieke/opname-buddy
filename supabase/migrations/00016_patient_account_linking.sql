@@ -16,7 +16,7 @@
 --     exposed to clients (no select grant / no select policy).
 --
 -- Idempotent: safe to re-run.
--- See docs/branch-plans/branch-account-domain-model.md
+-- See docs/branch-plans/branch-04-account-domain-model.md
 -- =============================================================================
 
 create extension if not exists "pgcrypto";
