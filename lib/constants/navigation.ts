@@ -1,6 +1,7 @@
 import {
   Activity,
   Bell,
+  Building2,
   Calendar,
   CalendarDays,
   ClipboardList,
@@ -51,6 +52,7 @@ export const adminNavItems: NavItem[] = [
   { label: "Overzicht", href: "/admin", icon: LayoutDashboard },
   { label: "Gebruikers", href: "/admin/users", icon: Users },
   { label: "Rollen", href: "/admin/roles", icon: Shield },
+  { label: "Afdelingen", href: "/admin/departments", icon: Building2 },
 ];
 
 export function getCarePatientSubNavItems(patientId: string): NavItem[] {
@@ -59,6 +61,11 @@ export function getCarePatientSubNavItems(patientId: string): NavItem[] {
       label: "Overzicht",
       href: `/care/patients/${patientId}`,
       icon: LayoutDashboard,
+    },
+    {
+      label: "Gegevens",
+      href: `/care/patients/${patientId}/edit`,
+      icon: Users,
     },
     {
       label: PATIENT_CONTEXT_COPY.staff.subNavLabel,

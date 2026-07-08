@@ -2,17 +2,25 @@ import { createClient } from "@/lib/supabase/client";
 import { getActiveAdmissionId } from "@/lib/services/admissions";
 import { resetAidFieldsWhenHidden } from "@/lib/patient-context/mobility-aid";
 import type { PatientContextFormValues } from "@/lib/validations/patient-context";
+import { formatPatientDisplayName } from "@/lib/utils/patient-greeting";
+import type { PatientSex } from "@/types/clinical-patient";
 import type {
   PatientContext,
   PatientContextWithAudit,
 } from "@/types/patient-context";
 
+export { formatPatientDisplayName };
+
 export interface CarePatientSummary {
   /** Clinical patient id (patients.id) — the caregiver route key. */
   id: string;
-  full_name: string | null;
+  first_name: string;
+  last_name: string;
+  birth_date: string | null;
+  sex: PatientSex | null;
   /** Active admission for this patient, if any. */
   admission_id: string | null;
+  expected_discharge_on: string | null;
   /** Linked login account (profiles.id), if the patient has one yet. */
   user_id: string | null;
 }
@@ -200,5 +208,14 @@ export async function listPatientsForCare(): Promise<CarePatientSummary[]> {
     throw new Error(getSupabaseErrorMessage(error));
   }
 
-  return data ?? [];
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    first_name: row.first_name,
+    last_name: row.last_name,
+    birth_date: row.birth_date,
+    sex: row.sex as CarePatientSummary["sex"],
+    admission_id: row.admission_id,
+    expected_discharge_on: row.expected_discharge_on,
+    user_id: row.user_id,
+  }));
 }

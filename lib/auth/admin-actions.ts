@@ -28,12 +28,25 @@ import type {
   RoleWithCount,
   StaffAccountSummary,
 } from "@/types/admin-account";
+import {
+  createDepartment,
+  listAllDepartments,
+  setDepartmentActive,
+  updateDepartment,
+} from "@/lib/services/departments";
+import {
+  departmentInputSchema,
+  departmentUpdateSchema,
+} from "@/lib/validations/department";
+import type { Department } from "@/types/department";
+
 import type { StaffRoleName } from "@/lib/constants/admin-account-copy";
 
 function revalidateAdminPaths() {
   revalidatePath("/admin");
   revalidatePath("/admin/users");
   revalidatePath("/admin/roles");
+  revalidatePath("/admin/departments");
 }
 
 export async function fetchStaffAccountsAction(options?: {
@@ -171,6 +184,76 @@ export async function setAccountActiveAction(
         error instanceof Error
           ? error.message
           : "Accountstatus bijwerken is mislukt.",
+    };
+  }
+}
+
+export async function fetchAllDepartmentsAction(): Promise<Department[]> {
+  await requireRole("admin");
+  return listAllDepartments();
+}
+
+export async function createDepartmentAction(
+  input: unknown,
+): Promise<{ ok: true } | { error: string }> {
+  await requireRole("admin");
+  const parsed = departmentInputSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Ongeldige invoer." };
+  }
+
+  try {
+    await createDepartment(parsed.data);
+    revalidateAdminPaths();
+    return { ok: true };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Afdeling toevoegen is mislukt.",
+    };
+  }
+}
+
+export async function updateDepartmentAction(
+  departmentId: string,
+  input: unknown,
+): Promise<{ ok: true } | { error: string }> {
+  await requireRole("admin");
+  const parsed = departmentUpdateSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Ongeldige invoer." };
+  }
+
+  try {
+    await updateDepartment(departmentId, parsed.data);
+    revalidateAdminPaths();
+    return { ok: true };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Afdeling bijwerken is mislukt.",
+    };
+  }
+}
+
+export async function setDepartmentActiveAction(
+  departmentId: string,
+  isActive: boolean,
+): Promise<{ ok: true } | { error: string }> {
+  await requireRole("admin");
+
+  try {
+    await setDepartmentActive(departmentId, isActive);
+    revalidateAdminPaths();
+    return { ok: true };
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Afdelingsstatus bijwerken is mislukt.",
     };
   }
 }

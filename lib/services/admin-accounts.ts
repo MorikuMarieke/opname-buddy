@@ -16,6 +16,7 @@ import type {
   RoleWithCount,
   StaffAccountSummary,
 } from "@/types/admin-account";
+import { formatPatientDisplayName } from "@/lib/utils/patient-greeting";
 import type { CreateStaffAccountInput } from "@/lib/validations/admin-account";
 import type { UpdateAccountProfileInput } from "@/lib/validations/admin-account";
 
@@ -113,7 +114,7 @@ async function loadAccountContext(): Promise<AccountContext> {
       admin.from("user_roles").select("user_id, role_id"),
       admin
         .from("patient_account_links")
-        .select("user_id, patient_id, patients(full_name)"),
+        .select("user_id, patient_id, patients(first_name, last_name)"),
     ]);
 
   if (profilesResult.error) {
@@ -153,11 +154,16 @@ async function loadAccountContext(): Promise<AccountContext> {
   >();
 
   for (const link of linksResult.data ?? []) {
-    const patient = link.patients as { full_name: string } | null;
+    const patient = link.patients as {
+      first_name: string;
+      last_name: string;
+    } | null;
 
     patientLinksByUserId.set(link.user_id, {
       patient_id: link.patient_id,
-      patient_name: patient?.full_name ?? null,
+      patient_name: patient
+        ? formatPatientDisplayName(patient)
+        : null,
     });
   }
 

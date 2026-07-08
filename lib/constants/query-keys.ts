@@ -58,6 +58,36 @@
   },
   carePatients: {
     all: ["care-patients"] as const,
+    detail: (patientId: string) =>
+      [...queryKeys.carePatients.all, "detail", patientId] as const,
+    search: (filters: { firstName: string; lastName: string; birthDate?: string }) =>
+      [
+        ...queryKeys.carePatients.all,
+        "search",
+        filters.firstName,
+        filters.lastName,
+        filters.birthDate ?? "",
+      ] as const,
+  },
+  clinicalPatients: {
+    all: ["clinical-patients"] as const,
+    detail: (patientId: string) =>
+      [...queryKeys.clinicalPatients.all, "detail", patientId] as const,
+    admission: (patientId: string) =>
+      [...queryKeys.clinicalPatients.all, "admission", patientId] as const,
+    linkStatus: (patientId: string) =>
+      [...queryKeys.clinicalPatients.all, "link-status", patientId] as const,
+  },
+  activeAdmission: {
+    own: () => ["active-admission", "own"] as const,
+    location: () => ["active-admission", "location"] as const,
+  },
+  patientLink: {
+    own: () => ["patient-link", "own"] as const,
+  },
+  departments: {
+    all: ["departments"] as const,
+    active: ["departments", "active"] as const,
   },
 } as const;
 
