@@ -19,6 +19,19 @@ export const createStaffAccountSchema = z.object({
 
 export type CreateStaffAccountInput = z.infer<typeof createStaffAccountSchema>;
 
+export const createVolunteerAccountSchema = z.object({
+  fullName: z.string().trim().min(1, "Naam is verplicht.").max(200),
+  email: z.string().trim().email("Ongeldig e-mailadres."),
+  password: z
+    .string()
+    .min(8, "Wachtwoord moet minimaal 8 tekens zijn.")
+    .max(128),
+});
+
+export type CreateVolunteerAccountInput = z.infer<
+  typeof createVolunteerAccountSchema
+>;
+
 export const updateAccountProfileSchema = z.object({
   fullName: z.string().trim().min(1, "Naam is verplicht.").max(200),
   preferredLanguage: z.enum(["nl", "en"]),

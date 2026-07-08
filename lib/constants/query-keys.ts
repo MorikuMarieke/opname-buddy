@@ -41,6 +41,17 @@
 
       return [...queryKeys.adminAccounts.all, "patients", linkStatus] as const;
     },
+    volunteers: (filters?: { search?: string; status?: string }) => {
+      const search = filters?.search?.trim() ?? "";
+      const status = filters?.status ?? "all";
+
+      return [
+        ...queryKeys.adminAccounts.all,
+        "volunteers",
+        search,
+        status,
+      ] as const;
+    },
     detail: (userId: string) =>
       [...queryKeys.adminAccounts.all, "detail", userId] as const,
     audit: (userId: string, limit: number) =>
@@ -116,6 +127,15 @@
     },
     volunteers: {
       all: ["planning", "volunteers"] as const,
+    },
+  },
+  volunteer: {
+    sessions: {
+      all: ["volunteer", "sessions"] as const,
+    },
+    availability: {
+      recurring: ["volunteer", "availability", "recurring"] as const,
+      exceptions: ["volunteer", "availability", "exceptions"] as const,
     },
   },
 } as const;

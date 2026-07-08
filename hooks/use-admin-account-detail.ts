@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   fetchStaffAccountAction,
+  fetchVolunteerAccountAction,
   setAccountActiveAction,
   setStaffRolesAction,
   updateAccountProfileAction,
@@ -14,6 +15,14 @@ export function useAdminStaffAccountDetail(userId: string) {
   return useQuery({
     queryKey: queryKeys.adminAccounts.detail(userId),
     queryFn: () => fetchStaffAccountAction(userId),
+    enabled: Boolean(userId),
+  });
+}
+
+export function useAdminVolunteerAccountDetail(userId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.adminAccounts.detail(userId), "volunteer"] as const,
+    queryFn: () => fetchVolunteerAccountAction(userId),
     enabled: Boolean(userId),
   });
 }

@@ -50,6 +50,11 @@ export const planningNavItems: NavItem[] = [
   { label: "Instellingen", href: "/planning", icon: Settings },
 ];
 
+export const volunteerNavItems: NavItem[] = [
+  { label: "Mijn planning", href: "/volunteer", icon: CalendarDays },
+  { label: "Beschikbaarheid", href: "/volunteer/availability", icon: Repeat2 },
+];
+
 export const adminNavItems: NavItem[] = [
   { label: "Overzicht", href: "/admin", icon: LayoutDashboard },
   { label: "Gebruikers", href: "/admin/users", icon: Users },

@@ -5,19 +5,23 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import {
   createStaffAccount,
+  createVolunteerAccount,
   getAdminOverviewStats,
   getStaffAccountById,
+  getVolunteerAccountById,
   listPatientAccounts,
   listRecentAuditEvents,
   listRecentAuditEventsForTargetUser,
   listRolesWithCounts,
   listStaffAccounts,
+  listVolunteerAccounts,
   setAccountActive,
   setStaffRoles,
   updateAccountProfile,
 } from "@/lib/services/admin-accounts";
 import {
   createStaffAccountSchema,
+  createVolunteerAccountSchema,
   setStaffRolesSchema,
   updateAccountProfileSchema,
 } from "@/lib/validations/admin-account";
@@ -27,6 +31,7 @@ import type {
   PatientAccountSummary,
   RoleWithCount,
   StaffAccountSummary,
+  VolunteerAccountSummary,
 } from "@/types/admin-account";
 import {
   createDepartment,
@@ -65,11 +70,26 @@ export async function fetchPatientAccountsAction(options?: {
   return listPatientAccounts(options);
 }
 
+export async function fetchVolunteerAccountsAction(options?: {
+  search?: string;
+  status?: "active" | "inactive" | "all";
+}): Promise<VolunteerAccountSummary[]> {
+  await requireRole("admin");
+  return listVolunteerAccounts(options);
+}
+
 export async function fetchStaffAccountAction(
   userId: string,
 ): Promise<StaffAccountSummary | null> {
   await requireRole("admin");
   return getStaffAccountById(userId);
+}
+
+export async function fetchVolunteerAccountAction(
+  userId: string,
+): Promise<VolunteerAccountSummary | null> {
+  await requireRole("admin");
+  return getVolunteerAccountById(userId);
 }
 
 export async function fetchRolesWithCountsAction(): Promise<RoleWithCount[]> {
@@ -109,6 +129,28 @@ export async function createStaffAccountAction(
 
   try {
     const result = await createStaffAccount(parsed.data, user.id);
+    revalidateAdminPaths();
+    return result;
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Account aanmaken is mislukt.",
+    };
+  }
+}
+
+export async function createVolunteerAccountAction(
+  input: unknown,
+): Promise<{ userId: string } | { error: string }> {
+  const { user } = await requireRole("admin");
+  const parsed = createVolunteerAccountSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Ongeldige invoer." };
+  }
+
+  try {
+    const result = await createVolunteerAccount(parsed.data, user.id);
     revalidateAdminPaths();
     return result;
   } catch (error) {

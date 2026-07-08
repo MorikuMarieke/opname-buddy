@@ -15,10 +15,12 @@ import type {
   PatientAccountSummary,
   RoleWithCount,
   StaffAccountSummary,
+  VolunteerAccountSummary,
 } from "@/types/admin-account";
 import { formatPatientDisplayName } from "@/lib/utils/patient-greeting";
 import type { CreateStaffAccountInput } from "@/lib/validations/admin-account";
 import type { UpdateAccountProfileInput } from "@/lib/validations/admin-account";
+import type { CreateVolunteerAccountInput } from "@/lib/validations/admin-account";
 
 type StaffRoleName = (typeof STAFF_ROLE_NAMES)[number];
 
@@ -221,6 +223,33 @@ async function countActiveAdmins(excludeUserId?: string): Promise<number> {
   return count ?? 0;
 }
 
+function hasVolunteerRole(roles: RoleName[]): boolean {
+  return roles.includes("volunteer");
+}
+
+function toVolunteerSummary(
+  userId: string,
+  context: AccountContext,
+): VolunteerAccountSummary | null {
+  const roles = context.rolesByUserId.get(userId) ?? [];
+
+  if (!hasVolunteerRole(roles) || hasStaffRoles(roles)) {
+    return null;
+  }
+
+  const profile = context.profilesById.get(userId);
+  const authUser = context.authUsersById.get(userId);
+
+  return {
+    id: userId,
+    email: authUser?.email ?? "",
+    fullName: profile?.full_name ?? null,
+    preferredLanguage: profile?.preferred_language ?? "nl",
+    isActive: isUserActive(authUser),
+    createdAt: profile?.created_at ?? authUser?.created_at ?? "",
+  };
+}
+
 function toStaffSummary(
   userId: string,
   context: AccountContext,
@@ -350,6 +379,51 @@ export async function listPatientAccounts(options?: {
   );
 }
 
+export async function listVolunteerAccounts(options?: {
+  search?: string;
+  status?: "active" | "inactive" | "all";
+}): Promise<VolunteerAccountSummary[]> {
+  const context = await loadAccountContext();
+  const search = options?.search?.trim().toLowerCase() ?? "";
+  const status = options?.status ?? "all";
+
+  let accounts: VolunteerAccountSummary[] = [];
+
+  for (const userId of context.profilesById.keys()) {
+    const summary = toVolunteerSummary(userId, context);
+
+    if (!summary) {
+      continue;
+    }
+
+    accounts.push(summary);
+  }
+
+  if (search) {
+    accounts = accounts.filter((account) => {
+      const haystack = `${account.fullName ?? ""} ${account.email}`.toLowerCase();
+      return haystack.includes(search);
+    });
+  }
+
+  if (status === "active") {
+    accounts = accounts.filter((account) => account.isActive);
+  } else if (status === "inactive") {
+    accounts = accounts.filter((account) => !account.isActive);
+  }
+
+  return accounts.sort((a, b) =>
+    (a.fullName ?? a.email).localeCompare(b.fullName ?? b.email, "nl"),
+  );
+}
+
+export async function getVolunteerAccountById(
+  userId: string,
+): Promise<VolunteerAccountSummary | null> {
+  const context = await loadAccountContext();
+  return toVolunteerSummary(userId, context);
+}
+
 export async function getStaffAccountById(
   userId: string,
 ): Promise<StaffAccountSummary | null> {
@@ -411,6 +485,65 @@ export async function createStaffAccount(
       role: roleName,
     });
   }
+
+  return { userId };
+}
+
+export async function createVolunteerAccount(
+  input: CreateVolunteerAccountInput,
+  actorUserId: string,
+): Promise<{ userId: string }> {
+  const admin = createAdminClient();
+  const roleMaps = await loadRoleMaps();
+  const volunteerRoleId = roleMaps.byName.get("volunteer");
+
+  if (!volunteerRoleId) {
+    throw new Error("Vrijwilligersrol ontbreekt in de database.");
+  }
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email: input.email,
+    password: input.password,
+    email_confirm: true,
+    user_metadata: { full_name: input.fullName },
+    app_metadata: { account_type: "volunteer" },
+  });
+
+  if (error || !data.user) {
+    throw new Error(error?.message ?? "Account aanmaken is mislukt.");
+  }
+
+  const userId = data.user.id;
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({
+      full_name: input.fullName,
+      preferred_language: "nl",
+    })
+    .eq("id", userId);
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  const { error: rolesError } = await admin.from("user_roles").insert({
+    user_id: userId,
+    role_id: volunteerRoleId,
+  });
+
+  if (rolesError) {
+    throw new Error(rolesError.message);
+  }
+
+  await writeAuditEvent(actorUserId, userId, "account_created", {
+    email: input.email,
+    accountType: "volunteer",
+  });
+
+  await writeAuditEvent(actorUserId, userId, "role_assigned", {
+    role: "volunteer",
+  });
 
   return { userId };
 }

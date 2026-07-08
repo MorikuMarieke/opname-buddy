@@ -14,12 +14,13 @@ import {
 import type { StaffRoleName } from "@/lib/constants/admin-account-copy";
 import {
   useAdminStaffAccountDetail,
+  useAdminVolunteerAccountDetail,
   useSetAccountActive,
   useSetStaffRoles,
   useUpdateAccountProfile,
 } from "@/hooks/use-admin-account-detail";
 import { AdminUserAccountActivity } from "@/components/dashboard/admin-user-account-activity";
-import type { StaffAccountSummary } from "@/types/admin-account";
+import type { StaffAccountSummary, VolunteerAccountSummary } from "@/types/admin-account";
 
 const inputClasses =
   "h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm text-carbon-black-900";
@@ -209,12 +210,156 @@ function AdminUserDetailForm({ account }: AdminUserDetailFormProps) {
   );
 }
 
+interface AdminVolunteerDetailFormProps {
+  account: VolunteerAccountSummary;
+}
+
+function AdminVolunteerDetailForm({ account }: AdminVolunteerDetailFormProps) {
+  const updateProfile = useUpdateAccountProfile(account.id);
+  const setActive = useSetAccountActive(account.id);
+
+  const [fullName, setFullName] = useState(account.fullName ?? "");
+  const [preferredLanguage, setPreferredLanguage] = useState<"nl" | "en">(
+    account.preferredLanguage === "en" ? "en" : "nl",
+  );
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleProfileSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+
+    const result = await updateProfile.mutateAsync({
+      fullName,
+      preferredLanguage,
+    });
+
+    if ("error" in result) {
+      setError(result.error);
+      return;
+    }
+
+    setMessage("Profiel bijgewerkt.");
+  }
+
+  async function handleToggleActive() {
+    setError(null);
+    setMessage(null);
+
+    const wasActive = account.isActive;
+    const result = await setActive.mutateAsync(!wasActive);
+
+    if ("error" in result) {
+      setError(result.error);
+      return;
+    }
+
+    setMessage(wasActive ? "Account gedeactiveerd." : "Account geactiveerd.");
+  }
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge variant={account.isActive ? "positive" : "neutral"}>
+          {account.isActive ? "Actief" : "Inactief"}
+        </StatusBadge>
+        <StatusBadge variant="neutral">{ROLE_LABELS.volunteer}</StatusBadge>
+      </div>
+
+      {message ? (
+        <p className="text-sm text-pearl-aqua-800" role="status">
+          {message}
+        </p>
+      ) : null}
+
+      {error ? (
+        <p className="text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      <DashboardCard density="compact">
+        <form onSubmit={handleProfileSubmit} className="space-y-4">
+          <h2 className="text-base font-semibold text-carbon-black-900">Profiel</h2>
+
+          <div className="space-y-2">
+            <label htmlFor="fullName" className="block text-sm font-medium">
+              Naam
+            </label>
+            <input
+              id="fullName"
+              required
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              className={inputClasses}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="language" className="block text-sm font-medium">
+              Taal
+            </label>
+            <select
+              id="language"
+              value={preferredLanguage}
+              onChange={(event) =>
+                setPreferredLanguage(event.target.value as "nl" | "en")
+              }
+              className={inputClasses}
+            >
+              <option value="nl">Nederlands</option>
+              <option value="en">Engels</option>
+            </select>
+          </div>
+
+          <PrimaryButton type="submit" disabled={updateProfile.isPending}>
+            Profiel opslaan
+          </PrimaryButton>
+        </form>
+      </DashboardCard>
+
+      <DashboardCard density="compact" className="space-y-3">
+        <h2 className="text-base font-semibold text-carbon-black-900">Accountstatus</h2>
+        <p className="text-sm text-carbon-black-600">
+          {account.isActive
+            ? "Deactiveer dit account om inloggen te blokkeren."
+            : "Activeer dit account om inloggen weer toe te staan."}
+        </p>
+        <PrimaryButton
+          type="button"
+          onClick={handleToggleActive}
+          disabled={setActive.isPending}
+        >
+          {account.isActive ? "Account deactiveren" : "Account activeren"}
+        </PrimaryButton>
+      </DashboardCard>
+    </>
+  );
+}
+
 interface AdminUserDetailViewProps {
   userId: string;
 }
 
 export function AdminUserDetailView({ userId }: AdminUserDetailViewProps) {
-  const { data: account, isLoading, isError } = useAdminStaffAccountDetail(userId);
+  const {
+    data: staffAccount,
+    isLoading: staffLoading,
+    isError: staffError,
+  } = useAdminStaffAccountDetail(userId);
+  const {
+    data: volunteerAccount,
+    isLoading: volunteerLoading,
+    isError: volunteerError,
+  } = useAdminVolunteerAccountDetail(userId);
+
+  const isLoading = staffLoading || (!staffAccount && volunteerLoading);
+  const account = staffAccount ?? volunteerAccount;
+  const isError =
+    !isLoading &&
+    !account &&
+    (staffError || volunteerError || (!staffAccount && !volunteerAccount));
 
   if (isLoading) {
     return <p className="text-sm text-carbon-black-600">Laden...</p>;
@@ -223,30 +368,58 @@ export function AdminUserDetailView({ userId }: AdminUserDetailViewProps) {
   if (isError || !account) {
     return (
       <p className="text-sm text-red-600" role="alert">
-        Staffaccount niet gevonden.
+        Account niet gevonden.
       </p>
     );
   }
 
-  const rolesKey = [...account.roles].sort().join(",");
-  const formKey = `${account.id}-${rolesKey}-${account.isActive}-${account.fullName ?? ""}`;
+  const backHref = staffAccount
+    ? "/admin/users"
+    : "/admin/users?tab=volunteers";
+
+  if (volunteerAccount && !staffAccount) {
+    const formKey = `${volunteerAccount.id}-${volunteerAccount.isActive}-${volunteerAccount.fullName ?? ""}`;
+
+    return (
+      <div className="space-y-4">
+        <SectionHeader
+          title={volunteerAccount.fullName?.trim() || "Vrijwilliger"}
+          description={volunteerAccount.email}
+          size="compact"
+          action={
+            <Link href={backHref} className="text-sm font-medium text-blue-slate-700 hover:underline">
+              Terug naar overzicht
+            </Link>
+          }
+        />
+
+        <AdminVolunteerDetailForm key={formKey} account={volunteerAccount} />
+
+        <AdminUserAccountActivity userId={volunteerAccount.id} />
+      </div>
+    );
+  }
+
+  const staff = account as StaffAccountSummary;
+  const rolesKey = [...staff.roles].sort().join(",");
+  const formKey = `${staff.id}-${rolesKey}-${staff.isActive}-${staff.fullName ?? ""}`;
 
   return (
     <div className="space-y-4">
       <SectionHeader
-        title={account.fullName?.trim() || "Staffaccount"}
-        description={account.email}
+        title={staff.fullName?.trim() || "Staffaccount"}
+        description={staff.email}
         size="compact"
         action={
-          <Link href="/admin/users" className="text-sm font-medium text-blue-slate-700 hover:underline">
+          <Link href={backHref} className="text-sm font-medium text-blue-slate-700 hover:underline">
             Terug naar overzicht
           </Link>
         }
       />
 
-      <AdminUserDetailForm key={formKey} account={account} />
+      <AdminUserDetailForm key={formKey} account={staff} />
 
-      <AdminUserAccountActivity userId={account.id} />
+      <AdminUserAccountActivity userId={staff.id} />
     </div>
   );
 }

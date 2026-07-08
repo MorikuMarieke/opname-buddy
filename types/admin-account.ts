@@ -30,6 +30,15 @@ export interface PatientAccountSummary {
   createdAt: string;
 }
 
+export interface VolunteerAccountSummary {
+  id: string;
+  email: string;
+  fullName: string | null;
+  preferredLanguage: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface RoleWithCount {
   name: RoleName;
   label: string;
