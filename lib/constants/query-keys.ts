@@ -21,6 +21,9 @@
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
   },
+  patientActivities: {
+    all: ["patient-activities"] as const,
+  },
   adminAccounts: {
     all: ["admin-accounts"] as const,
     staff: (filters?: { search?: string; status?: string; role?: string }) => {

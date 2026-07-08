@@ -153,6 +153,7 @@ export interface PatientActivitySessionListItem {
   startsAt: string;
   endsAt: string;
   location: string;
+  volunteerNames: string | null;
 }
 
 /** Coordinator: volunteer profile summary. */

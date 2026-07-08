@@ -999,6 +999,7 @@ export type Database = {
           location: string
           session_id: string
           starts_at: string
+          volunteer_names: string | null
         }[]
       }
       list_planning_patients: {
