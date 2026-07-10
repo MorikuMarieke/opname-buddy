@@ -242,5 +242,6 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) | Admin account management design notes (branch 5 — `feature/admin-account-management`) |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 10) |
+| [`docs/branch-plans/branch-11-final-polish-docs.md`](branch-plans/branch-11-final-polish-docs.md) | Final polish, deployment QA, and known technical debt (branch 11) |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |
 | `AGENTS.md` | Next.js 16 project notes for agents |
