@@ -31,7 +31,15 @@ interface RoleMaps {
 
 interface AccountContext {
   authUsersById: Map<string, User>;
-  profilesById: Map<string, { full_name: string | null; preferred_language: string; created_at: string }>;
+  profilesById: Map<
+    string,
+    {
+      full_name: string | null;
+      preferred_language: string;
+      created_at: string;
+      is_active: boolean;
+    }
+  >;
   rolesByUserId: Map<string, RoleName[]>;
   patientLinksByUserId: Map<string, { patient_id: string; patient_name: string | null }>;
 }
@@ -40,12 +48,78 @@ function isStaffRole(role: RoleName): role is StaffRoleName {
   return (STAFF_ROLE_NAMES as readonly RoleName[]).includes(role);
 }
 
-function isUserActive(user: User | undefined): boolean {
+function isAuthUserBanned(user: User | undefined): boolean {
   if (!user?.banned_until) {
-    return true;
+    return false;
   }
 
-  return new Date(user.banned_until) <= new Date();
+  return new Date(user.banned_until) > new Date();
+}
+
+function isAccountActiveState(
+  profile: { is_active: boolean } | undefined,
+  authUser: User | undefined,
+): boolean {
+  if (profile?.is_active === false) {
+    return false;
+  }
+
+  return !isAuthUserBanned(authUser);
+}
+
+async function rollbackAuthUser(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+): Promise<void> {
+  const { error } = await admin.auth.admin.deleteUser(userId);
+
+  if (error) {
+    console.error("[admin-accounts] Failed to roll back auth user:", error.message);
+  }
+}
+
+async function removeAutoAssignedPatientRole(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  roleMaps: RoleMaps,
+): Promise<boolean> {
+  const patientRoleId = roleMaps.byName.get("patient");
+
+  if (!patientRoleId) {
+    return false;
+  }
+
+  const { data, error } = await admin
+    .from("user_roles")
+    .delete()
+    .eq("user_id", userId)
+    .eq("role_id", patientRoleId)
+    .select("user_id");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data?.length ?? 0) > 0;
+}
+
+function isDuplicateAuthEmailError(message: string): boolean {
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("already registered") ||
+    normalized.includes("already been registered") ||
+    normalized.includes("user already exists") ||
+    normalized.includes("duplicate")
+  );
+}
+
+function mapAdminCreateUserError(error: { message: string }): string {
+  if (isDuplicateAuthEmailError(error.message)) {
+    return "Dit e-mailadres is al geregistreerd.";
+  }
+
+  return error.message;
 }
 
 function hasStaffRoles(roles: RoleName[]): boolean {
@@ -112,7 +186,7 @@ async function loadAccountContext(): Promise<AccountContext> {
   const [authUsers, profilesResult, assignmentsResult, linksResult] =
     await Promise.all([
       listAllAuthUsers(),
-      admin.from("profiles").select("id, full_name, preferred_language, created_at"),
+      admin.from("profiles").select("id, full_name, preferred_language, created_at, is_active"),
       admin.from("user_roles").select("user_id, role_id"),
       admin
         .from("patient_account_links")
@@ -245,7 +319,7 @@ function toVolunteerSummary(
     email: authUser?.email ?? "",
     fullName: profile?.full_name ?? null,
     preferredLanguage: profile?.preferred_language ?? "nl",
-    isActive: isUserActive(authUser),
+    isActive: isAccountActiveState(profile, authUser),
     createdAt: profile?.created_at ?? authUser?.created_at ?? "",
   };
 }
@@ -274,7 +348,7 @@ function toStaffSummary(
     fullName: profile?.full_name ?? null,
     preferredLanguage: profile?.preferred_language ?? "nl",
     roles: staffRoles,
-    isActive: isUserActive(authUser),
+    isActive: isAccountActiveState(profile, authUser),
     departmentId: null,
     createdAt: profile?.created_at ?? authUser?.created_at ?? "",
   };
@@ -298,7 +372,7 @@ function toPatientSummary(
     id: userId,
     email: authUser?.email ?? "",
     fullName: profile?.full_name ?? null,
-    isActive: isUserActive(authUser),
+    isActive: isAccountActiveState(profile, authUser),
     isLinked: Boolean(link),
     linkedPatientId: link?.patient_id ?? null,
     linkedPatientName: link?.patient_name ?? null,
@@ -442,15 +516,17 @@ export async function createStaffAccount(
     email: input.email,
     password: input.password,
     email_confirm: true,
-    user_metadata: { full_name: input.fullName },
+    user_metadata: { full_name: input.fullName, account_type: "staff" },
     app_metadata: { account_type: "staff" },
   });
 
   if (error || !data.user) {
-    throw new Error(error?.message ?? "Account aanmaken is mislukt.");
+    throw new Error(mapAdminCreateUserError(error ?? { message: "Account aanmaken is mislukt." }));
   }
 
   const userId = data.user.id;
+
+  await removeAutoAssignedPatientRole(admin, userId, roleMaps);
 
   const { error: profileError } = await admin
     .from("profiles")
@@ -461,6 +537,7 @@ export async function createStaffAccount(
     .eq("id", userId);
 
   if (profileError) {
+    await rollbackAuthUser(admin, userId);
     throw new Error(profileError.message);
   }
 
@@ -472,6 +549,7 @@ export async function createStaffAccount(
   const { error: rolesError } = await admin.from("user_roles").insert(roleRows);
 
   if (rolesError) {
+    await rollbackAuthUser(admin, userId);
     throw new Error(rolesError.message);
   }
 
@@ -505,15 +583,17 @@ export async function createVolunteerAccount(
     email: input.email,
     password: input.password,
     email_confirm: true,
-    user_metadata: { full_name: input.fullName },
+    user_metadata: { full_name: input.fullName, account_type: "volunteer" },
     app_metadata: { account_type: "volunteer" },
   });
 
   if (error || !data.user) {
-    throw new Error(error?.message ?? "Account aanmaken is mislukt.");
+    throw new Error(mapAdminCreateUserError(error ?? { message: "Account aanmaken is mislukt." }));
   }
 
   const userId = data.user.id;
+
+  await removeAutoAssignedPatientRole(admin, userId, roleMaps);
 
   const { error: profileError } = await admin
     .from("profiles")
@@ -524,6 +604,7 @@ export async function createVolunteerAccount(
     .eq("id", userId);
 
   if (profileError) {
+    await rollbackAuthUser(admin, userId);
     throw new Error(profileError.message);
   }
 
@@ -533,6 +614,7 @@ export async function createVolunteerAccount(
   });
 
   if (rolesError) {
+    await rollbackAuthUser(admin, userId);
     throw new Error(rolesError.message);
   }
 
@@ -661,12 +743,34 @@ export async function setAccountActive(
   }
 
   const admin = createAdminClient();
-  const { error } = await admin.auth.admin.updateUserById(userId, {
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({ is_active: active })
+    .eq("id", userId);
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  const { error: authError } = await admin.auth.admin.updateUserById(userId, {
     ban_duration: active ? "none" : "876000h",
   });
 
-  if (error) {
-    throw new Error(error.message);
+  if (authError) {
+    const { error: rollbackError } = await admin
+      .from("profiles")
+      .update({ is_active: !active })
+      .eq("id", userId);
+
+    if (rollbackError) {
+      console.error(
+        "[admin-accounts] Failed to roll back profile state after auth update failure:",
+        rollbackError.message,
+      );
+    }
+
+    throw new Error(authError.message);
   }
 
   await writeAuditEvent(
@@ -690,6 +794,7 @@ export async function listRolesWithCounts(): Promise<RoleWithCount[]> {
     "patient",
     "caregiver",
     "activity_coordinator",
+    "volunteer",
     "admin",
   ];
 

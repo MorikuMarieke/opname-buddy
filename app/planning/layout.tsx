@@ -10,7 +10,12 @@ export default async function PlanningLayout({
 }>) {
   const { user, roles } = await requireRole("activity_coordinator");
   const profile = await getCurrentUserProfile();
-  const userHeader = buildDashboardUserHeader(user, profile, roles);
+  const userHeader = buildDashboardUserHeader(
+    user,
+    profile,
+    roles,
+    "activity_coordinator",
+  );
 
   return <PlanningShell userHeader={userHeader}>{children}</PlanningShell>;
 }

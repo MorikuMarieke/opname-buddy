@@ -17,6 +17,7 @@ interface DashboardShellProps {
   sidebarFooter?: React.ReactNode;
   rightPanel?: React.ReactNode;
   showSearch?: boolean;
+  showLogout?: boolean;
   userHeader?: DashboardUserHeader;
 }
 
@@ -29,6 +30,7 @@ export function DashboardShell({
   sidebarFooter,
   rightPanel,
   showSearch = true,
+  showLogout = false,
   userHeader,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -60,6 +62,7 @@ export function DashboardShell({
           pageTitle={pageTitle}
           onMenuClick={() => setSidebarOpen(true)}
           showSearch={showSearch}
+          showLogout={showLogout}
           userHeader={userHeader}
         />
 

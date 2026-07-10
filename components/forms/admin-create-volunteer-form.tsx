@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { DashboardCard } from "@/components/ui/dashboard-card";
@@ -13,8 +12,13 @@ import { useCreateVolunteerAccount } from "@/hooks/use-admin-volunteer-accounts"
 const inputClasses =
   "h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm text-carbon-black-900";
 
+interface CreateSuccessState {
+  userId: string;
+  email: string;
+  fullName: string;
+}
+
 export function AdminCreateVolunteerForm() {
-  const router = useRouter();
   const createVolunteer = useCreateVolunteerAccount();
   const copy = VOLUNTEER_COPY.admin;
 
@@ -22,6 +26,7 @@ export function AdminCreateVolunteerForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<CreateSuccessState | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +43,65 @@ export function AdminCreateVolunteerForm() {
       return;
     }
 
-    router.push(`/admin/users/${result.userId}`);
+    setSuccess({
+      userId: result.userId,
+      email: email.trim(),
+      fullName: fullName.trim(),
+    });
+    setPassword("");
+  }
+
+  if (success) {
+    return (
+      <div className="space-y-4">
+        <SectionHeader
+          title={copy.createSuccessTitle}
+          description={success.fullName}
+          size="compact"
+        />
+
+        <DashboardCard density="compact" className="space-y-4">
+          <p className="text-sm text-pearl-aqua-800" role="status">
+            Het account is actief. {copy.createSuccessPasswordHint}
+          </p>
+
+          <dl className="space-y-3 text-sm">
+            <div>
+              <dt className="font-medium text-carbon-black-900">E-mailadres</dt>
+              <dd className="mt-0.5 text-carbon-black-700">{success.email}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-carbon-black-900">
+                {copy.createSuccessLoginLabel}
+              </dt>
+              <dd className="mt-0.5">
+                <code className="rounded bg-parchment-200 px-2 py-0.5 text-carbon-black-800">
+                  {copy.createSuccessLoginPath}
+                </code>
+              </dd>
+            </div>
+          </dl>
+
+          <p className="text-sm text-carbon-black-600">{copy.createSuccessNextSteps}</p>
+
+          <div className="flex flex-wrap gap-2">
+            <PrimaryButton
+              href={`/admin/users/${success.userId}`}
+              size="sm"
+            >
+              {copy.createSuccessViewAccount}
+            </PrimaryButton>
+            <PrimaryButton
+              href="/admin/users?tab=volunteers"
+              size="sm"
+              className="bg-parchment-300 text-carbon-black-900 hover:bg-parchment-400"
+            >
+              Terug naar vrijwilligers
+            </PrimaryButton>
+          </div>
+        </DashboardCard>
+      </div>
+    );
   }
 
   return (

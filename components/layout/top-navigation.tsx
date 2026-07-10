@@ -15,6 +15,7 @@ interface TopNavigationProps {
   pageTitle?: string;
   onMenuClick?: () => void;
   showSearch?: boolean;
+  showLogout?: boolean;
   userHeader?: DashboardUserHeader;
 }
 
@@ -24,6 +25,7 @@ export function TopNavigation({
   pageTitle,
   onMenuClick,
   showSearch = true,
+  showLogout = false,
   userHeader,
 }: TopNavigationProps) {
   const pathname = usePathname();
@@ -121,12 +123,19 @@ export function TopNavigation({
               <p className="text-xs text-carbon-black-600">{userHeader.roleLabel}</p>
             ) : null}
           </div>
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua-200 text-sm font-semibold text-pearl-aqua-800"
-            aria-hidden
-          >
-            {userHeader?.initials ?? "?"}
-          </div>
+          {showLogout ? (
+            <LogoutButton
+              variant="icon"
+              initials={userHeader?.initials ?? "?"}
+            />
+          ) : (
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-pearl-aqua-200 text-sm font-semibold text-pearl-aqua-800"
+              aria-hidden
+            >
+              {userHeader?.initials ?? "?"}
+            </div>
+          )}
         </div>
       </div>
     </header>

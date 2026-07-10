@@ -1,6 +1,10 @@
 import Link from "next/link";
 
 import { LoginForm } from "@/components/forms/login-form";
+import { getLoginPageErrorMessage } from "@/lib/auth/login-errors";
+import { isSupabasePublicEnvConfigured } from "@/lib/config/supabase-env";
+import { isCurrentAccountActive, signOutCurrentUser } from "@/lib/auth/account-active";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
 
 interface LoginPageProps {
   searchParams: Promise<{
@@ -11,6 +15,14 @@ interface LoginPageProps {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { error, message } = await searchParams;
+  const pageError = getLoginPageErrorMessage(error, message);
+  const configConfigured = isSupabasePublicEnvConfigured();
+  const user = await getCurrentUser();
+  const userActive = user ? await isCurrentAccountActive(user) : null;
+
+  if (user && userActive === false) {
+    await signOutCurrentUser();
+  }
 
   return (
     <div className="space-y-6">
@@ -21,14 +33,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </p>
       </div>
 
-      {error === "roles" ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          Kon je rollen niet ophalen na het inloggen.
-          {message ? ` (${message})` : " Controleer je Supabase API-sleutels in .env.local."}
+      {pageError ? (
+        <p
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          role="alert"
+        >
+          {pageError}
         </p>
       ) : null}
 
-      <LoginForm />
+      <LoginForm
+        configMissing={!configConfigured}
+        pageErrorCode={error ?? null}
+      />
 
       <p className="text-center text-sm text-carbon-black-600">
         Nog geen account?{" "}

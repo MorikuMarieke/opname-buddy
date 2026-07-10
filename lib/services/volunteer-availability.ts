@@ -1,4 +1,8 @@
 import { createClient } from "@/lib/supabase/client";
+import {
+  findOverlappingRecurringSlot,
+  OVERLAPPING_AVAILABILITY_MESSAGE,
+} from "@/lib/utils/volunteer-availability-validation";
 import type {
   VolunteerAvailabilityException,
   VolunteerRecurringAvailability,
@@ -7,14 +11,25 @@ import type {
   VolunteerAvailabilityExceptionRow,
   VolunteerRecurringAvailabilityRow,
 } from "@/types/database";
-import type {
-  VolunteerAvailabilityExceptionInput,
-  VolunteerRecurringAvailabilityInput,
+import {
+  volunteerAvailabilityExceptionSchema,
+  volunteerRecurringAvailabilitySchema,
+  volunteerRecurringAvailabilityUpdateSchema,
+  type VolunteerAvailabilityExceptionInput,
+  type VolunteerRecurringAvailabilityInput,
+  type VolunteerRecurringAvailabilityUpdateInput,
 } from "@/lib/validations/volunteer-availability";
 
 function getSupabaseErrorMessage(error: { message: string; code?: string }): string {
   if (error.message.includes("permission denied")) {
     return "Je hebt geen toegang tot deze actie.";
+  }
+
+  if (
+    error.message.includes("overlapping_availability") ||
+    error.code === "23514"
+  ) {
+    return OVERLAPPING_AVAILABILITY_MESSAGE;
   }
 
   if (error.message.includes("does not exist") || error.code === "42P01") {
@@ -73,6 +88,45 @@ async function getCurrentUserId(): Promise<string> {
   return user.id;
 }
 
+async function assertNoOverlappingRecurringSlot(
+  userId: string,
+  input: VolunteerRecurringAvailabilityInput,
+  excludeId?: string,
+): Promise<void> {
+  const supabase = createClient();
+
+  let query = supabase
+    .from("volunteer_recurring_availability")
+    .select("id, day_of_week, start_time, end_time, is_active")
+    .eq("user_id", userId)
+    .eq("day_of_week", input.dayOfWeek)
+    .eq("is_active", true);
+
+  if (excludeId) {
+    query = query.neq("id", excludeId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(getSupabaseErrorMessage(error));
+  }
+
+  const existingSlots = (data ?? []).map((row) => ({
+    id: row.id,
+    dayOfWeek: row.day_of_week,
+    startTime: row.start_time.slice(0, 5),
+    endTime: row.end_time.slice(0, 5),
+    isActive: row.is_active,
+  }));
+
+  const overlapping = findOverlappingRecurringSlot(existingSlots, input, excludeId);
+
+  if (overlapping) {
+    throw new Error(OVERLAPPING_AVAILABILITY_MESSAGE);
+  }
+}
+
 export async function listVolunteerRecurringAvailability(): Promise<
   VolunteerRecurringAvailability[]
 > {
@@ -96,16 +150,24 @@ export async function listVolunteerRecurringAvailability(): Promise<
 export async function createVolunteerRecurringAvailability(
   input: VolunteerRecurringAvailabilityInput,
 ): Promise<VolunteerRecurringAvailability> {
+  const parsed = volunteerRecurringAvailabilitySchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Ongeldige invoer.");
+  }
+
   const supabase = createClient();
   const userId = await getCurrentUserId();
+
+  await assertNoOverlappingRecurringSlot(userId, parsed.data);
 
   const { data, error } = await supabase
     .from("volunteer_recurring_availability")
     .insert({
       user_id: userId,
-      day_of_week: input.dayOfWeek,
-      start_time: normalizeTime(input.startTime),
-      end_time: normalizeTime(input.endTime),
+      day_of_week: parsed.data.dayOfWeek,
+      start_time: normalizeTime(parsed.data.startTime),
+      end_time: normalizeTime(parsed.data.endTime),
       is_active: true,
     })
     .select("*")
@@ -118,14 +180,45 @@ export async function createVolunteerRecurringAvailability(
   return mapRecurringRow(data);
 }
 
-export async function setVolunteerRecurringAvailabilityActive(
-  id: string,
-  isActive: boolean,
-): Promise<void> {
+export async function updateVolunteerRecurringAvailability(
+  input: VolunteerRecurringAvailabilityUpdateInput,
+): Promise<VolunteerRecurringAvailability> {
+  const parsed = volunteerRecurringAvailabilityUpdateSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Ongeldige invoer.");
+  }
+
+  const supabase = createClient();
+  const userId = await getCurrentUserId();
+  const { id, ...availability } = parsed.data;
+
+  await assertNoOverlappingRecurringSlot(userId, availability, id);
+
+  const { data, error } = await supabase
+    .from("volunteer_recurring_availability")
+    .update({
+      day_of_week: availability.dayOfWeek,
+      start_time: normalizeTime(availability.startTime),
+      end_time: normalizeTime(availability.endTime),
+    })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    throw new Error(getSupabaseErrorMessage(error ?? { message: "Update failed" }));
+  }
+
+  return mapRecurringRow(data);
+}
+
+export async function deleteVolunteerRecurringAvailability(id: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase
     .from("volunteer_recurring_availability")
-    .update({ is_active: isActive })
+    .delete()
     .eq("id", id);
 
   if (error) {
@@ -156,6 +249,12 @@ export async function listVolunteerAvailabilityExceptions(): Promise<
 export async function createVolunteerAvailabilityException(
   input: VolunteerAvailabilityExceptionInput,
 ): Promise<VolunteerAvailabilityException> {
+  const parsed = volunteerAvailabilityExceptionSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Ongeldige invoer.");
+  }
+
   const supabase = createClient();
   const userId = await getCurrentUserId();
 
@@ -163,11 +262,11 @@ export async function createVolunteerAvailabilityException(
     .from("volunteer_availability_exceptions")
     .insert({
       user_id: userId,
-      exception_date: input.exceptionDate,
-      start_time: normalizeTime(input.startTime),
-      end_time: normalizeTime(input.endTime),
-      kind: input.kind,
-      note: input.note ?? null,
+      exception_date: parsed.data.exceptionDate,
+      start_time: normalizeTime(parsed.data.startTime),
+      end_time: normalizeTime(parsed.data.endTime),
+      kind: parsed.data.kind,
+      note: parsed.data.note ?? null,
     })
     .select("*")
     .single();

@@ -10,7 +10,7 @@ export default async function AdminLayout({
 }>) {
   const { user, roles } = await requireRole("admin");
   const profile = await getCurrentUserProfile();
-  const userHeader = buildDashboardUserHeader(user, profile, roles);
+  const userHeader = buildDashboardUserHeader(user, profile, roles, "admin");
 
   return <AdminShell userHeader={userHeader}>{children}</AdminShell>;
 }

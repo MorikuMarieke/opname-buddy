@@ -6,9 +6,10 @@ import {
   createVolunteerAvailabilityException,
   createVolunteerRecurringAvailability,
   deleteVolunteerAvailabilityException,
+  deleteVolunteerRecurringAvailability,
   listVolunteerAvailabilityExceptions,
   listVolunteerRecurringAvailability,
-  setVolunteerRecurringAvailabilityActive,
+  updateVolunteerRecurringAvailability,
 } from "@/lib/services/volunteer-availability";
 import { queryKeys } from "@/lib/constants/query-keys";
 
@@ -35,19 +36,40 @@ export function useCreateVolunteerRecurringAvailability() {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.volunteer.availability.recurring,
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.planning.coordinatorVolunteers.all,
+      });
     },
   });
 }
 
-export function useSetVolunteerRecurringAvailabilityActive() {
+export function useDeleteVolunteerRecurringAvailability() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
-      setVolunteerRecurringAvailabilityActive(id, isActive),
+    mutationFn: deleteVolunteerRecurringAvailability,
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.volunteer.availability.recurring,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.planning.coordinatorVolunteers.all,
+      });
+    },
+  });
+}
+
+export function useUpdateVolunteerRecurringAvailability() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateVolunteerRecurringAvailability,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.volunteer.availability.recurring,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.planning.coordinatorVolunteers.all,
       });
     },
   });

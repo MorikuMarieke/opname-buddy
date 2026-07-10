@@ -33,7 +33,7 @@ export const volunteerAvailabilityExceptionSchema = z
     exceptionDate: z
       .string()
       .trim()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Kies een geldige datum."),
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Gebruik een geldige datum (dd/mm/jjjj)."),
     startTime: timeSchema,
     endTime: timeSchema,
     kind: z.enum(AVAILABILITY_EXCEPTION_KINDS),
@@ -50,8 +50,17 @@ export const volunteerAvailabilityExceptionSchema = z
     path: ["endTime"],
   });
 
+export const volunteerRecurringAvailabilityUpdateSchema =
+  volunteerRecurringAvailabilitySchema.extend({
+    id: z.string().uuid("Ongeldige beschikbaarheid."),
+  });
+
 export type VolunteerRecurringAvailabilityInput = z.infer<
   typeof volunteerRecurringAvailabilitySchema
+>;
+
+export type VolunteerRecurringAvailabilityUpdateInput = z.infer<
+  typeof volunteerRecurringAvailabilityUpdateSchema
 >;
 
 export type VolunteerAvailabilityExceptionInput = z.infer<

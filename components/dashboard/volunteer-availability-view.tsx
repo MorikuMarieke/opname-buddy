@@ -3,15 +3,18 @@
 import { useState } from "react";
 
 import { DashboardCard } from "@/components/ui/dashboard-card";
+import { DutchDateInput } from "@/components/ui/dutch-date-input";
 import { PrimaryButton } from "@/components/ui/primary-button";
-import { SecondaryButton } from "@/components/ui/secondary-button";
 import { SectionHeader } from "@/components/ui/section-header";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { VolunteerAvailabilityExceptionCard } from "@/components/dashboard/volunteer-availability-exception-card";
+import { VolunteerBioSection } from "@/components/dashboard/volunteer-bio-section";
+import { VolunteerRecurringAvailabilityCard } from "@/components/dashboard/volunteer-recurring-availability-card";
 import {
   useCreateVolunteerAvailabilityException,
   useCreateVolunteerRecurringAvailability,
   useDeleteVolunteerAvailabilityException,
-  useSetVolunteerRecurringAvailabilityActive,
+  useDeleteVolunteerRecurringAvailability,
+  useUpdateVolunteerRecurringAvailability,
   useVolunteerAvailabilityExceptions,
   useVolunteerRecurringAvailability,
 } from "@/hooks/use-volunteer-availability";
@@ -21,7 +24,6 @@ import {
   DAYS_OF_WEEK,
 } from "@/lib/constants/planning-enums";
 import { VOLUNTEER_COPY } from "@/lib/constants/volunteer-copy";
-import { formatDutchDate } from "@/lib/utils/amsterdam-date";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 
 const inputClasses =
@@ -35,24 +37,26 @@ export function VolunteerAvailabilityView() {
     useVolunteerAvailabilityExceptions();
 
   const createRecurring = useCreateVolunteerRecurringAvailability();
-  const setRecurringActive = useSetVolunteerRecurringAvailabilityActive();
+  const updateRecurring = useUpdateVolunteerRecurringAvailability();
+  const deleteRecurring = useDeleteVolunteerRecurringAvailability();
   const createException = useCreateVolunteerAvailabilityException();
   const deleteException = useDeleteVolunteerAvailabilityException();
 
   const [dayOfWeek, setDayOfWeek] = useState<number>(1);
   const [recurringStart, setRecurringStart] = useState("09:00");
   const [recurringEnd, setRecurringEnd] = useState("12:00");
+  const [recurringError, setRecurringError] = useState<string | null>(null);
   const [exceptionDate, setExceptionDate] = useState(getAmsterdamDateString());
   const [exceptionStart, setExceptionStart] = useState("09:00");
   const [exceptionEnd, setExceptionEnd] = useState("12:00");
   const [exceptionKind, setExceptionKind] =
     useState<(typeof AVAILABILITY_EXCEPTION_KINDS)[number]>("unavailable");
   const [exceptionNote, setExceptionNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [exceptionError, setExceptionError] = useState<string | null>(null);
 
   async function handleAddRecurring(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    setRecurringError(null);
 
     try {
       await createRecurring.mutateAsync({
@@ -61,17 +65,44 @@ export function VolunteerAvailabilityView() {
         endTime: recurringEnd,
       });
     } catch (submitError) {
-      setError(
+      const errorMessage =
         submitError instanceof Error
           ? submitError.message
-          : "Opslaan is mislukt.",
-      );
+          : "Opslaan is mislukt.";
+      setRecurringError(errorMessage);
+    }
+  }
+
+  function clearRecurringError() {
+    if (recurringError !== null) {
+      setRecurringError(null);
+    }
+  }
+
+  function handleDayOfWeekChange(value: number) {
+    setDayOfWeek(value);
+    clearRecurringError();
+  }
+
+  function handleRecurringStartChange(value: string) {
+    setRecurringStart(value);
+    clearRecurringError();
+  }
+
+  function handleRecurringEndChange(value: string) {
+    setRecurringEnd(value);
+    clearRecurringError();
+  }
+
+  function clearExceptionError() {
+    if (exceptionError !== null) {
+      setExceptionError(null);
     }
   }
 
   async function handleAddException(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    setExceptionError(null);
 
     try {
       await createException.mutateAsync({
@@ -83,7 +114,7 @@ export function VolunteerAvailabilityView() {
       });
       setExceptionNote("");
     } catch (submitError) {
-      setError(
+      setExceptionError(
         submitError instanceof Error
           ? submitError.message
           : "Opslaan is mislukt.",
@@ -92,29 +123,25 @@ export function VolunteerAvailabilityView() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 max-w-full space-y-4">
       <SectionHeader
         title={copy.pageTitle}
         description={copy.pageDescription}
         size="compact"
       />
 
-      {error ? (
-        <p className="text-sm text-red-600" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <VolunteerBioSection />
 
-      <DashboardCard density="compact" title={copy.recurringTitle}>
+      <DashboardCard density="compact" title={copy.recurringTitle} className="min-w-0 max-w-full">
         <p className="mb-4 text-sm text-carbon-black-600">{copy.recurringHint}</p>
 
-        <form onSubmit={handleAddRecurring} className="mb-4 grid gap-3 md:grid-cols-4">
-          <label className="space-y-1 text-sm">
+        <form onSubmit={handleAddRecurring} className="mb-4 grid min-w-0 gap-3 md:grid-cols-4">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Weekdag</span>
             <select
               className={inputClasses}
               value={dayOfWeek}
-              onChange={(event) => setDayOfWeek(Number(event.target.value))}
+              onChange={(event) => handleDayOfWeekChange(Number(event.target.value))}
             >
               {DAYS_OF_WEEK.map((day) => (
                 <option key={day} value={day}>
@@ -123,141 +150,159 @@ export function VolunteerAvailabilityView() {
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-sm">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Van</span>
             <input
               type="time"
               required
               className={inputClasses}
               value={recurringStart}
-              onChange={(event) => setRecurringStart(event.target.value)}
+              onChange={(event) => handleRecurringStartChange(event.target.value)}
             />
           </label>
-          <label className="space-y-1 text-sm">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Tot</span>
             <input
               type="time"
               required
               className={inputClasses}
               value={recurringEnd}
-              onChange={(event) => setRecurringEnd(event.target.value)}
+              onChange={(event) => handleRecurringEndChange(event.target.value)}
             />
           </label>
-          <div className="flex items-end">
+          <div className="min-w-0 flex items-end">
             <PrimaryButton type="submit" disabled={createRecurring.isPending}>
               {copy.addRecurring}
             </PrimaryButton>
           </div>
         </form>
 
+        {recurringError ? (
+          <p className="mb-4 text-sm text-red-600" role="alert">
+            {recurringError}
+          </p>
+        ) : null}
+
         {recurringLoading ? (
           <p className="text-sm text-carbon-black-600">Laden...</p>
         ) : null}
 
-        {!recurringLoading && !recurring?.length ? (
+        {!recurringLoading && !recurring?.filter((slot) => slot.isActive).length ? (
           <p className="text-sm text-carbon-black-600">{copy.emptyRecurring}</p>
         ) : null}
 
-        {recurring && recurring.length > 0 ? (
-          <ul className="divide-y divide-dust-grey-100">
-            {recurring.map((slot) => (
-              <li
-                key={slot.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-3"
-              >
-                <div>
-                  <p className="font-medium text-carbon-black-900">
-                    {DAY_OF_WEEK_LABELS[slot.dayOfWeek]} · {slot.startTime} –{" "}
-                    {slot.endTime}
-                  </p>
-                  <StatusBadge variant={slot.isActive ? "positive" : "neutral"}>
-                    {slot.isActive ? "Actief" : "Inactief"}
-                  </StatusBadge>
-                </div>
-                {slot.isActive ? (
-                  <SecondaryButton
-                    type="button"
-                    disabled={setRecurringActive.isPending}
-                    onClick={() =>
-                      setRecurringActive.mutate({ id: slot.id, isActive: false })
-                    }
-                  >
-                    {copy.deactivateRecurring}
-                  </SecondaryButton>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+        {recurring && recurring.filter((slot) => slot.isActive).length > 0 ? (
+          <div className="min-w-0">
+            <h3 className="mb-3 text-base font-semibold text-carbon-black-900">
+              {copy.recurringListTitle}
+            </h3>
+            <ul className="min-w-0 space-y-3">
+              {recurring
+                .filter((slot) => slot.isActive)
+                .map((slot) => (
+                  <li key={slot.id} className="min-w-0">
+                    <VolunteerRecurringAvailabilityCard
+                      item={slot}
+                      isDeleting={deleteRecurring.isPending}
+                      isUpdating={updateRecurring.isPending}
+                      onDelete={(id) => deleteRecurring.mutateAsync(id)}
+                      onUpdate={async (input) => {
+                        await updateRecurring.mutateAsync(input);
+                      }}
+                    />
+                  </li>
+                ))}
+            </ul>
+          </div>
         ) : null}
       </DashboardCard>
 
-      <DashboardCard density="compact" title={copy.exceptionsTitle}>
+      <DashboardCard density="compact" title={copy.exceptionsTitle} className="min-w-0 max-w-full">
         <p className="mb-4 text-sm text-carbon-black-600">{copy.exceptionsHint}</p>
 
         <form
           onSubmit={handleAddException}
-          className="mb-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3"
+          className="mb-4 grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3"
         >
-          <label className="space-y-1 text-sm">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Datum</span>
-            <input
-              type="date"
+            <DutchDateInput
               required
               className={inputClasses}
               value={exceptionDate}
-              onChange={(event) => setExceptionDate(event.target.value)}
+              onChange={(value) => {
+                setExceptionDate(value);
+                clearExceptionError();
+              }}
+              pickerAriaLabel={copy.datePickerAriaLabel}
             />
           </label>
-          <label className="space-y-1 text-sm">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Van</span>
             <input
               type="time"
               required
               className={inputClasses}
               value={exceptionStart}
-              onChange={(event) => setExceptionStart(event.target.value)}
+              onChange={(event) => {
+                setExceptionStart(event.target.value);
+                clearExceptionError();
+              }}
             />
           </label>
-          <label className="space-y-1 text-sm">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Tot</span>
             <input
               type="time"
               required
               className={inputClasses}
               value={exceptionEnd}
-              onChange={(event) => setExceptionEnd(event.target.value)}
+              onChange={(event) => {
+                setExceptionEnd(event.target.value);
+                clearExceptionError();
+              }}
             />
           </label>
-          <label className="space-y-1 text-sm">
+          <label className="min-w-0 space-y-1 text-sm">
             <span className="font-medium">Type</span>
             <select
               className={inputClasses}
               value={exceptionKind}
-              onChange={(event) =>
+              onChange={(event) => {
                 setExceptionKind(
                   event.target.value as (typeof AVAILABILITY_EXCEPTION_KINDS)[number],
-                )
-              }
+                );
+                clearExceptionError();
+              }}
             >
               <option value="extra">{copy.kindExtra}</option>
               <option value="unavailable">{copy.kindUnavailable}</option>
             </select>
           </label>
-          <label className="space-y-1 text-sm md:col-span-2">
+          <label className="min-w-0 space-y-1 text-sm md:col-span-2">
             <span className="font-medium">Notitie (optioneel)</span>
             <input
               type="text"
               className={inputClasses}
               value={exceptionNote}
-              onChange={(event) => setExceptionNote(event.target.value)}
+              onChange={(event) => {
+                setExceptionNote(event.target.value);
+                clearExceptionError();
+              }}
             />
           </label>
-          <div className="flex items-end">
+          <div className="min-w-0 flex items-end">
             <PrimaryButton type="submit" disabled={createException.isPending}>
               {copy.addException}
             </PrimaryButton>
           </div>
         </form>
+
+        {exceptionError ? (
+          <p className="mb-4 text-sm text-red-600" role="alert">
+            {exceptionError}
+          </p>
+        ) : null}
 
         {exceptionsLoading ? (
           <p className="text-sm text-carbon-black-600">Laden...</p>
@@ -268,33 +313,14 @@ export function VolunteerAvailabilityView() {
         ) : null}
 
         {exceptions && exceptions.length > 0 ? (
-          <ul className="divide-y divide-dust-grey-100">
+          <ul className="min-w-0 space-y-3">
             {exceptions.map((item) => (
-              <li
-                key={item.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-3"
-              >
-                <div>
-                  <p className="font-medium text-carbon-black-900">
-                    {formatDutchDate(item.exceptionDate)} · {item.startTime} –{" "}
-                    {item.endTime}
-                  </p>
-                  <StatusBadge
-                    variant={item.kind === "extra" ? "positive" : "attention"}
-                  >
-                    {item.kind === "extra" ? copy.kindExtra : copy.kindUnavailable}
-                  </StatusBadge>
-                  {item.note ? (
-                    <p className="mt-1 text-sm text-carbon-black-600">{item.note}</p>
-                  ) : null}
-                </div>
-                <SecondaryButton
-                  type="button"
-                  disabled={deleteException.isPending}
-                  onClick={() => deleteException.mutate(item.id)}
-                >
-                  {copy.deleteException}
-                </SecondaryButton>
+              <li key={item.id} className="min-w-0">
+                <VolunteerAvailabilityExceptionCard
+                  item={item}
+                  isDeleting={deleteException.isPending}
+                  onDelete={(id) => deleteException.mutateAsync(id)}
+                />
               </li>
             ))}
           </ul>

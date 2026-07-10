@@ -813,22 +813,28 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_active: boolean
           preferred_language: string
           updated_at: string
+          volunteer_bio: string | null
         }
         Insert: {
           created_at?: string
           full_name?: string | null
           id: string
+          is_active?: boolean
           preferred_language?: string
           updated_at?: string
+          volunteer_bio?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean
           preferred_language?: string
           updated_at?: string
+          volunteer_bio?: string | null
         }
         Relationships: []
       }
@@ -1043,6 +1049,7 @@ export type Database = {
         Returns: {
           full_name: string | null
           user_id: string
+          volunteer_bio: string | null
         }[]
       }
       list_volunteer_sessions: {

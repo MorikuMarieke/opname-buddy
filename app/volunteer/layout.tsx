@@ -10,7 +10,7 @@ export default async function VolunteerLayout({
 }>) {
   const { user, roles } = await requireRole("volunteer");
   const profile = await getCurrentUserProfile();
-  const userHeader = buildDashboardUserHeader(user, profile, roles);
+  const userHeader = buildDashboardUserHeader(user, profile, roles, "volunteer");
 
   return <VolunteerShell userHeader={userHeader}>{children}</VolunteerShell>;
 }

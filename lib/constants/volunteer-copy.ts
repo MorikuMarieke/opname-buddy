@@ -11,8 +11,16 @@ export const VOLUNTEER_COPY = {
   availability: {
     pageTitle: "Beschikbaarheid",
     pageDescription: "Geef aan wanneer je doorgaans kunt helpen.",
+    profileTitle: "Profiel",
+    profileHint:
+      "Vertel kort iets over jezelf: interesses, ervaring, voorkeuren of persoonlijkheid. Dit helpt bij toekomstige planning.",
+    bioLabel: "Over mij",
+    bioSave: "Profiel opslaan",
+    bioSaved: "Profiel opgeslagen.",
     recurringTitle: "Wekelijkse beschikbaarheid",
-    recurringHint: "Voeg vaste tijdvakken toe per weekdag.",
+    recurringHint:
+      "Voeg vaste tijdvakken toe per weekdag. Meerdere niet-overlappende tijdvakken op dezelfde dag zijn toegestaan (bijv. 09:00–12:00 en 13:00–17:00).",
+    recurringListTitle: "Jouw vaste vrijwilligersdagen",
     exceptionsTitle: "Uitzonderingen",
     exceptionsHint: "Extra beschikbaarheid of afwezigheid op specifieke dagen.",
     addRecurring: "Weekdag toevoegen",
@@ -20,7 +28,18 @@ export const VOLUNTEER_COPY = {
     saveRecurring: "Opslaan",
     saveException: "Opslaan",
     deleteException: "Verwijderen",
-    deactivateRecurring: "Deactiveren",
+    deleteExceptionAriaLabel: "Uitzondering verwijderen",
+    deleteConfirmPrompt: "Wil je deze uitzondering verwijderen?",
+    deleteConfirmYes: "Ja",
+    deleteConfirmCancel: "Annuleer",
+    deleteConfirmBusy: "Bezig...",
+    deleteRecurringAriaLabel: "Wekelijkse beschikbaarheid verwijderen",
+    deleteRecurringConfirmPrompt: "Wil je deze weekdag verwijderen?",
+    editRecurring: "Bewerken",
+    editRecurringAriaLabel: "Wekelijkse beschikbaarheid bewerken",
+    saveRecurringEdit: "Opslaan",
+    cancelRecurringEdit: "Annuleren",
+    datePickerAriaLabel: "Datum kiezen",
     kindExtra: "Extra beschikbaar",
     kindUnavailable: "Niet beschikbaar",
     emptyRecurring: "Nog geen vaste beschikbaarheid ingesteld.",
@@ -29,9 +48,20 @@ export const VOLUNTEER_COPY = {
   admin: {
     createTitle: "Vrijwilliger toevoegen",
     createDescription:
-      "Maak een vrijwilligersaccount aan. Vrijwilligers beheren hun eigen beschikbaarheid en zien toegewezen sessies.",
+      "Maak een vrijwilligersaccount aan. Inloggegevens worden niet per e-mail verstuurd — deel het tijdelijke wachtwoord veilig met de vrijwilliger. Vrijwilligers loggen in via de gewone inlogpagina.",
     createButton: "Vrijwilliger toevoegen",
     tabLabel: "Vrijwilligers",
+    tabHint:
+      "Vrijwilligers loggen in via de gewone inlogpagina met het wachtwoord dat je aanmaakt.",
     emptyList: "Geen vrijwilligersaccounts gevonden.",
+    emptyListCta: "Eerste vrijwilliger toevoegen",
+    createSuccessTitle: "Vrijwilligersaccount aangemaakt",
+    createSuccessPasswordHint:
+      "Deel het tijdelijke wachtwoord veilig met de vrijwilliger. Dit scherm toont het wachtwoord niet opnieuw.",
+    createSuccessLoginLabel: "Inlogpagina",
+    createSuccessLoginPath: "/login",
+    createSuccessNextSteps:
+      "Vraag de vrijwilliger om in te loggen en beschikbaarheid in te stellen onder Mijn planning → Beschikbaarheid.",
+    createSuccessViewAccount: "Naar accountdetails",
   },
 } as const;

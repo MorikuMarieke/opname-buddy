@@ -49,6 +49,7 @@ export function SidebarNavigation({
               (item.href !== "/care" &&
                 item.href !== "/planning" &&
                 item.href !== "/admin" &&
+                item.href !== "/volunteer" &&
                 pathname.startsWith(item.href));
 
             const Icon = item.icon;
@@ -75,11 +76,8 @@ export function SidebarNavigation({
               </Link>
             );
           })}
+          {footer ? <div className="pt-2">{footer}</div> : null}
         </nav>
-
-        {footer ? (
-          <div className="border-t border-white/10 px-5 py-4">{footer}</div>
-        ) : null}
       </aside>
     </>
   );

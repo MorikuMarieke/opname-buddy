@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 
 import { ROLE_LABELS } from "@/lib/constants/admin-account-copy";
+import { getPrimaryRole } from "@/lib/auth/get-primary-role";
 import type { Profile, RoleName } from "@/types/database";
 
 export interface DashboardUserHeader {
@@ -8,13 +9,6 @@ export interface DashboardUserHeader {
   roleLabel: string | null;
   initials: string;
 }
-
-const ROLE_PRIORITY: RoleName[] = [
-  "admin",
-  "caregiver",
-  "activity_coordinator",
-  "patient",
-];
 
 export function resolveUserDisplayName(
   user: User,
@@ -54,25 +48,24 @@ export function getUserInitials(displayName: string): string {
 }
 
 export function getPrimaryRoleLabel(roles: RoleName[]): string | null {
-  for (const role of ROLE_PRIORITY) {
-    if (roles.includes(role)) {
-      return ROLE_LABELS[role];
-    }
-  }
+  const role = getPrimaryRole(roles);
 
-  return null;
+  return role ? ROLE_LABELS[role] : null;
 }
 
 export function buildDashboardUserHeader(
   user: User,
   profile: Profile | null,
   roles: RoleName[],
+  activeRole?: RoleName,
 ): DashboardUserHeader {
   const displayName = resolveUserDisplayName(user, profile);
+  const role =
+    activeRole && roles.includes(activeRole) ? activeRole : getPrimaryRole(roles);
 
   return {
     displayName,
-    roleLabel: getPrimaryRoleLabel(roles),
+    roleLabel: role ? ROLE_LABELS[role] : null,
     initials: getUserInitials(displayName),
   };
 }

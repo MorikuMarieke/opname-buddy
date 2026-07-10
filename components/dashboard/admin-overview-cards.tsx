@@ -24,7 +24,7 @@ export function AdminOverviewCards() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <AdminOverviewStatCard
           href={buildAdminUsersUrl({ tab: "staff" })}
           ariaLabel="Bekijk staffaccounts"
@@ -58,6 +58,16 @@ export function AdminOverviewCards() {
           <p className="text-xs text-carbon-black-600">Zorgverleners</p>
           <p className="text-xl font-semibold text-carbon-black-900">
             {stats.roleCounts.caregiver}
+          </p>
+        </AdminOverviewStatCard>
+
+        <AdminOverviewStatCard
+          href={buildAdminUsersUrl({ tab: "volunteers" })}
+          ariaLabel="Bekijk vrijwilligersaccounts"
+        >
+          <p className="text-xs text-carbon-black-600">Vrijwilligers</p>
+          <p className="text-xl font-semibold text-carbon-black-900">
+            {stats.roleCounts.volunteer ?? 0}
           </p>
         </AdminOverviewStatCard>
 

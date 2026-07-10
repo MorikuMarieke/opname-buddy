@@ -318,7 +318,10 @@ export function AdminUsersView() {
 
       {filters.tab === "volunteers" ? (
         <DashboardCard density="compact" className="space-y-3">
-          <div className="flex flex-wrap gap-2 px-3 pt-3">
+          <p className="px-3 pt-3 text-sm text-carbon-black-600">
+            {volunteerCopy.tabHint}
+          </p>
+          <div className="flex flex-wrap gap-2 px-3">
             {STATUS_OPTIONS.map((option) => {
               const isActive =
                 option.value === "all"
@@ -367,9 +370,18 @@ export function AdminUsersView() {
             {!volunteersLoading &&
             !volunteersError &&
             volunteerAccounts?.length === 0 ? (
-              <p className="px-3 py-4 text-sm text-carbon-black-600">
-                {volunteerCopy.emptyList}
-              </p>
+              <div className="space-y-3 px-3 py-4">
+                <p className="text-sm text-carbon-black-600">
+                  {volunteerCopy.emptyList}
+                </p>
+                <PrimaryButton
+                  href="/admin/users/new/volunteer"
+                  size="sm"
+                  icon={<Plus className="h-4 w-4" />}
+                >
+                  {volunteerCopy.emptyListCta}
+                </PrimaryButton>
+              </div>
             ) : null}
 
             {volunteerAccounts && volunteerAccounts.length > 0 ? (
