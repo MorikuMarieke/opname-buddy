@@ -74,8 +74,26 @@ Canonical role names and assignments.
 - Role names: `patient`, `caregiver`, `activity_coordinator`, `volunteer`, `admin`
 - Clients may read their own role assignments only
 - Clients cannot assign or remove roles (prevents privilege escalation)
-- Staff may have multiple roles; patients normally have only `patient`
-- Volunteer accounts use `account_type = volunteer` in auth metadata and the `volunteer` role only (admin-created)
+- **One auth identity per email:** Supabase Auth enforces unique email addresses; `profiles.id` is a 1:1 FK to `auth.users.id`. A second signup with the same email is rejected before any profile or role row is created.
+- **Multi-role ready:** `user_roles` uses composite PK `(user_id, role_id)`, so one account may hold multiple roles. Staff already use this (`setStaffRoles`). Future cross-type roles (e.g. patient + volunteer) can be added by inserting into `user_roles` on the existing `user_id` — no schema change required.
+- Staff may have multiple roles; patients normally have only `patient` until explicitly linked or assigned another role
+- Volunteer accounts are admin-created with the `volunteer` role only (no auto-patient; see migration `00047`)
+- **`account_type` in auth metadata** is a signup hint for `handle_new_user()` (staff/volunteer skip auto-patient). Authorization uses `user_roles` / `has_role()`, not `account_type`. When multi-role assignment is implemented later, roles remain the source of truth.
+
+**Admin volunteer creation — duplicate email (current MVP behavior)**
+
+When an admin submits `/admin/users/new/volunteer` with an email that already belongs to an auth user:
+
+1. `admin.auth.admin.createUser` fails (Supabase unique email constraint).
+2. No new `auth.users` row, no `profiles` row, and no `user_roles` rows are created (`handle_new_user` runs only on successful INSERT).
+3. The admin sees: **"Dit e-mailadres is al geregistreerd."**
+4. **No** "add volunteer role to existing account" flow exists yet. That is the intended future path: look up the existing user by email, insert `volunteer` into `user_roles`, audit the assignment — same pattern as `setStaffRoles`.
+
+**Login with multiple roles (current behavior, unchanged)**
+
+- Post-login redirect uses `getPrimaryRole()` and `ROLE_PRIORITY` (admin → activity_coordinator → caregiver → volunteer → patient).
+- Route guards use `requireRole()` — a user with multiple roles can open any module they hold a role for (no role switcher UI yet).
+- Multi-role dashboards and explicit role switching are out of scope until product requirements define them.
 
 ### Blueprint: implemented tables
 
