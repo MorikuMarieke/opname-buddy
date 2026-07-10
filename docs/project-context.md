@@ -259,5 +259,6 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md) | Branch 7 implementation plan (shipped) |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 10) |
+| [`docs/branch-plans/branch-11-final-polish-docs.md`](branch-plans/branch-11-final-polish-docs.md) | Final polish, deployment QA, and known technical debt (branch 11) |
 | `.cursor/rules/project.mdc` | Folder structure and coding conventions |
 | `AGENTS.md` | Next.js 16 project notes for agents |
