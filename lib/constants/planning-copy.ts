@@ -139,5 +139,6 @@ export const PLANNING_COPY = {
     exceptionsTitle: "Uitzonderingen",
     noRecurring: "Geen vaste tijdvakken",
     noExceptions: "Geen uitzonderingen",
+    bioTitle: "Over mij",
   },
 } as const;

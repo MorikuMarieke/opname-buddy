@@ -126,6 +126,7 @@ export async function listCoordinatorVolunteerProfiles(): Promise<
   return (volunteersResult.data ?? []).map((volunteer) => ({
     userId: volunteer.user_id,
     fullName: volunteer.full_name,
+    volunteerBio: volunteer.volunteer_bio,
     recurringAvailability: recurringByUser.get(volunteer.user_id) ?? [],
     availabilityExceptions: exceptionsByUser.get(volunteer.user_id) ?? [],
   }));

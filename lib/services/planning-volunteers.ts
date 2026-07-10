@@ -20,5 +20,6 @@ export async function listPlanningVolunteers(): Promise<PlanningVolunteerListIte
   return (data ?? []).map((row) => ({
     userId: row.user_id,
     fullName: row.full_name,
+    volunteerBio: row.volunteer_bio,
   }));
 }

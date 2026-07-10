@@ -70,6 +70,17 @@ export function PlanningCoordinatorVolunteersView() {
                   {formatVolunteerRecurringSummary(profile.recurringAvailability)}
                 </p>
 
+                {profile.volunteerBio ? (
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">
+                      {copy.bioTitle}
+                    </h3>
+                    <p className="whitespace-pre-wrap text-sm text-carbon-black-700">
+                      {profile.volunteerBio}
+                    </p>
+                  </div>
+                ) : null}
+
                 <div className="space-y-4">
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-carbon-black-900">

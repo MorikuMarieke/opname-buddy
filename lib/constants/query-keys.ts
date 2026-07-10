@@ -140,6 +140,7 @@
     },
   },
   volunteer: {
+    profile: ["volunteer", "profile"] as const,
     sessions: {
       all: ["volunteer", "sessions"] as const,
     },

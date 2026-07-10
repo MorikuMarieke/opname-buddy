@@ -160,6 +160,7 @@ export interface PatientActivitySessionListItem {
 export interface PlanningVolunteerListItem {
   userId: string;
   fullName: string | null;
+  volunteerBio: string | null;
 }
 
 export type CreateActivityInput = Pick<
