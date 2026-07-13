@@ -14,52 +14,73 @@ const timeSchema = z
   .trim()
   .regex(/^\d{2}:\d{2}(:\d{2})?$/, "Gebruik een geldige tijd (uu:mm).");
 
-export const recurringScheduleInputSchema = z
-  .object({
-    activityId: z.string().uuid("Kies een activiteit."),
-    dayOfWeek: dayOfWeekSchema,
-    startTime: timeSchema,
-    endTime: timeSchema,
-    location: z
-      .string()
-      .trim()
-      .max(200)
-      .optional()
-      .nullable()
-      .transform((value) => value || null),
-    minParticipants: z
-      .union([z.literal(""), z.coerce.number().int().min(1)])
-      .optional()
-      .nullable()
-      .transform((value) => (value === "" || value == null ? null : value)),
-    maxParticipants: z
-      .union([z.literal(""), z.coerce.number().int().min(1)])
-      .optional()
-      .nullable()
-      .transform((value) => (value === "" || value == null ? null : value)),
-  })
-  .refine((data) => data.endTime > data.startTime, {
-    message: "Eindtijd moet na starttijd liggen.",
-    path: ["endTime"],
-  })
-  .refine(
-    (data) => {
-      if (data.minParticipants == null || data.maxParticipants == null) {
-        return true;
-      }
-      return data.maxParticipants >= data.minParticipants;
-    },
-    {
+const recurringScheduleInputFields = z.object({
+  activityId: z.string().uuid("Kies een activiteit."),
+  dayOfWeek: dayOfWeekSchema,
+  startTime: timeSchema,
+  endTime: timeSchema,
+  location: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .nullable()
+    .transform((value) => value || null),
+  minParticipants: z
+    .union([z.literal(""), z.coerce.number().int().min(1)])
+    .optional()
+    .nullable()
+    .transform((value) => (value === "" || value == null ? null : value)),
+  maxParticipants: z
+    .union([z.literal(""), z.coerce.number().int().min(1)])
+    .optional()
+    .nullable()
+    .transform((value) => (value === "" || value == null ? null : value)),
+});
+
+function refineRecurringSchedule(
+  data: {
+    startTime?: string;
+    endTime?: string;
+    minParticipants?: number | null;
+    maxParticipants?: number | null;
+  },
+  ctx: z.RefinementCtx,
+) {
+  if (
+    data.startTime !== undefined &&
+    data.endTime !== undefined &&
+    data.endTime <= data.startTime
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Eindtijd moet na starttijd liggen.",
+      path: ["endTime"],
+    });
+  }
+
+  if (
+    data.minParticipants != null &&
+    data.maxParticipants != null &&
+    data.maxParticipants < data.minParticipants
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
       message: "Maximum moet minimaal het minimum zijn.",
       path: ["maxParticipants"],
-    },
-  );
+    });
+  }
+}
 
-export const recurringScheduleUpdateSchema = recurringScheduleInputSchema
+export const recurringScheduleInputSchema =
+  recurringScheduleInputFields.superRefine(refineRecurringSchedule);
+
+export const recurringScheduleUpdateSchema = recurringScheduleInputFields
   .partial()
   .extend({
     isActive: z.boolean().optional(),
-  });
+  })
+  .superRefine(refineRecurringSchedule);
 
 export type RecurringScheduleFormValues = {
   activityId: string;

@@ -89,6 +89,12 @@ export const PLANNING_COPY = {
     volunteersTitle: "Vrijwilligers",
     volunteersHint: "Wijs vrijwilligers handmatig toe.",
     saveAssignmentsButton: "Toewijzingen opslaan",
+    unsavedAssignmentsHint:
+      "Sla eerst de toewijzingen op voordat je de status wijzigt.",
+    patientsLoadError: "Patiënten konden niet worden geladen.",
+    volunteersLoadError: "Vrijwilligers konden niet worden geladen.",
+    emptyPatients: "Geen actieve opnames gevonden.",
+    emptyVolunteers: "Geen vrijwilligers gevonden.",
     statusActions: {
       propose: "Voorstellen",
       confirm: "Bevestigen",

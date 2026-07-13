@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import {
   formatDutchDateInput,
@@ -36,14 +36,11 @@ export function DutchDateInput({
   pickerAriaLabel = "Datum kiezen",
 }: DutchDateInputProps) {
   const pickerRef = useRef<HTMLInputElement>(null);
-  const [text, setText] = useState(() => formatDutchDateInput(value));
-
-  useEffect(() => {
-    setText(formatDutchDateInput(value));
-  }, [value]);
+  const [draftText, setDraftText] = useState<string | null>(null);
+  const displayText = draftText ?? formatDutchDateInput(value);
 
   function handleTextChange(nextText: string) {
-    setText(nextText);
+    setDraftText(nextText);
 
     const parsed = parseDutchDateInput(nextText);
 
@@ -57,16 +54,14 @@ export function DutchDateInput({
 
     if (parsed) {
       onChange(parsed);
-      setText(formatDutchDateInput(parsed));
-      return;
     }
 
-    setText(formatDutchDateInput(value));
+    setDraftText(null);
   }
 
   function handlePickerChange(nextValue: string) {
     onChange(nextValue);
-    setText(formatDutchDateInput(nextValue));
+    setDraftText(null);
   }
 
   function openDatePicker() {
@@ -92,10 +87,11 @@ export function DutchDateInput({
         required={required}
         disabled={disabled}
         className={cn(defaultInputClasses, className)}
-        value={text}
+        value={displayText}
         placeholder={placeholder}
         inputMode={inputMode}
         autoComplete="off"
+        onFocus={() => setDraftText(formatDutchDateInput(value))}
         onChange={(event) => handleTextChange(event.target.value)}
         onBlur={(event) => handleBlur(event.target.value)}
       />

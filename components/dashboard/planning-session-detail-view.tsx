@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
@@ -22,8 +22,15 @@ import {
   type SessionStatus,
 } from "@/lib/constants/planning-enums";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
-import { isSessionEditable } from "@/lib/services/activity-sessions";
+import {
+  isSessionEditable,
+  type PlanningSessionDetail,
+} from "@/lib/services/activity-sessions";
 import { formatDutchDateTime } from "@/lib/utils/amsterdam-date";
+import type {
+  PlanningPatientListItem,
+  PlanningVolunteerListItem,
+} from "@/types/activity";
 
 interface PlanningSessionDetailViewProps {
   sessionId: string;
@@ -48,44 +55,64 @@ function statusVariant(
   return "neutral";
 }
 
-export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailViewProps) {
-  const { data: detail, isLoading, isError } = usePlanningSessionDetail(sessionId);
-  const { data: patients } = usePlanningPatients();
-  const { data: volunteers } = usePlanningVolunteers();
+function sortedIdsEqual(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  const sortedLeft = [...left].sort();
+  const sortedRight = [...right].sort();
+
+  return sortedLeft.every((id, index) => id === sortedRight[index]);
+}
+
+function statusRequiresSavedAssignments(status: SessionStatus): boolean {
+  return status === "proposed" || status === "confirmed";
+}
+
+interface SessionAssignmentsPanelProps {
+  sessionId: string;
+  detail: PlanningSessionDetail;
+  patients: PlanningPatientListItem[] | undefined;
+  patientsLoading: boolean;
+  patientsError: boolean;
+  volunteers: PlanningVolunteerListItem[] | undefined;
+  volunteersLoading: boolean;
+  volunteersError: boolean;
+}
+
+function SessionAssignmentsPanel({
+  sessionId,
+  detail,
+  patients,
+  patientsLoading,
+  patientsError,
+  volunteers,
+  volunteersLoading,
+  volunteersError,
+}: SessionAssignmentsPanelProps) {
   const statusMutation = useUpdateSessionStatus(sessionId);
   const participantsMutation = useSetSessionParticipants(sessionId);
   const volunteersMutation = useSetSessionVolunteers(sessionId);
 
-  const [selectedAdmissionIds, setSelectedAdmissionIds] = useState<string[]>([]);
-  const [selectedVolunteerIds, setSelectedVolunteerIds] = useState<string[]>([]);
+  const [selectedAdmissionIds, setSelectedAdmissionIds] = useState(
+    () => detail.participantAdmissionIds,
+  );
+  const [selectedVolunteerIds, setSelectedVolunteerIds] = useState(
+    () => detail.volunteerUserIds,
+  );
   const [actionError, setActionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (detail) {
-      setSelectedAdmissionIds(detail.participantAdmissionIds);
-      setSelectedVolunteerIds(detail.volunteerUserIds);
-    }
-  }, [detail]);
-
-  if (isLoading) {
-    return <p className="text-sm text-carbon-black-600">Sessie laden…</p>;
-  }
-
-  if (isError || !detail) {
-    return (
-      <p className="text-sm text-red-600" role="alert">
-        Sessie niet gevonden.
-      </p>
-    );
-  }
 
   const { session, activityTitle, activityDescription } = detail;
   const editable = isSessionEditable(session.status);
   const nextStatuses = SESSION_STATUS_TRANSITIONS[session.status];
+  const isSavingAssignments =
+    participantsMutation.isPending || volunteersMutation.isPending;
   const isBusy =
-    statusMutation.isPending ||
-    participantsMutation.isPending ||
-    volunteersMutation.isPending;
+    statusMutation.isPending || isSavingAssignments;
+  const hasUnsavedAssignments =
+    !sortedIdsEqual(selectedAdmissionIds, detail.participantAdmissionIds) ||
+    !sortedIdsEqual(selectedVolunteerIds, detail.volunteerUserIds);
 
   function toggleAdmission(admissionId: string) {
     setSelectedAdmissionIds((current) =>
@@ -103,8 +130,21 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
     );
   }
 
+  function isStatusActionDisabled(nextStatus: SessionStatus): boolean {
+    if (isBusy) {
+      return true;
+    }
+
+    if (statusRequiresSavedAssignments(nextStatus) && hasUnsavedAssignments) {
+      return true;
+    }
+
+    return false;
+  }
+
   async function handleStatusChange(nextStatus: SessionStatus) {
     setActionError(null);
+
     try {
       await statusMutation.mutateAsync(nextStatus);
     } catch (error) {
@@ -114,6 +154,7 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
 
   async function handleSaveAssignments() {
     setActionError(null);
+
     try {
       await participantsMutation.mutateAsync(selectedAdmissionIds);
       await volunteersMutation.mutateAsync(selectedVolunteerIds);
@@ -167,12 +208,17 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
 
       {nextStatuses.length > 0 ? (
         <DashboardCard density="compact" title="Status">
+          {hasUnsavedAssignments ? (
+            <p className="mb-3 text-sm text-carbon-black-600" role="status">
+              {copy.unsavedAssignmentsHint}
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             {nextStatuses.map((nextStatus) => (
               <PrimaryButton
                 key={nextStatus}
                 size="sm"
-                disabled={isBusy}
+                disabled={isStatusActionDisabled(nextStatus)}
                 onClick={() => handleStatusChange(nextStatus)}
               >
                 {getStatusActionLabel(nextStatus)}
@@ -184,8 +230,14 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
 
       <DashboardCard density="compact" title={copy.participantsTitle}>
         <p className="mb-3 text-sm text-carbon-black-600">{copy.participantsHint}</p>
-        {!patients?.length ? (
-          <p className="text-sm text-carbon-black-600">Geen actieve opnames gevonden.</p>
+        {patientsLoading ? (
+          <p className="text-sm text-carbon-black-600">Laden...</p>
+        ) : patientsError ? (
+          <p className="text-sm text-red-600" role="alert">
+            {copy.patientsLoadError}
+          </p>
+        ) : !patients?.length ? (
+          <p className="text-sm text-carbon-black-600">{copy.emptyPatients}</p>
         ) : (
           <div className="space-y-2">
             {patients.map((patient) => (
@@ -214,8 +266,14 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
 
       <DashboardCard density="compact" title={copy.volunteersTitle}>
         <p className="mb-3 text-sm text-carbon-black-600">{copy.volunteersHint}</p>
-        {!volunteers?.length ? (
-          <p className="text-sm text-carbon-black-600">Geen vrijwilligers gevonden.</p>
+        {volunteersLoading ? (
+          <p className="text-sm text-carbon-black-600">Laden...</p>
+        ) : volunteersError ? (
+          <p className="text-sm text-red-600" role="alert">
+            {copy.volunteersLoadError}
+          </p>
+        ) : !volunteers?.length ? (
+          <p className="text-sm text-carbon-black-600">{copy.emptyVolunteers}</p>
         ) : (
           <div className="space-y-2">
             {volunteers.map((volunteer) => (
@@ -251,5 +309,47 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
         </p>
       ) : null}
     </div>
+  );
+}
+
+export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailViewProps) {
+  const { data: detail, isLoading, isError } = usePlanningSessionDetail(sessionId);
+  const {
+    data: patients,
+    isLoading: patientsLoading,
+    isError: patientsError,
+  } = usePlanningPatients();
+  const {
+    data: volunteers,
+    isLoading: volunteersLoading,
+    isError: volunteersError,
+  } = usePlanningVolunteers();
+
+  if (isLoading) {
+    return <p className="text-sm text-carbon-black-600">Sessie laden…</p>;
+  }
+
+  if (isError || !detail) {
+    return (
+      <p className="text-sm text-red-600" role="alert">
+        Sessie niet gevonden.
+      </p>
+    );
+  }
+
+  const assignmentKey = `${detail.participantAdmissionIds.join(",")}|${detail.volunteerUserIds.join(",")}`;
+
+  return (
+    <SessionAssignmentsPanel
+      key={assignmentKey}
+      sessionId={sessionId}
+      detail={detail}
+      patients={patients}
+      patientsLoading={patientsLoading}
+      patientsError={patientsError}
+      volunteers={volunteers}
+      volunteersLoading={volunteersLoading}
+      volunteersError={volunteersError}
+    />
   );
 }

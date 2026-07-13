@@ -65,7 +65,7 @@ export function VolunteerProfileView() {
 
       {profile ? <VolunteerAccountSection profile={profile} copy={copy} /> : null}
 
-      <VolunteerBioSection />
+      <VolunteerBioSection profile={profile} isLoading={isLoading} />
     </div>
   );
 }

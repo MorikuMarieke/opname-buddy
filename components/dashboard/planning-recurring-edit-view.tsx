@@ -1,12 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import {
-  defaultRecurringScheduleFormValues,
-  RecurringScheduleForm,
-} from "@/components/forms/recurring-schedule-form";
+import { RecurringScheduleForm } from "@/components/forms/recurring-schedule-form";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -37,20 +34,19 @@ function toFormValues(schedule: ActivityRecurringSchedule): RecurringScheduleFor
   };
 }
 
-export function PlanningRecurringEditView({ scheduleId }: PlanningRecurringEditViewProps) {
-  const router = useRouter();
-  const { data: schedule, isLoading, isError } = useRecurringSchedule(scheduleId);
-  const updateMutation = useUpdateRecurringSchedule(scheduleId);
-  const [values, setValues] = useState<RecurringScheduleFormValues>(
-    defaultRecurringScheduleFormValues,
-  );
-  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+interface PlanningRecurringEditFormProps {
+  schedule: ActivityRecurringSchedule;
+  scheduleId: string;
+}
 
-  useEffect(() => {
-    if (schedule) {
-      setValues(toFormValues(schedule));
-    }
-  }, [schedule]);
+function PlanningRecurringEditForm({
+  schedule,
+  scheduleId,
+}: PlanningRecurringEditFormProps) {
+  const router = useRouter();
+  const updateMutation = useUpdateRecurringSchedule(scheduleId);
+  const [values, setValues] = useState(() => toFormValues(schedule));
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
   async function handleSubmit() {
     const parsed = recurringScheduleInputSchema.safeParse(values);
@@ -80,8 +76,6 @@ export function PlanningRecurringEditView({ scheduleId }: PlanningRecurringEditV
   }
 
   async function handleToggleActive() {
-    if (!schedule) return;
-
     try {
       await updateMutation.mutateAsync({ isActive: !schedule.isActive });
     } catch (error) {
@@ -89,18 +83,6 @@ export function PlanningRecurringEditView({ scheduleId }: PlanningRecurringEditV
         submit: error instanceof Error ? error.message : "Status wijzigen mislukt.",
       });
     }
-  }
-
-  if (isLoading) {
-    return <p className="text-sm text-carbon-black-600">Schema laden…</p>;
-  }
-
-  if (isError || !schedule) {
-    return (
-      <p className="text-sm text-red-600" role="alert">
-        Schema niet gevonden.
-      </p>
-    );
   }
 
   return (
@@ -133,5 +115,29 @@ export function PlanningRecurringEditView({ scheduleId }: PlanningRecurringEditV
         />
       </DashboardCard>
     </div>
+  );
+}
+
+export function PlanningRecurringEditView({ scheduleId }: PlanningRecurringEditViewProps) {
+  const { data: schedule, isLoading, isError } = useRecurringSchedule(scheduleId);
+
+  if (isLoading) {
+    return <p className="text-sm text-carbon-black-600">Schema laden…</p>;
+  }
+
+  if (isError || !schedule) {
+    return (
+      <p className="text-sm text-red-600" role="alert">
+        Schema niet gevonden.
+      </p>
+    );
+  }
+
+  return (
+    <PlanningRecurringEditForm
+      key={`${schedule.id}-${schedule.updatedAt}`}
+      schedule={schedule}
+      scheduleId={scheduleId}
+    />
   );
 }

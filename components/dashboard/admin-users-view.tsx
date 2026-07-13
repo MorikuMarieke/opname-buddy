@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-
 import { AdminPatientAccountsView } from "@/components/dashboard/admin-patient-accounts-view";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
@@ -27,16 +26,50 @@ const STATUS_OPTIONS: { value: AdminUsersStatus | "all"; label: string }[] = [
   { value: "inactive", label: "Inactief" },
 ];
 
+interface AdminUsersSearchInputProps {
+  initialValue: string;
+  onDebouncedChange: (value: string | undefined) => void;
+}
+
+function AdminUsersSearchInput({
+  initialValue,
+  onDebouncedChange,
+}: AdminUsersSearchInputProps) {
+  const [searchInput, setSearchInput] = useState(initialValue);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      const trimmed = searchInput.trim();
+      const current = initialValue.trim();
+
+      if (trimmed === current) {
+        return;
+      }
+
+      onDebouncedChange(trimmed || undefined);
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchInput, initialValue, onDebouncedChange]);
+
+  return (
+    <label className="block px-3">
+      <span className="sr-only">Zoeken</span>
+      <input
+        type="search"
+        value={searchInput}
+        onChange={(event) => setSearchInput(event.target.value)}
+        placeholder="Zoek op naam of e-mail"
+        className="h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm"
+      />
+    </label>
+  );
+}
+
 export function AdminUsersView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filters = parseAdminUsersFilters(searchParams);
-
-  const [searchInput, setSearchInput] = useState(filters.search ?? "");
-
-  useEffect(() => {
-    setSearchInput(filters.search ?? "");
-  }, [filters.search]);
 
   const navigate = useCallback(
     (next: Partial<typeof filters>) => {
@@ -51,23 +84,6 @@ export function AdminUsersView() {
     },
     [router, filters],
   );
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const trimmed = searchInput.trim();
-      const current = filters.search ?? "";
-
-      if (trimmed === current) {
-        return;
-      }
-
-      navigate({
-        search: trimmed || undefined,
-      });
-    }, 300);
-
-    return () => window.clearTimeout(timeout);
-  }, [searchInput, filters.search, navigate]);
 
   const { data: staffAccounts, isLoading, isError } = useAdminStaffAccounts({
     search: filters.search,
@@ -122,6 +138,7 @@ export function AdminUsersView() {
   );
 
   const volunteerCopy = VOLUNTEER_COPY.admin;
+  const searchKey = filters.search ?? "";
 
   return (
     <div className="space-y-4">
@@ -238,16 +255,11 @@ export function AdminUsersView() {
             </div>
           ) : null}
 
-          <label className="block px-3">
-            <span className="sr-only">Zoeken</span>
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Zoek op naam of e-mail"
-              className="h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm"
-            />
-          </label>
+          <AdminUsersSearchInput
+            key={`staff-search-${searchKey}`}
+            initialValue={searchKey}
+            onDebouncedChange={(search) => navigate({ search })}
+          />
 
           <div className="overflow-x-auto">
             {isLoading ? (
@@ -345,16 +357,11 @@ export function AdminUsersView() {
             })}
           </div>
 
-          <label className="block px-3">
-            <span className="sr-only">Zoeken</span>
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Zoek op naam of e-mail"
-              className="h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm"
-            />
-          </label>
+          <AdminUsersSearchInput
+            key={`volunteers-search-${searchKey}`}
+            initialValue={searchKey}
+            onDebouncedChange={(search) => navigate({ search })}
+          />
 
           <div className="overflow-x-auto">
             {volunteersLoading ? (

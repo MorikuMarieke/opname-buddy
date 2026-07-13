@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { DischargeAdmissionDialog } from "@/components/dashboard/discharge-admission-dialog";
 import { AdmissionFormFields } from "@/components/forms/admission-form-fields";
@@ -36,6 +36,79 @@ function admissionToFormValues(
   };
 }
 
+interface AdmissionEditSectionProps {
+  admission: AdmissionWithDepartment;
+  patientId: string;
+  onCancel: () => void;
+  onSaved: () => void;
+}
+
+function AdmissionEditSection({
+  admission,
+  patientId,
+  onCancel,
+  onSaved,
+}: AdmissionEditSectionProps) {
+  const [values, setValues] = useState(() => admissionToFormValues(admission));
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const updateMutation = useUpdateAdmission(patientId, admission.id);
+
+  async function handleSave() {
+    const parsed = admissionFormSchema.safeParse(values);
+
+    if (!parsed.success) {
+      const fieldErrors: Partial<Record<string, string>> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string" && !fieldErrors[key]) {
+          fieldErrors[key] = issue.message;
+        }
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    try {
+      await updateMutation.mutateAsync(parsed.data);
+      setErrors({});
+      onSaved();
+    } catch (error) {
+      setErrors({
+        submit:
+          error instanceof Error ? error.message : "Opslaan is mislukt.",
+      });
+    }
+  }
+
+  return (
+    <>
+      <AdmissionFormFields
+        values={values}
+        onChange={setValues}
+        errors={errors}
+        disabled={updateMutation.isPending}
+      />
+      <div className="flex flex-wrap gap-3">
+        <PrimaryButton
+          type="button"
+          onClick={handleSave}
+          disabled={updateMutation.isPending}
+        >
+          {updateMutation.isPending ? "Opslaan..." : CLINICAL_PATIENT_COPY.savePatient}
+        </PrimaryButton>
+        <SecondaryButton type="button" onClick={onCancel}>
+          {CLINICAL_PATIENT_COPY.cancel}
+        </SecondaryButton>
+      </div>
+      {errors.submit ? (
+        <p className="text-sm text-red-600" role="alert">
+          {errors.submit}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 export function CarePatientAdmissionCard({
   patientId,
   patientName,
@@ -45,21 +118,7 @@ export function CarePatientAdmissionCard({
   const [showDischargeDialog, setShowDischargeDialog] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
-  const [values, setValues] = useState<AdmissionFormValues>({
-    admittedOn: "",
-    departmentId: "",
-    roomNumber: null,
-    expectedDischargeOn: null,
-  });
-
-  const updateMutation = useUpdateAdmission(patientId, admission?.id ?? null);
   const dischargeMutation = useDischargeAdmission(patientId, admission?.id ?? null);
-
-  useEffect(() => {
-    if (admission && !isEditing) {
-      setValues(admissionToFormValues(admission));
-    }
-  }, [admission, isEditing]);
 
   if (!admission) {
     return (
@@ -80,33 +139,6 @@ export function CarePatientAdmissionCard({
     );
   }
 
-  async function handleSave() {
-    const parsed = admissionFormSchema.safeParse(values);
-
-    if (!parsed.success) {
-      const fieldErrors: Partial<Record<string, string>> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0];
-        if (typeof key === "string" && !fieldErrors[key]) {
-          fieldErrors[key] = issue.message;
-        }
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
-    try {
-      await updateMutation.mutateAsync(parsed.data);
-      setIsEditing(false);
-      setErrors({});
-    } catch (error) {
-      setErrors({
-        submit:
-          error instanceof Error ? error.message : "Opslaan is mislukt.",
-      });
-    }
-  }
-
   async function handleDischarge() {
     try {
       await dischargeMutation.mutateAsync();
@@ -118,16 +150,6 @@ export function CarePatientAdmissionCard({
       });
       setShowDischargeDialog(false);
     }
-  }
-
-  function startEditing() {
-    if (!admission) {
-      return;
-    }
-
-    setValues(admissionToFormValues(admission));
-    setIsEditing(true);
-    setErrors({});
   }
 
   return (
@@ -143,32 +165,13 @@ export function CarePatientAdmissionCard({
         </div>
 
         {isEditing ? (
-          <>
-            <AdmissionFormFields
-              values={values}
-              onChange={setValues}
-              errors={errors}
-              disabled={updateMutation.isPending}
-            />
-            <div className="flex flex-wrap gap-3">
-              <PrimaryButton
-                type="button"
-                onClick={handleSave}
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? "Opslaan..." : CLINICAL_PATIENT_COPY.savePatient}
-              </PrimaryButton>
-              <SecondaryButton
-                type="button"
-                onClick={() => {
-                  setIsEditing(false);
-                  setValues(admissionToFormValues(admission));
-                }}
-              >
-                {CLINICAL_PATIENT_COPY.cancel}
-              </SecondaryButton>
-            </div>
-          </>
+          <AdmissionEditSection
+            key={`${admission.id}-${admission.updated_at}`}
+            admission={admission}
+            patientId={patientId}
+            onCancel={() => setIsEditing(false)}
+            onSaved={() => setIsEditing(false)}
+          />
         ) : (
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
             <div>
@@ -216,7 +219,7 @@ export function CarePatientAdmissionCard({
 
         {!isEditing ? (
           <div className="flex flex-wrap gap-3">
-            <SecondaryButton type="button" onClick={startEditing}>
+            <SecondaryButton type="button" onClick={() => setIsEditing(true)}>
               Bewerken
             </SecondaryButton>
             <SecondaryButton

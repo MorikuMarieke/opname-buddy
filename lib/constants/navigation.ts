@@ -48,7 +48,6 @@ export const planningNavItems: NavItem[] = [
   { label: "Terugkerend", href: "/planning/recurring", icon: Repeat2 },
   { label: "Vrijwilligers", href: "/planning/volunteers", icon: Users },
   { label: "Kalender", href: "/planning/calendar", icon: Calendar },
-  { label: "Instellingen", href: "/planning", icon: Settings },
 ];
 
 export const volunteerNavItems: NavItem[] = [

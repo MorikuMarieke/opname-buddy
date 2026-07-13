@@ -62,6 +62,7 @@ export interface PlanningSessionDetail {
   session: ActivitySession;
   activityTitle: string;
   activityDescription: string;
+  requiresVolunteer: boolean;
   participantAdmissionIds: string[];
   volunteerUserIds: string[];
 }
@@ -141,7 +142,7 @@ export async function getPlanningSessionDetail(
 
   const { data: sessionRow, error: sessionError } = await supabase
     .from("activity_sessions")
-    .select("*, activities(title, description)")
+    .select("*, activities(title, description, requires_volunteer)")
     .eq("id", sessionId)
     .single();
 
@@ -170,12 +171,14 @@ export async function getPlanningSessionDetail(
   const activity = sessionRow.activities as {
     title: string;
     description: string;
+    requires_volunteer: boolean;
   } | null;
 
   return {
     session: mapSession(sessionRow as ActivitySessionRow),
     activityTitle: activity?.title ?? "Onbekende activiteit",
     activityDescription: activity?.description ?? "",
+    requiresVolunteer: activity?.requires_volunteer ?? false,
     participantAdmissionIds: (participants ?? []).map((row) => row.admission_id),
     volunteerUserIds: (volunteers ?? []).map((row) => row.user_id),
   };
@@ -215,6 +218,27 @@ export async function createOneOffSession(
   return mapSession(data);
 }
 
+function assertPersistedAssignmentsForStatusChange(
+  detail: PlanningSessionDetail,
+  nextStatus: SessionStatus,
+): void {
+  if (nextStatus === "proposed" || nextStatus === "confirmed") {
+    assertParticipantBounds(
+      detail.participantAdmissionIds.length,
+      detail.session.minParticipants,
+      detail.session.maxParticipants,
+    );
+  }
+
+  if (nextStatus === "confirmed" && detail.requiresVolunteer) {
+    if (detail.volunteerUserIds.length === 0) {
+      throw new Error(
+        "Deze activiteit vereist minstens één toegewezen vrijwilliger voordat je kunt bevestigen.",
+      );
+    }
+  }
+}
+
 export async function updateSessionStatus(
   sessionId: string,
   nextStatus: SessionStatus,
@@ -227,6 +251,8 @@ export async function updateSessionStatus(
   if (!canTransitionSessionStatus(currentStatus, nextStatus)) {
     throw new Error("Deze statuswijziging is niet toegestaan.");
   }
+
+  assertPersistedAssignmentsForStatusChange(detail, nextStatus);
 
   const payload: Partial<ActivitySessionRow> = {
     status: nextStatus,

@@ -1,12 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import {
-  ActivityForm,
-  defaultActivityFormValues,
-} from "@/components/forms/activity-form";
+import { ActivityForm } from "@/components/forms/activity-form";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -41,21 +38,20 @@ function toFormValues(activity: Activity): ActivityInputFormValues {
   };
 }
 
-export function PlanningActivityEditView({ activityId }: PlanningActivityEditViewProps) {
+interface PlanningActivityEditFormProps {
+  activity: Activity;
+  activityId: string;
+}
+
+function PlanningActivityEditForm({
+  activity,
+  activityId,
+}: PlanningActivityEditFormProps) {
   const router = useRouter();
-  const { data: activity, isLoading, isError } = useActivity(activityId);
   const updateMutation = useUpdateActivity(activityId);
   const activeMutation = useSetActivityActive(activityId);
-  const [values, setValues] = useState<ActivityInputFormValues>(
-    defaultActivityFormValues,
-  );
+  const [values, setValues] = useState(() => toFormValues(activity));
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
-
-  useEffect(() => {
-    if (activity) {
-      setValues(toFormValues(activity));
-    }
-  }, [activity]);
 
   async function handleSubmit() {
     const parsed = activityInputSchema.safeParse(values);
@@ -85,8 +81,6 @@ export function PlanningActivityEditView({ activityId }: PlanningActivityEditVie
   }
 
   async function handleToggleActive() {
-    if (!activity) return;
-
     try {
       await activeMutation.mutateAsync(!activity.isActive);
     } catch (error) {
@@ -94,18 +88,6 @@ export function PlanningActivityEditView({ activityId }: PlanningActivityEditVie
         submit: error instanceof Error ? error.message : "Status wijzigen mislukt.",
       });
     }
-  }
-
-  if (isLoading) {
-    return <p className="text-sm text-carbon-black-600">Activiteit laden…</p>;
-  }
-
-  if (isError || !activity) {
-    return (
-      <p className="text-sm text-red-600" role="alert">
-        Activiteit niet gevonden.
-      </p>
-    );
   }
 
   return (
@@ -138,5 +120,29 @@ export function PlanningActivityEditView({ activityId }: PlanningActivityEditVie
         />
       </DashboardCard>
     </div>
+  );
+}
+
+export function PlanningActivityEditView({ activityId }: PlanningActivityEditViewProps) {
+  const { data: activity, isLoading, isError } = useActivity(activityId);
+
+  if (isLoading) {
+    return <p className="text-sm text-carbon-black-600">Activiteit laden…</p>;
+  }
+
+  if (isError || !activity) {
+    return (
+      <p className="text-sm text-red-600" role="alert">
+        Activiteit niet gevonden.
+      </p>
+    );
+  }
+
+  return (
+    <PlanningActivityEditForm
+      key={`${activity.id}-${activity.updatedAt}`}
+      activity={activity}
+      activityId={activityId}
+    />
   );
 }
