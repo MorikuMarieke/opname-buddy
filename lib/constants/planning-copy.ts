@@ -113,6 +113,14 @@ export const PLANNING_COPY = {
       maxParticipants: "Max. deelnemers",
       notes: "Notities (optioneel)",
     },
+    schedule: {
+      endTimeHint: "Berekend op basis van de actieve duur.",
+      defaultDurationHint: "Standaardduur van de activiteit: {minutes} minuten.",
+      missingDefaultDurationHint:
+        "Deze activiteit heeft geen standaardduur. Geef een duur op voor deze planning.",
+      useCustomDuration: "Aangepaste duur gebruiken",
+      customDurationMinutes: "Duur (minuten)",
+    },
     filters: {
       status: "Status",
       kind: "Type",

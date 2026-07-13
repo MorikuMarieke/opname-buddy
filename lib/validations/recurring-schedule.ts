@@ -87,6 +87,8 @@ export type RecurringScheduleFormValues = {
   dayOfWeek: number;
   startTime: string;
   endTime: string;
+  useCustomDuration: boolean;
+  customDurationMinutes: string | number;
   location?: string | null;
   minParticipants?: string | number | null;
   maxParticipants?: string | number | null;

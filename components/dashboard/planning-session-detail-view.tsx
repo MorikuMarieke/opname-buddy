@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { FormField } from "@/components/forms/form-field";
+import { ScheduleTimeFields } from "@/components/forms/schedule-time-fields";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useActivities } from "@/hooks/use-activities";
 import { usePlanningFacilitatorCandidates } from "@/hooks/use-planning-facilitators";
 import { usePlanningPatients } from "@/hooks/use-planning-patients";
 import {
@@ -33,6 +35,11 @@ import {
 } from "@/lib/services/activity-sessions";
 import { updateActivitySessionSchema } from "@/lib/validations/activity-session";
 import type { UpdateActivitySessionFormValues } from "@/lib/validations/activity-session";
+import { inferScheduleDurationState } from "@/lib/utils/planning-time";
+import {
+  getScheduleDurationFieldErrors,
+  syncScheduleEndTime,
+} from "@/lib/validations/schedule-duration";
 import { formatDutchDateTime } from "@/lib/utils/amsterdam-date";
 import type {
   PlanningFacilitatorCandidate,
@@ -107,17 +114,47 @@ function SessionAssignmentsPanel({
   const participantsMutation = useSetSessionParticipants(sessionId);
   const facilitatorsMutation = useSetSessionFacilitators(sessionId);
   const scheduleMutation = useUpdateActivitySession(sessionId);
+  const { data: activities } = useActivities();
+  const activityDefaultDurationMinutes = (activities ?? []).find(
+    (activity) => activity.id === detail.session.activityId,
+  )?.defaultDurationMinutes;
+
+  const durationHydratedRef = useRef(false);
 
   const [scheduleValues, setScheduleValues] = useState<UpdateActivitySessionFormValues>(
     () => {
       const defaults = getDefaultSessionEditValues(detail.session);
+      const durationState = inferScheduleDurationState(
+        defaults.startTime,
+        defaults.endTime,
+      );
       return {
         ...defaults,
+        ...durationState,
         minParticipants: String(defaults.minParticipants),
         maxParticipants: String(defaults.maxParticipants),
       };
     },
   );
+
+  useEffect(() => {
+    if (durationHydratedRef.current || activityDefaultDurationMinutes == null) {
+      return;
+    }
+
+    durationHydratedRef.current = true;
+    setScheduleValues((current) => {
+      const durationState = inferScheduleDurationState(
+        current.startTime,
+        current.endTime,
+        activityDefaultDurationMinutes,
+      );
+      return {
+        ...current,
+        ...durationState,
+      };
+    });
+  }, [activityDefaultDurationMinutes]);
   const [scheduleErrors, setScheduleErrors] = useState<
     Partial<Record<string, string>>
   >({});
@@ -187,7 +224,21 @@ function SessionAssignmentsPanel({
   }
 
   async function handleSaveSchedule() {
-    const parsed = updateActivitySessionSchema.safeParse(scheduleValues);
+    const syncedValues = syncScheduleEndTime(
+      scheduleValues,
+      activityDefaultDurationMinutes,
+    );
+    const durationErrors = getScheduleDurationFieldErrors(
+      syncedValues,
+      activityDefaultDurationMinutes,
+    );
+
+    if (Object.keys(durationErrors).length > 0) {
+      setScheduleErrors(durationErrors);
+      return;
+    }
+
+    const parsed = updateActivitySessionSchema.safeParse(syncedValues);
 
     if (!parsed.success) {
       const fieldErrors: Partial<Record<string, string>> = {};
@@ -307,44 +358,21 @@ function SessionAssignmentsPanel({
                 }
               />
             </FormField>
-            <FormField
-              label={copy.fields.startTime}
-              htmlFor="editStartTime"
-              error={scheduleErrors.startTime}
-            >
-              <input
-                id="editStartTime"
-                type="time"
-                disabled={isBusy}
-                className={inputClasses}
-                value={scheduleValues.startTime}
-                onChange={(event) =>
-                  setScheduleValues((current) => ({
-                    ...current,
-                    startTime: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
-            <FormField
-              label={copy.fields.endTime}
-              htmlFor="editEndTime"
-              error={scheduleErrors.endTime}
-            >
-              <input
-                id="editEndTime"
-                type="time"
-                disabled={isBusy}
-                className={inputClasses}
-                value={scheduleValues.endTime}
-                onChange={(event) =>
-                  setScheduleValues((current) => ({
-                    ...current,
-                    endTime: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
+            <ScheduleTimeFields
+              values={scheduleValues}
+              activityDefaultDurationMinutes={activityDefaultDurationMinutes}
+              onChange={(nextValues) =>
+                setScheduleValues((current) => ({ ...current, ...nextValues }))
+              }
+              errors={scheduleErrors}
+              disabled={isBusy}
+              ids={{
+                startTime: "editStartTime",
+                endTime: "editEndTime",
+                customDuration: "editCustomDuration",
+                useCustomDuration: "editUseCustomDuration",
+              }}
+            />
             <FormField
               label={copy.fields.location}
               htmlFor="editLocation"

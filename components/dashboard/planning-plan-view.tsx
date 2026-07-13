@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ZodIssue } from "zod";
 
+import { ScheduleTimeFields } from "@/components/forms/schedule-time-fields";
 import { FacilitatorPicker } from "@/components/forms/facilitator-picker";
 import { FormField } from "@/components/forms/form-field";
 import { DashboardCard } from "@/components/ui/dashboard-card";
@@ -19,6 +20,11 @@ import {
 } from "@/lib/constants/planning-enums";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
+import { applyActivityDefaultDuration } from "@/lib/utils/planning-time";
+import {
+  getScheduleDurationFieldErrors,
+  syncScheduleEndTime,
+} from "@/lib/validations/schedule-duration";
 import {
   planActivityActivityStepSchema,
   planActivityKindStepSchema,
@@ -53,6 +59,8 @@ function createDefaultFormState(): PlanActivityFormState {
     sessionDate: getAmsterdamDateString(),
     startTime: "10:00",
     endTime: "11:30",
+    useCustomDuration: false,
+    customDurationMinutes: 90,
     location: "",
     minParticipants: 1,
     maxParticipants: 8,
@@ -63,14 +71,6 @@ function createDefaultFormState(): PlanActivityFormState {
     recurringMaxParticipants: null,
     facilitatorUserIds: [],
   };
-}
-
-function addMinutes(time: string, minutes: number): string {
-  const [hour, minute] = time.split(":").map(Number);
-  const total = hour * 60 + minute + minutes;
-  const nextHour = Math.floor(total / 60) % 24;
-  const nextMinute = total % 60;
-  return `${String(nextHour).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`;
 }
 
 function collectFieldErrors(issues: ZodIssue[]): Partial<Record<string, string>> {
@@ -110,17 +110,36 @@ export function PlanningPlanView() {
       return;
     }
 
-    setValues((current) => ({
-      ...current,
-      activityId,
-      location: activity.location ?? "",
-      minParticipants: activity.minParticipants,
-      maxParticipants: activity.maxParticipants,
-      endTime:
-        activity.defaultDurationMinutes != null
-          ? addMinutes(current.startTime || "10:00", activity.defaultDurationMinutes)
-          : current.endTime,
-    }));
+    setValues((current) => {
+      const defaultLocation = activity.location?.trim() ?? "";
+      return applyActivityDefaultDuration(
+        {
+          ...current,
+          activityId,
+          location: defaultLocation,
+          recurringLocation: defaultLocation || null,
+          minParticipants: activity.minParticipants,
+          maxParticipants: activity.maxParticipants,
+        },
+        activity.defaultDurationMinutes,
+      );
+    });
+  }
+
+  function getSyncedScheduleValues() {
+    return syncScheduleEndTime(
+      values,
+      selectedActivity?.defaultDurationMinutes,
+    );
+  }
+
+  function validateScheduleDuration(
+    scheduleValues: PlanActivityFormState,
+  ): Partial<Record<string, string>> {
+    return getScheduleDurationFieldErrors(
+      scheduleValues,
+      selectedActivity?.defaultDurationMinutes,
+    );
   }
 
   function validateStep(stepId: StepId): boolean {
@@ -143,16 +162,24 @@ export function PlanningPlanView() {
     }
 
     if (stepId === "schedule") {
+      const scheduleValues = getSyncedScheduleValues();
+      const durationErrors = validateScheduleDuration(scheduleValues);
+
+      if (Object.keys(durationErrors).length > 0) {
+        setErrors(durationErrors);
+        return false;
+      }
+
       if (values.kind === "one_off") {
         const parsed = planOneOffActivityInputSchema.safeParse({
-          activityId: values.activityId,
-          sessionDate: values.sessionDate,
-          startTime: values.startTime,
-          endTime: values.endTime,
-          location: values.location,
-          minParticipants: values.minParticipants,
-          maxParticipants: values.maxParticipants,
-          notes: values.notes,
+          activityId: scheduleValues.activityId,
+          sessionDate: scheduleValues.sessionDate,
+          startTime: scheduleValues.startTime,
+          endTime: scheduleValues.endTime,
+          location: scheduleValues.location,
+          minParticipants: scheduleValues.minParticipants,
+          maxParticipants: scheduleValues.maxParticipants,
+          notes: scheduleValues.notes,
           facilitatorUserIds: [],
         });
         if (!parsed.success) {
@@ -160,14 +187,23 @@ export function PlanningPlanView() {
           return false;
         }
       } else if (values.kind === "recurring") {
+        const resolvedLocation =
+          values.recurringLocation?.trim() ||
+          selectedActivity?.location?.trim() ||
+          "";
+        if (!resolvedLocation) {
+          setErrors({ location: "Locatie is verplicht." });
+          return false;
+        }
+
         const parsed = planRecurringActivityInputSchema.safeParse({
-          activityId: values.activityId,
-          dayOfWeek: values.dayOfWeek,
-          startTime: values.startTime,
-          endTime: values.endTime,
-          location: values.recurringLocation,
-          minParticipants: values.recurringMinParticipants,
-          maxParticipants: values.recurringMaxParticipants,
+          activityId: scheduleValues.activityId,
+          dayOfWeek: scheduleValues.dayOfWeek,
+          startTime: scheduleValues.startTime,
+          endTime: scheduleValues.endTime,
+          location: resolvedLocation,
+          minParticipants: scheduleValues.recurringMinParticipants,
+          maxParticipants: scheduleValues.recurringMaxParticipants,
           facilitatorUserIds: [],
         });
         if (!parsed.success) {
@@ -203,16 +239,18 @@ export function PlanningPlanView() {
     setErrors({});
 
     try {
+      const scheduleValues = getSyncedScheduleValues();
+
       if (values.kind === "one_off") {
         const parsed = planOneOffActivityInputSchema.parse({
-          activityId: values.activityId,
-          sessionDate: values.sessionDate,
-          startTime: values.startTime,
-          endTime: values.endTime,
-          location: values.location,
-          minParticipants: values.minParticipants,
-          maxParticipants: values.maxParticipants,
-          notes: values.notes,
+          activityId: scheduleValues.activityId,
+          sessionDate: scheduleValues.sessionDate,
+          startTime: scheduleValues.startTime,
+          endTime: scheduleValues.endTime,
+          location: scheduleValues.location,
+          minParticipants: scheduleValues.minParticipants,
+          maxParticipants: scheduleValues.maxParticipants,
+          notes: scheduleValues.notes,
           facilitatorUserIds: values.facilitatorUserIds,
         });
 
@@ -227,14 +265,18 @@ export function PlanningPlanView() {
       }
 
       if (values.kind === "recurring") {
+        const resolvedLocation =
+          values.recurringLocation?.trim() ||
+          selectedActivity?.location?.trim() ||
+          "";
         const parsed = planRecurringActivityInputSchema.parse({
-          activityId: values.activityId,
-          dayOfWeek: values.dayOfWeek,
-          startTime: values.startTime,
-          endTime: values.endTime,
-          location: values.recurringLocation,
-          minParticipants: values.recurringMinParticipants,
-          maxParticipants: values.recurringMaxParticipants,
+          activityId: scheduleValues.activityId,
+          dayOfWeek: scheduleValues.dayOfWeek,
+          startTime: scheduleValues.startTime,
+          endTime: scheduleValues.endTime,
+          location: resolvedLocation,
+          minParticipants: scheduleValues.recurringMinParticipants,
+          maxParticipants: scheduleValues.recurringMaxParticipants,
           facilitatorUserIds: values.facilitatorUserIds,
         });
 
@@ -336,12 +378,21 @@ export function PlanningPlanView() {
                   type="radio"
                   name="planKind"
                   checked={values.kind === kind}
-                  onChange={() =>
-                    setValues((current) => ({
-                      ...current,
-                      kind: kind as PlanActivityKind,
-                    }))
-                  }
+                  onChange={() => {
+                    setValues((current) => {
+                      const defaultLocation =
+                        selectedActivity?.location?.trim() ??
+                        current.location.trim();
+                      return {
+                        ...current,
+                        kind: kind as PlanActivityKind,
+                        recurringLocation:
+                          kind === "recurring"
+                            ? defaultLocation || current.recurringLocation
+                            : current.recurringLocation,
+                      };
+                    });
+                  }}
                   className="mt-1 h-5 w-5"
                 />
                 <span>
@@ -387,42 +438,18 @@ export function PlanningPlanView() {
                 }
               />
             </FormField>
-            <FormField
-              label={PLANNING_COPY.sessions.fields.startTime}
-              htmlFor="startTime"
-              error={errors.startTime}
-            >
-              <input
-                id="startTime"
-                type="time"
-                className={inputClasses}
-                value={values.startTime}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    startTime: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
-            <FormField
-              label={PLANNING_COPY.sessions.fields.endTime}
-              htmlFor="endTime"
-              error={errors.endTime}
-            >
-              <input
-                id="endTime"
-                type="time"
-                className={inputClasses}
-                value={values.endTime}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    endTime: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
+            <ScheduleTimeFields
+              values={values}
+              activityDefaultDurationMinutes={selectedActivity?.defaultDurationMinutes}
+              onChange={(nextValues) => setValues((current) => ({ ...current, ...nextValues }))}
+              errors={errors}
+              ids={{
+                startTime: "startTime",
+                endTime: "endTime",
+                customDuration: "customDurationMinutes",
+                useCustomDuration: "useCustomDuration",
+              }}
+            />
             <FormField
               label={PLANNING_COPY.sessions.fields.location}
               htmlFor="location"
@@ -532,42 +559,18 @@ export function PlanningPlanView() {
               </select>
             </FormField>
             <div className="hidden lg:block" />
-            <FormField
-              label={PLANNING_COPY.recurring.fields.startTime}
-              htmlFor="recurringStartTime"
-              error={errors.startTime}
-            >
-              <input
-                id="recurringStartTime"
-                type="time"
-                className={inputClasses}
-                value={values.startTime}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    startTime: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
-            <FormField
-              label={PLANNING_COPY.recurring.fields.endTime}
-              htmlFor="recurringEndTime"
-              error={errors.endTime}
-            >
-              <input
-                id="recurringEndTime"
-                type="time"
-                className={inputClasses}
-                value={values.endTime}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    endTime: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
+            <ScheduleTimeFields
+              values={values}
+              activityDefaultDurationMinutes={selectedActivity?.defaultDurationMinutes}
+              onChange={(nextValues) => setValues((current) => ({ ...current, ...nextValues }))}
+              errors={errors}
+              ids={{
+                startTime: "recurringStartTime",
+                endTime: "recurringEndTime",
+                customDuration: "recurringCustomDuration",
+                useCustomDuration: "recurringUseCustomDuration",
+              }}
+            />
             <FormField
               label={PLANNING_COPY.recurring.fields.location}
               htmlFor="recurringLocation"

@@ -38,6 +38,124 @@ export function combineAmsterdamDateAndTime(date: string, time: string): string 
   return new Date(utcMs).toISOString();
 }
 
+/** Add minutes to an HH:mm time string (wraps at 24h). */
+export function addMinutesToTime(time: string, minutes: number): string {
+  const [hour, minute] = time.split(":").map(Number);
+  const total = hour * 60 + minute + minutes;
+  const nextHour = Math.floor(total / 60) % 24;
+  const nextMinute = total % 60;
+  return `${String(nextHour).padStart(2, "0")}:${String(nextMinute).padStart(2, "0")}`;
+}
+
+export interface ScheduleDurationConfig {
+  useCustomDuration: boolean;
+  customDurationMinutes: string | number;
+  activityDefaultDurationMinutes?: number | null;
+}
+
+/** Minutes between same-day HH:mm times; null when invalid or overnight. */
+export function durationMinutesBetween(
+  startTime: string,
+  endTime: string,
+): number | null {
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const durationMinutes =
+    endHour * 60 + endMinute - (startHour * 60 + startMinute);
+
+  return durationMinutes > 0 ? durationMinutes : null;
+}
+
+export function endTimeFromDuration(
+  startTime: string,
+  durationMinutes: number,
+): string {
+  return addMinutesToTime(startTime, durationMinutes);
+}
+
+export function resolveActiveDurationMinutes(
+  config: ScheduleDurationConfig,
+): number | null {
+  if (config.useCustomDuration || config.activityDefaultDurationMinutes == null) {
+    const parsed = Number(config.customDurationMinutes);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
+  }
+
+  return config.activityDefaultDurationMinutes;
+}
+
+export function computeEndTimeFromDuration(
+  startTime: string,
+  config: ScheduleDurationConfig,
+): string | null {
+  const durationMinutes = resolveActiveDurationMinutes(config);
+  if (durationMinutes == null) {
+    return null;
+  }
+
+  return endTimeFromDuration(startTime, durationMinutes);
+}
+
+/** Infer whether a stored schedule uses a custom duration override. */
+export function inferScheduleDurationState(
+  startTime: string,
+  endTime: string,
+  activityDefaultDurationMinutes?: number | null,
+): Pick<ScheduleDurationConfig, "useCustomDuration" | "customDurationMinutes"> {
+  const storedDurationMinutes = durationMinutesBetween(startTime, endTime);
+  const defaultDuration = activityDefaultDurationMinutes ?? null;
+
+  if (
+    defaultDuration != null &&
+    storedDurationMinutes != null &&
+    storedDurationMinutes === defaultDuration
+  ) {
+    return {
+      useCustomDuration: false,
+      customDurationMinutes: defaultDuration,
+    };
+  }
+
+  return {
+    useCustomDuration: true,
+    customDurationMinutes:
+      storedDurationMinutes ?? defaultDuration ?? 90,
+  };
+}
+
+export function applyActivityDefaultDuration<T extends ScheduleDurationConfig & { startTime: string; endTime: string }>(
+  current: T,
+  activityDefaultDurationMinutes: number | null | undefined,
+): T {
+  if (activityDefaultDurationMinutes == null) {
+    const fallbackDuration =
+      durationMinutesBetween(current.startTime, current.endTime) ??
+      (Number(current.customDurationMinutes) || 90);
+
+    return {
+      ...current,
+      useCustomDuration: true,
+      customDurationMinutes: fallbackDuration,
+      endTime:
+        computeEndTimeFromDuration(current.startTime, {
+          useCustomDuration: true,
+          customDurationMinutes: fallbackDuration,
+          activityDefaultDurationMinutes: null,
+        }) ?? current.endTime,
+    };
+  }
+
+  return {
+    ...current,
+    useCustomDuration: false,
+    customDurationMinutes: activityDefaultDurationMinutes,
+    endTime: endTimeFromDuration(
+      current.startTime,
+      activityDefaultDurationMinutes,
+    ),
+  };
+}
+
 /** Returns true when two same-day time ranges overlap (HH:mm strings). */
 export function timeRangesOverlap(
   startA: string,

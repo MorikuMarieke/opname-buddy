@@ -10,20 +10,43 @@ import {
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { useCreateOneOffSession } from "@/hooks/use-planning-sessions";
+import { useActivities } from "@/hooks/use-activities";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
 import { oneOffSessionInputSchema } from "@/lib/validations/activity-session";
 import type { OneOffSessionFormValues } from "@/lib/validations/activity-session";
+import {
+  getScheduleDurationFieldErrors,
+  syncScheduleEndTime,
+} from "@/lib/validations/schedule-duration";
 
 export function PlanningSessionCreateView() {
   const router = useRouter();
   const createMutation = useCreateOneOffSession();
+  const { data: activities } = useActivities();
   const [values, setValues] = useState<OneOffSessionFormValues>(
     defaultOneOffSessionFormValues,
   );
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
   async function handleSubmit() {
-    const parsed = oneOffSessionInputSchema.safeParse(values);
+    const activityDefaultDurationMinutes = (activities ?? []).find(
+      (activity) => activity.id === values.activityId,
+    )?.defaultDurationMinutes;
+    const syncedValues = syncScheduleEndTime(
+      values,
+      activityDefaultDurationMinutes,
+    );
+    const durationErrors = getScheduleDurationFieldErrors(
+      syncedValues,
+      activityDefaultDurationMinutes,
+    );
+
+    if (Object.keys(durationErrors).length > 0) {
+      setErrors(durationErrors);
+      return;
+    }
+
+    const parsed = oneOffSessionInputSchema.safeParse(syncedValues);
 
     if (!parsed.success) {
       const fieldErrors: Partial<Record<string, string>> = {};

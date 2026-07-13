@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { RecurringScheduleForm } from "@/components/forms/recurring-schedule-form";
 import { DashboardCard } from "@/components/ui/dashboard-card";
@@ -11,7 +11,13 @@ import {
   useRecurringSchedule,
   useUpdateRecurringSchedule,
 } from "@/hooks/use-recurring-schedules";
+import { useActivities } from "@/hooks/use-activities";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
+import { inferScheduleDurationState } from "@/lib/utils/planning-time";
+import {
+  getScheduleDurationFieldErrors,
+  syncScheduleEndTime,
+} from "@/lib/validations/schedule-duration";
 import {
   recurringScheduleInputSchema,
   type RecurringScheduleFormValues,
@@ -22,12 +28,22 @@ interface PlanningRecurringEditViewProps {
   scheduleId: string;
 }
 
-function toFormValues(schedule: ActivityRecurringSchedule): RecurringScheduleFormValues {
+function toFormValues(
+  schedule: ActivityRecurringSchedule,
+  activityDefaultDurationMinutes?: number | null,
+): RecurringScheduleFormValues {
+  const durationState = inferScheduleDurationState(
+    schedule.startTime,
+    schedule.endTime,
+    activityDefaultDurationMinutes,
+  );
+
   return {
     activityId: schedule.activityId,
     dayOfWeek: schedule.dayOfWeek,
     startTime: schedule.startTime,
     endTime: schedule.endTime,
+    ...durationState,
     location: schedule.location,
     minParticipants: schedule.minParticipants,
     maxParticipants: schedule.maxParticipants,
@@ -45,11 +61,46 @@ function PlanningRecurringEditForm({
 }: PlanningRecurringEditFormProps) {
   const router = useRouter();
   const updateMutation = useUpdateRecurringSchedule(scheduleId);
+  const { data: activities } = useActivities();
+  const activityDefaultDurationMinutes = (activities ?? []).find(
+    (activity) => activity.id === schedule.activityId,
+  )?.defaultDurationMinutes;
+  const durationHydratedRef = useRef(false);
   const [values, setValues] = useState(() => toFormValues(schedule));
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
+  useEffect(() => {
+    if (durationHydratedRef.current || activityDefaultDurationMinutes == null) {
+      return;
+    }
+
+    durationHydratedRef.current = true;
+    setValues((current) => ({
+      ...current,
+      ...inferScheduleDurationState(
+        current.startTime,
+        current.endTime,
+        activityDefaultDurationMinutes,
+      ),
+    }));
+  }, [activityDefaultDurationMinutes]);
+
   async function handleSubmit() {
-    const parsed = recurringScheduleInputSchema.safeParse(values);
+    const syncedValues = syncScheduleEndTime(
+      values,
+      activityDefaultDurationMinutes,
+    );
+    const durationErrors = getScheduleDurationFieldErrors(
+      syncedValues,
+      activityDefaultDurationMinutes,
+    );
+
+    if (Object.keys(durationErrors).length > 0) {
+      setErrors(durationErrors);
+      return;
+    }
+
+    const parsed = recurringScheduleInputSchema.safeParse(syncedValues);
 
     if (!parsed.success) {
       const fieldErrors: Partial<Record<string, string>> = {};

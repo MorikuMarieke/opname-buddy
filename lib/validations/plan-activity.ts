@@ -40,6 +40,8 @@ export interface PlanActivityFormState {
   sessionDate: string;
   startTime: string;
   endTime: string;
+  useCustomDuration: boolean;
+  customDurationMinutes: string | number;
   location: string;
   minParticipants: string | number;
   maxParticipants: string | number;

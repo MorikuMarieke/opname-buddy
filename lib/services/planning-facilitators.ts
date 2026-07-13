@@ -1,9 +1,16 @@
 import { createClient } from "@/lib/supabase/client";
 import type { PlanningFacilitatorCandidate } from "@/types/activity";
 
-function getSupabaseErrorMessage(error: { message: string }): string {
+function getSupabaseErrorMessage(error: { message: string; code?: string }): string {
   if (error.message.includes("permission denied")) {
     return "Je hebt geen toegang tot deze actie.";
+  }
+
+  if (
+    error.code === "42883" ||
+    error.message.includes("Could not find the function")
+  ) {
+    return "De database is nog niet bijgewerkt. Neem contact op met beheer.";
   }
 
   return "Er ging iets mis. Probeer het opnieuw.";
@@ -13,9 +20,13 @@ export async function listPlanningFacilitatorCandidates(
   search?: string,
 ): Promise<PlanningFacilitatorCandidate[]> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc("list_planning_facilitator_candidates", {
-    p_search: search?.trim() || undefined,
-  });
+  const trimmedSearch = search?.trim();
+  const rpcArgs = trimmedSearch ? { p_search: trimmedSearch } : {};
+
+  const { data, error } = await supabase.rpc(
+    "list_planning_facilitator_candidates",
+    rpcArgs,
+  );
 
   if (error) {
     throw new Error(getSupabaseErrorMessage(error));

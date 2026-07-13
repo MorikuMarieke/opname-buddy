@@ -10,22 +10,45 @@ import {
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { useCreateRecurringSchedule } from "@/hooks/use-recurring-schedules";
+import { useActivities } from "@/hooks/use-activities";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
 import {
   recurringScheduleInputSchema,
   type RecurringScheduleFormValues,
 } from "@/lib/validations/recurring-schedule";
+import {
+  getScheduleDurationFieldErrors,
+  syncScheduleEndTime,
+} from "@/lib/validations/schedule-duration";
 
 export function PlanningRecurringCreateView() {
   const router = useRouter();
   const createMutation = useCreateRecurringSchedule();
+  const { data: activities } = useActivities();
   const [values, setValues] = useState<RecurringScheduleFormValues>(
     defaultRecurringScheduleFormValues,
   );
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
   async function handleSubmit() {
-    const parsed = recurringScheduleInputSchema.safeParse(values);
+    const activityDefaultDurationMinutes = (activities ?? []).find(
+      (activity) => activity.id === values.activityId,
+    )?.defaultDurationMinutes;
+    const syncedValues = syncScheduleEndTime(
+      values,
+      activityDefaultDurationMinutes,
+    );
+    const durationErrors = getScheduleDurationFieldErrors(
+      syncedValues,
+      activityDefaultDurationMinutes,
+    );
+
+    if (Object.keys(durationErrors).length > 0) {
+      setErrors(durationErrors);
+      return;
+    }
+
+    const parsed = recurringScheduleInputSchema.safeParse(syncedValues);
 
     if (!parsed.success) {
       const fieldErrors: Partial<Record<string, string>> = {};

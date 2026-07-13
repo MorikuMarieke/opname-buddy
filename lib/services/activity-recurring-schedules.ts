@@ -142,6 +142,23 @@ export async function createRecurringSchedule(
   const seriesStartsOn = getAmsterdamDateString();
   const seriesEndsOn = addDaysToIsoDate(seriesStartsOn, 84);
 
+  const { data: activityRow, error: activityError } = await supabase
+    .from("activities")
+    .select("location")
+    .eq("id", input.activityId)
+    .single();
+
+  if (activityError) {
+    throw new Error(getSupabaseErrorMessage(activityError));
+  }
+
+  const resolvedLocation =
+    input.location?.trim() || activityRow.location?.trim() || "";
+
+  if (!resolvedLocation) {
+    throw new Error("Locatie is verplicht.");
+  }
+
   const { data, error } = await supabase
     .from("activity_recurring_schedules")
     .insert({
@@ -149,7 +166,7 @@ export async function createRecurringSchedule(
       day_of_week: input.dayOfWeek,
       start_time: normalizeTime(input.startTime),
       end_time: normalizeTime(input.endTime),
-      location: input.location,
+      location: resolvedLocation,
       min_participants: input.minParticipants,
       max_participants: input.maxParticipants,
       interval_weeks: 1,
