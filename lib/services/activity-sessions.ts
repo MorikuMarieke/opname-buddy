@@ -9,7 +9,10 @@ import type {
   PlanningSessionListItem,
 } from "@/types/activity";
 import type { ActivitySessionRow } from "@/types/database";
-import type { OneOffSessionInputValues } from "@/lib/validations/activity-session";
+import type {
+  OneOffSessionInputValues,
+  UpdateActivitySessionInput,
+} from "@/lib/validations/activity-session";
 
 function getSupabaseErrorMessage(error: { message: string; code?: string }): string {
   if (error.message.includes("permission denied")) {
@@ -385,4 +388,85 @@ export async function setSessionFacilitators(
 
 export function isSessionEditable(status: SessionStatus): boolean {
   return status === "draft";
+}
+
+export async function updateActivitySession(
+  sessionId: string,
+  input: UpdateActivitySessionInput,
+): Promise<ActivitySession> {
+  const supabase = createClient();
+  const detail = await getPlanningSessionDetail(sessionId);
+
+  if (!isSessionEditable(detail.session.status)) {
+    throw new Error("Alleen geplande sessies kunnen worden bewerkt.");
+  }
+
+  const startsAt = combineAmsterdamDateAndTime(input.sessionDate, input.startTime);
+  const endsAt = combineAmsterdamDateAndTime(input.sessionDate, input.endTime);
+
+  const payload: Partial<ActivitySessionRow> = {
+    starts_at: startsAt,
+    ends_at: endsAt,
+    location: input.location.trim(),
+    min_participants: input.minParticipants,
+    max_participants: input.maxParticipants,
+    notes: input.notes ?? null,
+    is_detached: detail.session.recurringScheduleId
+      ? true
+      : detail.session.isDetached,
+  };
+
+  const { data, error } = await supabase
+    .from("activity_sessions")
+    .update(payload)
+    .eq("id", sessionId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(getSupabaseErrorMessage(error));
+  }
+
+  return mapSession(data);
+}
+
+export function getSessionFormDateTime(session: ActivitySession): {
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+} {
+  const dateFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Amsterdam",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Amsterdam",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  return {
+    sessionDate: dateFormatter.format(new Date(session.startsAt)),
+    startTime: timeFormatter.format(new Date(session.startsAt)),
+    endTime: timeFormatter.format(new Date(session.endsAt)),
+  };
+}
+
+export function getDefaultSessionEditValues(
+  session: ActivitySession,
+): UpdateActivitySessionInput {
+  const { sessionDate, startTime, endTime } = getSessionFormDateTime(session);
+
+  return {
+    sessionDate,
+    startTime,
+    endTime,
+    location: session.location,
+    minParticipants: session.minParticipants,
+    maxParticipants: session.maxParticipants,
+    notes: session.notes,
+  };
 }

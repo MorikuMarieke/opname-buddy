@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { FormField } from "@/components/forms/form-field";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SecondaryButton } from "@/components/ui/secondary-button";
@@ -13,6 +14,7 @@ import {
   usePlanningSessionDetail,
   useSetSessionFacilitators,
   useSetSessionParticipants,
+  useUpdateActivitySession,
   useUpdateSessionStatus,
 } from "@/hooks/use-planning-sessions";
 import {
@@ -24,10 +26,13 @@ import {
 import { ROLE_LABELS } from "@/lib/constants/admin-account-copy";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
 import {
+  getDefaultSessionEditValues,
   isBelowMinParticipants,
   isSessionEditable,
   type PlanningSessionDetail,
 } from "@/lib/services/activity-sessions";
+import { updateActivitySessionSchema } from "@/lib/validations/activity-session";
+import type { UpdateActivitySessionFormValues } from "@/lib/validations/activity-session";
 import { formatDutchDateTime } from "@/lib/utils/amsterdam-date";
 import type {
   PlanningFacilitatorCandidate,
@@ -39,6 +44,12 @@ interface PlanningSessionDetailViewProps {
 }
 
 const copy = PLANNING_COPY.sessions;
+
+const inputClasses =
+  "h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm text-carbon-black-900 disabled:opacity-50";
+
+const textareaClasses =
+  "min-h-24 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 py-3 text-sm text-carbon-black-900 disabled:opacity-50";
 
 function getStatusActionLabel(nextStatus: SessionStatus): string {
   if (nextStatus === "confirmed") return copy.statusActions.publish;
@@ -95,6 +106,21 @@ function SessionAssignmentsPanel({
   const statusMutation = useUpdateSessionStatus(sessionId);
   const participantsMutation = useSetSessionParticipants(sessionId);
   const facilitatorsMutation = useSetSessionFacilitators(sessionId);
+  const scheduleMutation = useUpdateActivitySession(sessionId);
+
+  const [scheduleValues, setScheduleValues] = useState<UpdateActivitySessionFormValues>(
+    () => {
+      const defaults = getDefaultSessionEditValues(detail.session);
+      return {
+        ...defaults,
+        minParticipants: String(defaults.minParticipants),
+        maxParticipants: String(defaults.maxParticipants),
+      };
+    },
+  );
+  const [scheduleErrors, setScheduleErrors] = useState<
+    Partial<Record<string, string>>
+  >({});
 
   const [selectedAdmissionIds, setSelectedAdmissionIds] = useState(
     () => detail.participantAdmissionIds,
@@ -110,7 +136,10 @@ function SessionAssignmentsPanel({
   const nextStatuses = SESSION_STATUS_TRANSITIONS[session.status];
   const isSavingAssignments =
     participantsMutation.isPending || facilitatorsMutation.isPending;
-  const isBusy = statusMutation.isPending || isSavingAssignments;
+  const isBusy =
+    statusMutation.isPending ||
+    isSavingAssignments ||
+    scheduleMutation.isPending;
   const hasUnsavedAssignments =
     !sortedIdsEqual(selectedAdmissionIds, detail.participantAdmissionIds) ||
     !sortedIdsEqual(selectedFacilitatorIds, detail.facilitatorUserIds);
@@ -154,6 +183,31 @@ function SessionAssignmentsPanel({
       await statusMutation.mutateAsync(nextStatus);
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "Actie mislukt.");
+    }
+  }
+
+  async function handleSaveSchedule() {
+    const parsed = updateActivitySessionSchema.safeParse(scheduleValues);
+
+    if (!parsed.success) {
+      const fieldErrors: Partial<Record<string, string>> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string" && !fieldErrors[key]) {
+          fieldErrors[key] = issue.message;
+        }
+      }
+      setScheduleErrors(fieldErrors);
+      return;
+    }
+
+    setScheduleErrors({});
+    setActionError(null);
+
+    try {
+      await scheduleMutation.mutateAsync(parsed.data);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Opslaan mislukt.");
     }
   }
 
@@ -230,6 +284,156 @@ function SessionAssignmentsPanel({
           ) : null}
         </div>
       </DashboardCard>
+
+      {editable ? (
+        <DashboardCard density="compact" title={copy.editScheduleTitle}>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <FormField
+              label={copy.fields.sessionDate}
+              htmlFor="editSessionDate"
+              error={scheduleErrors.sessionDate}
+            >
+              <input
+                id="editSessionDate"
+                type="date"
+                disabled={isBusy}
+                className={inputClasses}
+                value={scheduleValues.sessionDate}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    sessionDate: event.target.value,
+                  }))
+                }
+              />
+            </FormField>
+            <FormField
+              label={copy.fields.startTime}
+              htmlFor="editStartTime"
+              error={scheduleErrors.startTime}
+            >
+              <input
+                id="editStartTime"
+                type="time"
+                disabled={isBusy}
+                className={inputClasses}
+                value={scheduleValues.startTime}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    startTime: event.target.value,
+                  }))
+                }
+              />
+            </FormField>
+            <FormField
+              label={copy.fields.endTime}
+              htmlFor="editEndTime"
+              error={scheduleErrors.endTime}
+            >
+              <input
+                id="editEndTime"
+                type="time"
+                disabled={isBusy}
+                className={inputClasses}
+                value={scheduleValues.endTime}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    endTime: event.target.value,
+                  }))
+                }
+              />
+            </FormField>
+            <FormField
+              label={copy.fields.location}
+              htmlFor="editLocation"
+              error={scheduleErrors.location}
+              className="lg:col-span-2"
+            >
+              <input
+                id="editLocation"
+                type="text"
+                disabled={isBusy}
+                className={inputClasses}
+                value={scheduleValues.location}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    location: event.target.value,
+                  }))
+                }
+              />
+            </FormField>
+            <FormField
+              label={copy.fields.minParticipants}
+              htmlFor="editMinParticipants"
+              error={scheduleErrors.minParticipants}
+            >
+              <input
+                id="editMinParticipants"
+                type="number"
+                min={1}
+                disabled={isBusy}
+                className={inputClasses}
+                value={String(scheduleValues.minParticipants)}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    minParticipants: event.target.value,
+                  }))
+                }
+              />
+            </FormField>
+            <FormField
+              label={copy.fields.maxParticipants}
+              htmlFor="editMaxParticipants"
+              error={scheduleErrors.maxParticipants}
+            >
+              <input
+                id="editMaxParticipants"
+                type="number"
+                min={1}
+                disabled={isBusy}
+                className={inputClasses}
+                value={String(scheduleValues.maxParticipants)}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    maxParticipants: event.target.value,
+                  }))
+                }
+              />
+            </FormField>
+            <FormField
+              label={copy.fields.notes}
+              htmlFor="editNotes"
+              error={scheduleErrors.notes}
+              className="lg:col-span-2"
+            >
+              <textarea
+                id="editNotes"
+                disabled={isBusy}
+                className={textareaClasses}
+                value={scheduleValues.notes ?? ""}
+                onChange={(event) =>
+                  setScheduleValues((current) => ({
+                    ...current,
+                    notes: event.target.value || null,
+                  }))
+                }
+              />
+            </FormField>
+          </div>
+          <PrimaryButton
+            className="mt-4"
+            onClick={handleSaveSchedule}
+            disabled={isBusy}
+          >
+            {copy.saveScheduleButton}
+          </PrimaryButton>
+        </DashboardCard>
+      ) : null}
 
       {nextStatuses.length > 0 ? (
         <DashboardCard density="compact" title="Status">

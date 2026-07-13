@@ -67,7 +67,7 @@ function PlanningRecurringEditForm({
 
     try {
       await updateMutation.mutateAsync(parsed.data);
-      router.push("/planning/recurring");
+      router.push(`/planning/series/${scheduleId}`);
     } catch (error) {
       setErrors({
         submit: error instanceof Error ? error.message : "Opslaan mislukt.",
@@ -110,7 +110,7 @@ function PlanningRecurringEditForm({
           errors={errors}
           disabled={updateMutation.isPending}
           submitLabel={PLANNING_COPY.recurring.saveButton}
-          onCancel={() => router.push("/planning/recurring")}
+          onCancel={() => router.push(`/planning/series/${scheduleId}`)}
           onSubmit={handleSubmit}
         />
       </DashboardCard>

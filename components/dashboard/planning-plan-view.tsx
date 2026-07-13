@@ -242,7 +242,7 @@ export function PlanningPlanView() {
           kind: "recurring",
           ...parsed,
         });
-        router.push("/planning/recurring");
+        router.push("/planning/series");
         return;
       }
 

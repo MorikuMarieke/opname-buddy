@@ -1,11 +1,15 @@
 import { RECURRING_MATERIALIZE_WEEKS_AHEAD } from "@/lib/constants/planning-enums";
 import { createClient } from "@/lib/supabase/client";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
-import { setSeriesFacilitators } from "@/lib/services/planning-facilitators";
+import { setSeriesFacilitators, listSeriesFacilitatorUserIds } from "@/lib/services/planning-facilitators";
 import type {
   ActivityRecurringSchedule,
+  ActivitySession,
 } from "@/types/activity";
-import type { ActivityRecurringScheduleRow } from "@/types/database";
+import type {
+  ActivityRecurringScheduleRow,
+  ActivitySessionRow,
+} from "@/types/database";
 import type {
   RecurringScheduleInputValues,
   RecurringScheduleUpdateValues,
@@ -208,4 +212,145 @@ export async function updateRecurringSchedule(
   }
 
   return schedule;
+}
+
+function mapSessionRow(row: ActivitySessionRow): ActivitySession {
+  return {
+    id: row.id,
+    activityId: row.activity_id,
+    recurringScheduleId: row.recurring_schedule_id,
+    sessionKind: row.session_kind as ActivitySession["sessionKind"],
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    location: row.location,
+    minParticipants: row.min_participants,
+    maxParticipants: row.max_participants,
+    status: row.status as ActivitySession["status"],
+    notes: row.notes,
+    recurringOccurrenceDate: row.recurring_occurrence_date,
+    isDetached: row.is_detached,
+    confirmedAt: row.confirmed_at,
+    confirmedByStaffId: row.confirmed_by_staff_id,
+    createdByStaffId: row.created_by_staff_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export type SeriesReminderStatus = "ending_soon" | "ended" | null;
+
+export function getSeriesReminderStatus(
+  schedule: ActivityRecurringSchedule,
+): SeriesReminderStatus {
+  if (schedule.endedAt) {
+    return "ended";
+  }
+
+  const today = getAmsterdamDateString();
+  const warningDate = addDaysToIsoDate(today, 14);
+
+  if (schedule.seriesEndsOn <= warningDate) {
+    return "ending_soon";
+  }
+
+  return null;
+}
+
+export interface RecurringSeriesDetail {
+  schedule: ActivityRecurringSchedule;
+  activityTitle: string;
+  facilitatorUserIds: string[];
+  sessions: ActivitySession[];
+}
+
+export async function getRecurringSeriesDetail(
+  scheduleId: string,
+): Promise<RecurringSeriesDetail> {
+  const supabase = createClient();
+
+  const { data: scheduleRow, error: scheduleError } = await supabase
+    .from("activity_recurring_schedules")
+    .select("*, activities(title)")
+    .eq("id", scheduleId)
+    .single();
+
+  if (scheduleError) {
+    throw new Error(getSupabaseErrorMessage(scheduleError));
+  }
+
+  const { data: sessionRows, error: sessionsError } = await supabase
+    .from("activity_sessions")
+    .select("*")
+    .eq("recurring_schedule_id", scheduleId)
+    .order("starts_at", { ascending: true });
+
+  if (sessionsError) {
+    throw new Error(getSupabaseErrorMessage(sessionsError));
+  }
+
+  const facilitatorUserIds = await listSeriesFacilitatorUserIds(scheduleId);
+  const activity = scheduleRow.activities as { title: string } | null;
+
+  return {
+    schedule: mapRecurringSchedule(scheduleRow as ActivityRecurringScheduleRow),
+    activityTitle: activity?.title ?? "Onbekende activiteit",
+    facilitatorUserIds,
+    sessions: (sessionRows ?? []).map((row) =>
+      mapSessionRow(row as ActivitySessionRow),
+    ),
+  };
+}
+
+export async function extendRecurringSeries(
+  scheduleId: string,
+  additionalWeeks = 12,
+): Promise<ActivityRecurringSchedule> {
+  const schedule = await getRecurringSchedule(scheduleId);
+  const newEndsOn = addDaysToIsoDate(schedule.seriesEndsOn, additionalWeeks * 7);
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("activity_recurring_schedules")
+    .update({ series_ends_on: newEndsOn })
+    .eq("id", scheduleId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(getSupabaseErrorMessage(error));
+  }
+
+  const updated = mapRecurringSchedule(data);
+  await materializeSchedule(updated.id);
+  return updated;
+}
+
+export async function endRecurringSeries(
+  scheduleId: string,
+): Promise<ActivityRecurringSchedule> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("activity_recurring_schedules")
+    .update({
+      ended_at: new Date().toISOString(),
+      is_active: false,
+    })
+    .eq("id", scheduleId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(getSupabaseErrorMessage(error));
+  }
+
+  return mapRecurringSchedule(data);
+}
+
+export async function setRecurringSeriesFacilitators(
+  scheduleId: string,
+  userIds: string[],
+): Promise<void> {
+  await setSeriesFacilitators(scheduleId, userIds);
+  await materializeSchedule(scheduleId);
 }

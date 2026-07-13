@@ -6,15 +6,18 @@ import { queryKeys } from "@/lib/constants/query-keys";
 import type { SessionStatus } from "@/lib/constants/planning-enums";
 import {
   createOneOffSession,
+  getDefaultSessionEditValues,
   getPlanningSessionDetail,
   listPlanningSessions,
   setSessionFacilitators,
   setSessionParticipants,
+  updateActivitySession,
   updateSessionStatus,
   type ListPlanningSessionsFilters,
 } from "@/lib/services/activity-sessions";
 import type {
   OneOffSessionInputValues,
+  UpdateActivitySessionInput,
 } from "@/lib/validations/activity-session";
 
 export function usePlanningSessions(filters: ListPlanningSessionsFilters = {}) {
@@ -104,3 +107,24 @@ export function useSetSessionFacilitators(sessionId: string) {
     },
   });
 }
+
+export function useUpdateActivitySession(sessionId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateActivitySessionInput) =>
+      updateActivitySession(sessionId, input),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.planning.sessions.all,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.planning.sessions.detail(sessionId),
+        }),
+      ]);
+    },
+  });
+}
+
+export { getDefaultSessionEditValues };

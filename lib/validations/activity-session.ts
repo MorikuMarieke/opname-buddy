@@ -66,3 +66,44 @@ export const sessionParticipantsSchema = z.object({
 export const sessionVolunteersSchema = z.object({
   userIds: z.array(z.string().uuid()).min(0),
 });
+
+export const updateActivitySessionSchema = z
+  .object({
+    sessionDate: dateSchema,
+    startTime: timeSchema,
+    endTime: timeSchema,
+    location: z
+      .string()
+      .trim()
+      .min(1, "Locatie is verplicht.")
+      .max(200),
+    minParticipants: z.coerce.number().int().min(1),
+    maxParticipants: z.coerce.number().int().min(1),
+    notes: z
+      .string()
+      .trim()
+      .max(2000)
+      .optional()
+      .nullable()
+      .transform((value) => value || null),
+  })
+  .refine((data) => data.endTime > data.startTime, {
+    message: "Eindtijd moet na starttijd liggen.",
+    path: ["endTime"],
+  })
+  .refine((data) => data.maxParticipants >= data.minParticipants, {
+    message: "Maximum moet minimaal het minimum zijn.",
+    path: ["maxParticipants"],
+  });
+
+export type UpdateActivitySessionInput = z.infer<typeof updateActivitySessionSchema>;
+
+export type UpdateActivitySessionFormValues = {
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  minParticipants: string | number;
+  maxParticipants: string | number;
+  notes?: string | null;
+};
