@@ -9,6 +9,7 @@ import {
   Home,
   LayoutDashboard,
   MessageCircleQuestion,
+  Plus,
   Repeat2,
   Settings,
   Shield,
@@ -43,6 +44,7 @@ export const careNavItems: NavItem[] = [
 
 export const planningNavItems: NavItem[] = [
   { label: "Planning", href: "/planning", icon: LayoutDashboard },
+  { label: "Activiteit plannen", href: "/planning/plan", icon: Plus },
   { label: "Activiteiten", href: "/planning/activities", icon: Activity },
   { label: "Sessies", href: "/planning/sessions", icon: CalendarDays },
   { label: "Terugkerend", href: "/planning/recurring", icon: Repeat2 },

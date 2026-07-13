@@ -1,6 +1,7 @@
 import { RECURRING_MATERIALIZE_WEEKS_AHEAD } from "@/lib/constants/planning-enums";
 import { createClient } from "@/lib/supabase/client";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
+import { setSeriesFacilitators } from "@/lib/services/planning-facilitators";
 import type {
   ActivityRecurringSchedule,
 } from "@/types/activity";
@@ -130,6 +131,7 @@ export async function getRecurringSchedule(
 
 export async function createRecurringSchedule(
   input: RecurringScheduleInputValues,
+  options?: { facilitatorUserIds?: string[] },
 ): Promise<ActivityRecurringSchedule> {
   const supabase = createClient();
   const staffId = await getCurrentStaffId();
@@ -159,6 +161,11 @@ export async function createRecurringSchedule(
   }
 
   const schedule = mapRecurringSchedule(data);
+
+  if (options?.facilitatorUserIds?.length) {
+    await setSeriesFacilitators(schedule.id, options.facilitatorUserIds);
+  }
+
   await materializeSchedule(schedule.id);
   return schedule;
 }

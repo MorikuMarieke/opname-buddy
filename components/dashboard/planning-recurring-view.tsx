@@ -26,9 +26,9 @@ export function PlanningRecurringView() {
           <PrimaryButton
             size="sm"
             icon={<Plus className="h-4 w-4" />}
-            href="/planning/recurring/new"
+            href="/planning/plan"
           >
-            {copy.addButton}
+            {PLANNING_COPY.plan.pageTitle}
           </PrimaryButton>
         }
       />
@@ -46,8 +46,8 @@ export function PlanningRecurringView() {
             title={copy.emptyTitle}
             description={copy.emptyDescription}
             action={
-              <PrimaryButton href="/planning/recurring/new">
-                {copy.addButton}
+              <PrimaryButton href="/planning/plan">
+                {PLANNING_COPY.plan.pageTitle}
               </PrimaryButton>
             }
           />

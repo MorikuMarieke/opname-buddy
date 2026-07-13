@@ -120,7 +120,7 @@ export const PLANNING_COPY = {
   overview: {
     pageTitle: "Activiteitenplanning",
     pageDescription: "Overzicht per locatie voor vandaag.",
-    addSessionButton: "Sessie plannen",
+    addSessionButton: "Activiteit plannen",
     emptyTitle: "Geen sessies vandaag",
     emptyDescription: "Plan een sessie of activeer terugkerende schema's.",
     listError: "Planning kon niet worden geladen.",
@@ -145,5 +145,34 @@ export const PLANNING_COPY = {
     noRecurring: "Geen vaste tijdvakken",
     noExceptions: "Geen uitzonderingen",
     bioTitle: "Over mij",
+  },
+  plan: {
+    pageTitle: "Activiteit plannen",
+    pageDescription:
+      "Plan een eenmalige sessie of een terugkerende reeks in een paar stappen.",
+    steps: {
+      activity: "Activiteit",
+      kind: "Type",
+      schedule: "Planning",
+      facilitators: "Begeleiders",
+    },
+    kindLabels: {
+      one_off: "Eenmalig",
+      recurring: "Terugkerend",
+    },
+    kindDescriptions: {
+      one_off: "Plan één sessie op een specifieke datum.",
+      recurring: "Maak een reeks die automatisch sessies genereert.",
+    },
+    chooseActivityPlaceholder: "Kies een activiteit",
+    newActivityHint: "Staat de activiteit nog niet in het catalogus?",
+    newActivityLink: "Nieuwe activiteit aanmaken",
+    selectedActivityLabel: "Gekozen activiteit",
+    summaryPrefix: "Je plant",
+    nextButton: "Volgende",
+    backButton: "Vorige",
+    saveButton: "Opslaan",
+    cancelButton: "Annuleren",
+    saveError: "Opslaan mislukt. Probeer het opnieuw.",
   },
 } as const;

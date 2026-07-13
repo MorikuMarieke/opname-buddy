@@ -108,7 +108,7 @@ export function PlanningOverviewView() {
           <PrimaryButton
             size="sm"
             icon={<Plus className="h-4 w-4" />}
-            href="/planning/sessions/new"
+            href="/planning/plan"
           >
             {copy.addSessionButton}
           </PrimaryButton>

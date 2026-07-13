@@ -51,9 +51,9 @@ export function PlanningSessionsView() {
           <PrimaryButton
             size="sm"
             icon={<Plus className="h-4 w-4" />}
-            href="/planning/sessions/new"
+            href="/planning/plan"
           >
-            {copy.addOneOffButton}
+            {PLANNING_COPY.plan.pageTitle}
           </PrimaryButton>
         }
       />
@@ -108,8 +108,8 @@ export function PlanningSessionsView() {
             title={copy.emptyTitle}
             description={copy.emptyDescription}
             action={
-              <PrimaryButton href="/planning/sessions/new">
-                {copy.addOneOffButton}
+              <PrimaryButton href="/planning/plan">
+                {PLANNING_COPY.plan.pageTitle}
               </PrimaryButton>
             }
           />
