@@ -4,7 +4,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { FacilitatorSessionsView } from "@/components/dashboard/facilitator-sessions-view";
 import { FACILITATOR_COPY } from "@/lib/constants/facilitator-copy";
 
-export function VolunteerPlanningView() {
+export function FacilitatorSessionsPageView() {
   const copy = FACILITATOR_COPY.sessions;
 
   return (
