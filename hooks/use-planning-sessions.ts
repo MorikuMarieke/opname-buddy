@@ -8,8 +8,8 @@ import {
   createOneOffSession,
   getPlanningSessionDetail,
   listPlanningSessions,
+  setSessionFacilitators,
   setSessionParticipants,
-  setSessionVolunteers,
   updateSessionStatus,
   type ListPlanningSessionsFilters,
 } from "@/lib/services/activity-sessions";
@@ -87,11 +87,11 @@ export function useSetSessionParticipants(sessionId: string) {
   });
 }
 
-export function useSetSessionVolunteers(sessionId: string) {
+export function useSetSessionFacilitators(sessionId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userIds: string[]) => setSessionVolunteers(sessionId, userIds),
+    mutationFn: (userIds: string[]) => setSessionFacilitators(sessionId, userIds),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({

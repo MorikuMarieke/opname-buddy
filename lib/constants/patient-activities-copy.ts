@@ -5,6 +5,6 @@ export const PATIENT_ACTIVITIES_COPY = {
   emptyDescription:
     "Er staan nog geen bevestigde activiteiten voor je klaar. Vraag je zorgteam als je vragen hebt.",
   loadError: "Activiteiten konden niet worden geladen.",
-  volunteerLabel: "Vrijwilliger",
+  facilitatorLabel: "Begeleider",
   locationLabel: "Locatie",
 } as const;

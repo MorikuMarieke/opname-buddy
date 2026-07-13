@@ -36,6 +36,8 @@ function mapSession(row: ActivitySessionRow): ActivitySession {
     maxParticipants: row.max_participants,
     status: row.status as ActivitySession["status"],
     notes: row.notes,
+    recurringOccurrenceDate: row.recurring_occurrence_date,
+    isDetached: row.is_detached,
     confirmedAt: row.confirmed_at,
     confirmedByStaffId: row.confirmed_by_staff_id,
     createdByStaffId: row.created_by_staff_id,
@@ -62,9 +64,8 @@ export interface PlanningSessionDetail {
   session: ActivitySession;
   activityTitle: string;
   activityDescription: string;
-  requiresVolunteer: boolean;
   participantAdmissionIds: string[];
-  volunteerUserIds: string[];
+  facilitatorUserIds: string[];
 }
 
 export interface ListPlanningSessionsFilters {
@@ -89,8 +90,9 @@ function mapPlanningSessionListItem(row: {
   min_participants: number;
   max_participants: number;
   participant_count: number;
-  volunteer_count: number;
+  facilitator_count: number;
   recurring_schedule_id: string | null;
+  is_detached: boolean;
 }): PlanningSessionListItem {
   return {
     sessionId: row.session_id,
@@ -107,8 +109,9 @@ function mapPlanningSessionListItem(row: {
     minParticipants: row.min_participants,
     maxParticipants: row.max_participants,
     participantCount: Number(row.participant_count),
-    volunteerCount: Number(row.volunteer_count),
+    facilitatorCount: Number(row.facilitator_count),
     recurringScheduleId: row.recurring_schedule_id,
+    isDetached: row.is_detached,
   };
 }
 
@@ -142,7 +145,7 @@ export async function getPlanningSessionDetail(
 
   const { data: sessionRow, error: sessionError } = await supabase
     .from("activity_sessions")
-    .select("*, activities(title, description, requires_volunteer)")
+    .select("*, activities(title, description)")
     .eq("id", sessionId)
     .single();
 
@@ -159,28 +162,26 @@ export async function getPlanningSessionDetail(
     throw new Error(getSupabaseErrorMessage(participantsError));
   }
 
-  const { data: volunteers, error: volunteersError } = await supabase
-    .from("activity_session_volunteers")
+  const { data: facilitators, error: facilitatorsError } = await supabase
+    .from("activity_session_facilitators")
     .select("user_id")
     .eq("session_id", sessionId);
 
-  if (volunteersError) {
-    throw new Error(getSupabaseErrorMessage(volunteersError));
+  if (facilitatorsError) {
+    throw new Error(getSupabaseErrorMessage(facilitatorsError));
   }
 
   const activity = sessionRow.activities as {
     title: string;
     description: string;
-    requires_volunteer: boolean;
   } | null;
 
   return {
     session: mapSession(sessionRow as ActivitySessionRow),
     activityTitle: activity?.title ?? "Onbekende activiteit",
     activityDescription: activity?.description ?? "",
-    requiresVolunteer: activity?.requires_volunteer ?? false,
     participantAdmissionIds: (participants ?? []).map((row) => row.admission_id),
-    volunteerUserIds: (volunteers ?? []).map((row) => row.user_id),
+    facilitatorUserIds: (facilitators ?? []).map((row) => row.user_id),
   };
 }
 
@@ -218,25 +219,22 @@ export async function createOneOffSession(
   return mapSession(data);
 }
 
-function assertPersistedAssignmentsForStatusChange(
-  detail: PlanningSessionDetail,
-  nextStatus: SessionStatus,
+function assertMaxParticipants(
+  count: number,
+  maxParticipants: number,
 ): void {
-  if (nextStatus === "proposed" || nextStatus === "confirmed") {
-    assertParticipantBounds(
-      detail.participantAdmissionIds.length,
-      detail.session.minParticipants,
-      detail.session.maxParticipants,
+  if (count > maxParticipants) {
+    throw new Error(
+      `Selecteer maximaal ${maxParticipants} deelnemer(s) voor deze sessie.`,
     );
   }
+}
 
-  if (nextStatus === "confirmed" && detail.requiresVolunteer) {
-    if (detail.volunteerUserIds.length === 0) {
-      throw new Error(
-        "Deze activiteit vereist minstens één toegewezen vrijwilliger voordat je kunt bevestigen.",
-      );
-    }
-  }
+export function isBelowMinParticipants(
+  count: number,
+  minParticipants: number,
+): boolean {
+  return count < minParticipants;
 }
 
 export async function updateSessionStatus(
@@ -252,7 +250,12 @@ export async function updateSessionStatus(
     throw new Error("Deze statuswijziging is niet toegestaan.");
   }
 
-  assertPersistedAssignmentsForStatusChange(detail, nextStatus);
+  if (nextStatus === "confirmed") {
+    assertMaxParticipants(
+      detail.participantAdmissionIds.length,
+      detail.session.maxParticipants,
+    );
+  }
 
   const payload: Partial<ActivitySessionRow> = {
     status: nextStatus,
@@ -277,24 +280,6 @@ export async function updateSessionStatus(
   return mapSession(data);
 }
 
-function assertParticipantBounds(
-  count: number,
-  minParticipants: number,
-  maxParticipants: number,
-): void {
-  if (count < minParticipants) {
-    throw new Error(
-      `Selecteer minimaal ${minParticipants} deelnemer(s) voor deze sessie.`,
-    );
-  }
-
-  if (count > maxParticipants) {
-    throw new Error(
-      `Selecteer maximaal ${maxParticipants} deelnemer(s) voor deze sessie.`,
-    );
-  }
-}
-
 export async function setSessionParticipants(
   sessionId: string,
   admissionIds: string[],
@@ -303,15 +288,11 @@ export async function setSessionParticipants(
   const staffId = await getCurrentStaffId();
   const detail = await getPlanningSessionDetail(sessionId);
 
-  if (!["draft", "proposed"].includes(detail.session.status)) {
-    throw new Error("Deelnemers kunnen alleen gewijzigd worden in concept of voorstel.");
+  if (!isSessionEditable(detail.session.status)) {
+    throw new Error("Deelnemers kunnen alleen gewijzigd worden bij een geplande sessie.");
   }
 
-  assertParticipantBounds(
-    admissionIds.length,
-    detail.session.minParticipants,
-    detail.session.maxParticipants,
-  );
+  assertMaxParticipants(admissionIds.length, detail.session.maxParticipants);
 
   const { error: deleteError } = await supabase
     .from("activity_session_participants")
@@ -341,7 +322,7 @@ export async function setSessionParticipants(
   }
 }
 
-export async function setSessionVolunteers(
+export async function setSessionFacilitators(
   sessionId: string,
   userIds: string[],
 ): Promise<void> {
@@ -349,12 +330,12 @@ export async function setSessionVolunteers(
   const staffId = await getCurrentStaffId();
   const detail = await getPlanningSessionDetail(sessionId);
 
-  if (!["draft", "proposed"].includes(detail.session.status)) {
-    throw new Error("Vrijwilligers kunnen alleen gewijzigd worden in concept of voorstel.");
+  if (!isSessionEditable(detail.session.status)) {
+    throw new Error("Begeleiders kunnen alleen gewijzigd worden bij een geplande sessie.");
   }
 
   const { error: deleteError } = await supabase
-    .from("activity_session_volunteers")
+    .from("activity_session_facilitators")
     .delete()
     .eq("session_id", sessionId);
 
@@ -363,11 +344,21 @@ export async function setSessionVolunteers(
   }
 
   if (userIds.length === 0) {
+    if (detail.session.recurringScheduleId) {
+      const { error: detachError } = await supabase
+        .from("activity_sessions")
+        .update({ is_detached: true })
+        .eq("id", sessionId);
+
+      if (detachError) {
+        throw new Error(getSupabaseErrorMessage(detachError));
+      }
+    }
     return;
   }
 
   const { error: insertError } = await supabase
-    .from("activity_session_volunteers")
+    .from("activity_session_facilitators")
     .insert(
       userIds.map((userId) => ({
         session_id: sessionId,
@@ -379,8 +370,19 @@ export async function setSessionVolunteers(
   if (insertError) {
     throw new Error(getSupabaseErrorMessage(insertError));
   }
+
+  if (detail.session.recurringScheduleId) {
+    const { error: detachError } = await supabase
+      .from("activity_sessions")
+      .update({ is_detached: true })
+      .eq("id", sessionId);
+
+    if (detachError) {
+      throw new Error(getSupabaseErrorMessage(detachError));
+    }
+  }
 }
 
 export function isSessionEditable(status: SessionStatus): boolean {
-  return status === "draft" || status === "proposed";
+  return status === "draft";
 }

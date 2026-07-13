@@ -30,6 +30,6 @@ export async function listPatientActivitySessions(): Promise<
     startsAt: row.starts_at,
     endsAt: row.ends_at,
     location: row.location,
-    volunteerNames: row.volunteer_names,
+    facilitatorNames: row.facilitator_names,
   }));
 }

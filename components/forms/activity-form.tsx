@@ -226,33 +226,6 @@ export function ActivityForm({
         </FormField>
       </div>
 
-      <div className="flex flex-col gap-3 lg:col-span-2">
-        <label className="flex items-center gap-3 text-sm text-carbon-black-900">
-          <input
-            type="checkbox"
-            disabled={disabled}
-            checked={values.requiresSupervision}
-            onChange={(event) =>
-              onChange({ ...values, requiresSupervision: event.target.checked })
-            }
-            className="h-5 w-5 rounded border-dust-grey-300"
-          />
-          {copy.requiresSupervision}
-        </label>
-        <label className="flex items-center gap-3 text-sm text-carbon-black-900">
-          <input
-            type="checkbox"
-            disabled={disabled}
-            checked={values.requiresVolunteer}
-            onChange={(event) =>
-              onChange({ ...values, requiresVolunteer: event.target.checked })
-            }
-            className="h-5 w-5 rounded border-dust-grey-300"
-          />
-          {copy.requiresVolunteer}
-        </label>
-      </div>
-
       <FormField
         label={copy.mobilityNotes}
         htmlFor="mobilityNotes"
@@ -300,7 +273,5 @@ export const defaultActivityFormValues: ActivityInputFormValues = {
   defaultDurationMinutes: "",
   minParticipants: 1,
   maxParticipants: 8,
-  requiresSupervision: false,
-  requiresVolunteer: false,
   mobilityNotes: null,
 };

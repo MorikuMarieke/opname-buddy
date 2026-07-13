@@ -14,7 +14,6 @@ import { formatDutchDateTime } from "@/lib/utils/amsterdam-date";
 function statusVariant(
   status: keyof typeof SESSION_STATUS_LABELS,
 ): "neutral" | "attention" | "positive" {
-  if (status === "proposed") return "attention";
   if (status === "confirmed") return "positive";
   return "neutral";
 }
@@ -65,6 +64,9 @@ export function VolunteerPlanningView() {
                     </p>
                     <p className="text-sm text-carbon-black-700">
                       {session.location}
+                    </p>
+                    <p className="text-sm text-carbon-black-600">
+                      {session.participantCount} deelnemer(s)
                     </p>
                   </div>
                   <StatusBadge variant={statusVariant(session.status)}>

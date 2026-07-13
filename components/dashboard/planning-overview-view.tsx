@@ -34,7 +34,6 @@ const nestedActivityColors = [
 function statusVariant(
   status: SessionStatus,
 ): "neutral" | "attention" | "positive" {
-  if (status === "proposed") return "attention";
   if (status === "confirmed" || status === "completed") return "positive";
   return "neutral";
 }
@@ -169,7 +168,7 @@ export function PlanningOverviewView() {
                     </p>
                     <p className="mt-1 text-xs font-medium text-blue-slate-700">
                       {session.participantCount} / {session.maxParticipants}{" "}
-                      deelnemers · {session.volunteerCount} vrijwilliger(s)
+                      deelnemers · {session.facilitatorCount} begeleider(s)
                     </p>
                   </Link>
                 ))}

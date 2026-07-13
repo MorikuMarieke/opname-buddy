@@ -37,8 +37,6 @@ function mapActivity(row: ActivityRow): Activity {
     defaultDurationMinutes: row.default_duration_minutes,
     minParticipants: row.min_participants,
     maxParticipants: row.max_participants,
-    requiresSupervision: row.requires_supervision,
-    requiresVolunteer: row.requires_volunteer,
     mobilityNotes: row.mobility_notes,
     isActive: row.is_active,
     createdByStaffId: row.created_by_staff_id,
@@ -58,8 +56,6 @@ function toInsertPayload(input: CreateActivityInput, staffId: string) {
     default_duration_minutes: input.defaultDurationMinutes,
     min_participants: input.minParticipants,
     max_participants: input.maxParticipants,
-    requires_supervision: input.requiresSupervision,
-    requires_volunteer: input.requiresVolunteer,
     mobility_notes: input.mobilityNotes?.trim() || null,
     created_by_staff_id: staffId,
   };
@@ -79,10 +75,6 @@ function toUpdatePayload(input: UpdateActivityInput): Partial<ActivityRow> {
   }
   if (input.minParticipants !== undefined) payload.min_participants = input.minParticipants;
   if (input.maxParticipants !== undefined) payload.max_participants = input.maxParticipants;
-  if (input.requiresSupervision !== undefined) {
-    payload.requires_supervision = input.requiresSupervision;
-  }
-  if (input.requiresVolunteer !== undefined) payload.requires_volunteer = input.requiresVolunteer;
   if (input.mobilityNotes !== undefined) {
     payload.mobility_notes = input.mobilityNotes?.trim() || null;
   }

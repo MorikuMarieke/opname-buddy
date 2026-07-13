@@ -4,6 +4,7 @@ import type {
   ActivityIntensity,
   AvailabilityExceptionKind,
   DayOfWeek,
+  RecurringIntervalWeeks,
   SessionKind,
   SessionStatus,
 } from "@/lib/constants/planning-enums";
@@ -19,8 +20,6 @@ export interface Activity {
   defaultDurationMinutes: number | null;
   minParticipants: number;
   maxParticipants: number;
-  requiresSupervision: boolean;
-  requiresVolunteer: boolean;
   mobilityNotes: string | null;
   isActive: boolean;
   createdByStaffId: string | null;
@@ -37,6 +36,10 @@ export interface ActivityRecurringSchedule {
   location: string | null;
   minParticipants: number | null;
   maxParticipants: number | null;
+  intervalWeeks: RecurringIntervalWeeks;
+  seriesStartsOn: string;
+  seriesEndsOn: string;
+  endedAt: string | null;
   isActive: boolean;
   createdByStaffId: string | null;
   createdAt: string;
@@ -55,6 +58,8 @@ export interface ActivitySession {
   maxParticipants: number;
   status: SessionStatus;
   notes: string | null;
+  recurringOccurrenceDate: string | null;
+  isDetached: boolean;
   confirmedAt: string | null;
   confirmedByStaffId: string | null;
   createdByStaffId: string | null;
@@ -69,7 +74,7 @@ export interface ActivitySessionParticipant {
   assignedByStaffId: string | null;
 }
 
-export interface ActivitySessionVolunteer {
+export interface ActivitySessionFacilitator {
   sessionId: string;
   userId: string;
   assignedAt: string;
@@ -124,22 +129,25 @@ export interface PlanningSessionListItem {
   minParticipants: number;
   maxParticipants: number;
   participantCount: number;
-  volunteerCount: number;
+  facilitatorCount: number;
   recurringScheduleId: string | null;
+  isDetached: boolean;
 }
 
-/** Volunteer RPC: assigned session with minimal pickup info. */
-export interface VolunteerSessionListItem {
+/** Facilitator RPC: assigned session with minimal pickup info when confirmed. */
+export interface FacilitatorSessionListItem {
   sessionId: string;
   activityTitle: string;
+  activityDescription: string;
   startsAt: string;
   endsAt: string;
   location: string;
   status: SessionStatus;
-  participants: VolunteerSessionParticipantPickup[];
+  participantCount: number;
+  participants: FacilitatorSessionParticipantPickup[];
 }
 
-export interface VolunteerSessionParticipantPickup {
+export interface FacilitatorSessionParticipantPickup {
   displayName: string;
   departmentName: string | null;
   roomNumber: string | null;
@@ -153,10 +161,17 @@ export interface PatientActivitySessionListItem {
   startsAt: string;
   endsAt: string;
   location: string;
-  volunteerNames: string | null;
+  facilitatorNames: string | null;
 }
 
-/** Coordinator: volunteer profile summary. */
+/** Coordinator: eligible facilitator account for assignment picker. */
+export interface PlanningFacilitatorCandidate {
+  userId: string;
+  fullName: string | null;
+  roleNames: string[];
+}
+
+/** Coordinator: volunteer profile summary (availability view). */
 export interface PlanningVolunteerListItem {
   userId: string;
   fullName: string | null;
@@ -174,8 +189,6 @@ export type CreateActivityInput = Pick<
   | "defaultDurationMinutes"
   | "minParticipants"
   | "maxParticipants"
-  | "requiresSupervision"
-  | "requiresVolunteer"
   | "mobilityNotes"
 >;
 

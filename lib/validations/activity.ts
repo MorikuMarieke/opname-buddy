@@ -32,8 +32,6 @@ const activityInputFields = z.object({
     .transform((value) => (value === "" || value == null ? null : value)),
   minParticipants: z.coerce.number().int().min(1, "Minimaal 1 deelnemer."),
   maxParticipants: z.coerce.number().int().min(1, "Maximaal minstens 1."),
-  requiresSupervision: z.boolean(),
-  requiresVolunteer: z.boolean(),
   mobilityNotes: z
     .string()
     .trim()
@@ -80,8 +78,6 @@ export type ActivityInputFormValues = {
   defaultDurationMinutes?: string | number | null;
   minParticipants: string | number;
   maxParticipants: string | number;
-  requiresSupervision: boolean;
-  requiresVolunteer: boolean;
   mobilityNotes?: string | null;
 };
 

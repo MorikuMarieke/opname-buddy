@@ -27,7 +27,6 @@ const inputClasses =
 function statusVariant(
   status: SessionStatus,
 ): "neutral" | "attention" | "positive" {
-  if (status === "proposed") return "attention";
   if (status === "confirmed" || status === "completed") return "positive";
   return "neutral";
 }
@@ -140,7 +139,7 @@ export function PlanningSessionsView() {
                   </p>
                   <p className="text-xs text-carbon-black-500">
                     {session.participantCount}/{session.maxParticipants} deelnemers ·{" "}
-                    {session.volunteerCount} vrijwilliger(s)
+                    {session.facilitatorCount} begeleider(s)
                   </p>
                 </div>
                 <SecondaryButton

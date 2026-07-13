@@ -82,8 +82,6 @@ export type Database = {
           max_participants: number
           min_participants: number
           mobility_notes: string | null
-          requires_supervision: boolean
-          requires_volunteer: boolean
           title: string
           updated_at: string
         }
@@ -101,8 +99,6 @@ export type Database = {
           max_participants: number
           min_participants?: number
           mobility_notes?: string | null
-          requires_supervision?: boolean
-          requires_volunteer?: boolean
           title: string
           updated_at?: string
         }
@@ -120,8 +116,6 @@ export type Database = {
           max_participants?: number
           min_participants?: number
           mobility_notes?: string | null
-          requires_supervision?: boolean
-          requires_volunteer?: boolean
           title?: string
           updated_at?: string
         }
@@ -142,11 +136,15 @@ export type Database = {
           created_by_staff_id: string | null
           day_of_week: number
           end_time: string
+          ended_at: string | null
           id: string
+          interval_weeks: number
           is_active: boolean
           location: string | null
           max_participants: number | null
           min_participants: number | null
+          series_ends_on: string
+          series_starts_on: string
           start_time: string
           updated_at: string
         }
@@ -156,11 +154,15 @@ export type Database = {
           created_by_staff_id?: string | null
           day_of_week: number
           end_time: string
+          ended_at?: string | null
           id?: string
+          interval_weeks?: number
           is_active?: boolean
           location?: string | null
           max_participants?: number | null
           min_participants?: number | null
+          series_ends_on: string
+          series_starts_on: string
           start_time: string
           updated_at?: string
         }
@@ -170,11 +172,15 @@ export type Database = {
           created_by_staff_id?: string | null
           day_of_week?: number
           end_time?: string
+          ended_at?: string | null
           id?: string
+          interval_weeks?: number
           is_active?: boolean
           location?: string | null
           max_participants?: number | null
           min_participants?: number | null
+          series_ends_on?: string
+          series_starts_on?: string
           start_time?: string
           updated_at?: string
         }
@@ -238,7 +244,7 @@ export type Database = {
           },
         ]
       }
-      activity_session_volunteers: {
+      activity_session_facilitators: {
         Row: {
           assigned_at: string
           assigned_by_staff_id: string | null
@@ -259,21 +265,64 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "activity_session_volunteers_assigned_by_staff_id_fkey"
+            foreignKeyName: "activity_session_facilitators_assigned_by_staff_id_fkey"
             columns: ["assigned_by_staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activity_session_volunteers_session_id_fkey"
+            foreignKeyName: "activity_session_facilitators_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "activity_sessions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activity_session_volunteers_user_id_fkey"
+            foreignKeyName: "activity_session_facilitators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_recurring_schedule_facilitators: {
+        Row: {
+          assigned_at: string
+          assigned_by_staff_id: string | null
+          recurring_schedule_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          recurring_schedule_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          recurring_schedule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_assigned_by_staff_id_fkey"
+            columns: ["assigned_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "activity_recurring_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -290,10 +339,12 @@ export type Database = {
           created_by_staff_id: string | null
           ends_at: string
           id: string
+          is_detached: boolean
           location: string
           max_participants: number
           min_participants: number
           notes: string | null
+          recurring_occurrence_date: string | null
           recurring_schedule_id: string | null
           session_kind: string
           starts_at: string
@@ -308,10 +359,12 @@ export type Database = {
           created_by_staff_id?: string | null
           ends_at: string
           id?: string
+          is_detached?: boolean
           location: string
           max_participants: number
           min_participants: number
           notes?: string | null
+          recurring_occurrence_date?: string | null
           recurring_schedule_id?: string | null
           session_kind: string
           starts_at: string
@@ -326,10 +379,12 @@ export type Database = {
           created_by_staff_id?: string | null
           ends_at?: string
           id?: string
+          is_detached?: boolean
           location?: string
           max_participants?: number
           min_participants?: number
           notes?: string | null
+          recurring_occurrence_date?: string | null
           recurring_schedule_id?: string | null
           session_kind?: string
           starts_at?: string
@@ -1003,16 +1058,30 @@ export type Database = {
           user_id: string
         }[]
       }
+      list_facilitator_sessions: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          activity_description: string
+          activity_title: string
+          ends_at: string
+          location: string
+          participant_count: number
+          participants: Json
+          session_id: string
+          starts_at: string
+          status: string
+        }[]
+      }
       list_patient_activity_sessions: {
         Args: never
         Returns: {
           activity_description: string
           activity_title: string
           ends_at: string
+          facilitator_names: string
           location: string
           session_id: string
           starts_at: string
-          volunteer_names: string
         }[]
       }
       list_planning_patients: {
@@ -1023,6 +1092,14 @@ export type Database = {
           department_name: string
           patient_display_name: string
           room_number: string
+        }[]
+      }
+      list_planning_facilitator_candidates: {
+        Args: { p_search?: string }
+        Returns: {
+          full_name: string
+          role_names: string[]
+          user_id: string
         }[]
       }
       list_planning_sessions: {
@@ -1039,6 +1116,8 @@ export type Database = {
           activity_intensity: string
           activity_title: string
           ends_at: string
+          facilitator_count: number
+          is_detached: boolean
           location: string
           max_participants: number
           min_participants: number
@@ -1048,7 +1127,6 @@ export type Database = {
           session_kind: string
           starts_at: string
           status: string
-          volunteer_count: number
         }[]
       }
       list_planning_volunteers: {
@@ -1057,18 +1135,6 @@ export type Database = {
           full_name: string
           user_id: string
           volunteer_bio: string
-        }[]
-      }
-      list_volunteer_sessions: {
-        Args: { p_from?: string; p_to?: string }
-        Returns: {
-          activity_title: string
-          ends_at: string
-          location: string
-          participants: Json
-          session_id: string
-          starts_at: string
-          status: string
         }[]
       }
       materialize_recurring_sessions: {
@@ -1233,7 +1299,9 @@ export type ActivityRow = Tables<"activities">;
 export type ActivityRecurringScheduleRow = Tables<"activity_recurring_schedules">;
 export type ActivitySessionRow = Tables<"activity_sessions">;
 export type ActivitySessionParticipantRow = Tables<"activity_session_participants">;
-export type ActivitySessionVolunteerRow = Tables<"activity_session_volunteers">;
+export type ActivitySessionFacilitatorRow = Tables<"activity_session_facilitators">;
+export type ActivityRecurringScheduleFacilitatorRow =
+  Tables<"activity_recurring_schedule_facilitators">;
 export type VolunteerRecurringAvailabilityRow =
   Tables<"volunteer_recurring_availability">;
 export type VolunteerAvailabilityExceptionRow =

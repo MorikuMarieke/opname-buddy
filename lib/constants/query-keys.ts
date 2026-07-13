@@ -138,11 +138,20 @@
     coordinatorVolunteers: {
       all: ["planning", "coordinator-volunteers"] as const,
     },
+    facilitators: {
+      candidates: (search?: string) =>
+        ["planning", "facilitators", "candidates", search?.trim() ?? ""] as const,
+    },
   },
   volunteer: {
     profile: ["volunteer", "profile"] as const,
     sessions: {
       all: ["volunteer", "sessions"] as const,
+    },
+    facilitators: {
+      sessions: {
+        all: ["facilitator", "sessions"] as const,
+      },
     },
     availability: {
       recurring: ["volunteer", "availability", "recurring"] as const,

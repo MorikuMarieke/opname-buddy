@@ -33,7 +33,6 @@ export type SessionKind = (typeof SESSION_KINDS)[number];
 
 export const SESSION_STATUSES = [
   "draft",
-  "proposed",
   "confirmed",
   "completed",
   "cancelled",
@@ -46,8 +45,7 @@ export const SESSION_STATUS_TRANSITIONS: Record<
   SessionStatus,
   readonly SessionStatus[]
 > = {
-  draft: ["proposed", "cancelled"],
-  proposed: ["confirmed", "draft", "cancelled"],
+  draft: ["confirmed", "cancelled"],
   confirmed: ["completed", "cancelled"],
   completed: [],
   cancelled: [],
@@ -96,12 +94,15 @@ export function canTransitionSessionStatus(
 }
 
 export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
-  draft: "Concept",
-  proposed: "Voorstel",
-  confirmed: "Bevestigd",
+  draft: "Gepland",
+  confirmed: "Gepubliceerd",
   completed: "Voltooid",
   cancelled: "Geannuleerd",
 };
+
+export const RECURRING_INTERVAL_WEEKS = [1, 2, 4] as const;
+
+export type RecurringIntervalWeeks = (typeof RECURRING_INTERVAL_WEEKS)[number];
 
 export const SESSION_KIND_LABELS: Record<SessionKind, string> = {
   recurring_instance: "Terugkerend",

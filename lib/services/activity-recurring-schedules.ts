@@ -1,5 +1,6 @@
 import { RECURRING_MATERIALIZE_WEEKS_AHEAD } from "@/lib/constants/planning-enums";
 import { createClient } from "@/lib/supabase/client";
+import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import type {
   ActivityRecurringSchedule,
 } from "@/types/activity";
@@ -38,11 +39,22 @@ function mapRecurringSchedule(row: ActivityRecurringScheduleRow): ActivityRecurr
     location: row.location,
     minParticipants: row.min_participants,
     maxParticipants: row.max_participants,
+    intervalWeeks: row.interval_weeks as ActivityRecurringSchedule["intervalWeeks"],
+    seriesStartsOn: row.series_starts_on,
+    seriesEndsOn: row.series_ends_on,
+    endedAt: row.ended_at,
     isActive: row.is_active,
     createdByStaffId: row.created_by_staff_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function addDaysToIsoDate(isoDate: string, days: number): string {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 async function getCurrentStaffId(): Promise<string> {
@@ -121,6 +133,8 @@ export async function createRecurringSchedule(
 ): Promise<ActivityRecurringSchedule> {
   const supabase = createClient();
   const staffId = await getCurrentStaffId();
+  const seriesStartsOn = getAmsterdamDateString();
+  const seriesEndsOn = addDaysToIsoDate(seriesStartsOn, 84);
 
   const { data, error } = await supabase
     .from("activity_recurring_schedules")
@@ -132,6 +146,9 @@ export async function createRecurringSchedule(
       location: input.location,
       min_participants: input.minParticipants,
       max_participants: input.maxParticipants,
+      interval_weeks: 1,
+      series_starts_on: seriesStartsOn,
+      series_ends_on: seriesEndsOn,
       created_by_staff_id: staffId,
     })
     .select()

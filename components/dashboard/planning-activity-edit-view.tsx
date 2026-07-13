@@ -32,8 +32,6 @@ function toFormValues(activity: Activity): ActivityInputFormValues {
     defaultDurationMinutes: activity.defaultDurationMinutes ?? "",
     minParticipants: activity.minParticipants,
     maxParticipants: activity.maxParticipants,
-    requiresSupervision: activity.requiresSupervision,
-    requiresVolunteer: activity.requiresVolunteer,
     mobilityNotes: activity.mobilityNotes,
   };
 }

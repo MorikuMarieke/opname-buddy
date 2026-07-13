@@ -52,9 +52,9 @@ export function PatientActivitiesView() {
                 <p className="mt-2 text-sm text-carbon-black-600">
                   {copy.locationLabel}: {session.location}
                 </p>
-                {session.volunteerNames ? (
+                {session.facilitatorNames ? (
                   <p className="mt-1 text-sm text-carbon-black-600">
-                    {copy.volunteerLabel}: {session.volunteerNames}
+                    {copy.facilitatorLabel}: {session.facilitatorNames}
                   </p>
                 ) : null}
               </DashboardCard>

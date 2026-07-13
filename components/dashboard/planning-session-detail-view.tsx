@@ -7,29 +7,31 @@ import { PrimaryButton } from "@/components/ui/primary-button";
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { usePlanningFacilitatorCandidates } from "@/hooks/use-planning-facilitators";
 import { usePlanningPatients } from "@/hooks/use-planning-patients";
 import {
   usePlanningSessionDetail,
+  useSetSessionFacilitators,
   useSetSessionParticipants,
-  useSetSessionVolunteers,
   useUpdateSessionStatus,
 } from "@/hooks/use-planning-sessions";
-import { usePlanningVolunteers } from "@/hooks/use-planning-volunteers";
 import {
   SESSION_KIND_LABELS,
   SESSION_STATUS_LABELS,
   SESSION_STATUS_TRANSITIONS,
   type SessionStatus,
 } from "@/lib/constants/planning-enums";
+import { ROLE_LABELS } from "@/lib/constants/admin-account-copy";
 import { PLANNING_COPY } from "@/lib/constants/planning-copy";
 import {
+  isBelowMinParticipants,
   isSessionEditable,
   type PlanningSessionDetail,
 } from "@/lib/services/activity-sessions";
 import { formatDutchDateTime } from "@/lib/utils/amsterdam-date";
 import type {
+  PlanningFacilitatorCandidate,
   PlanningPatientListItem,
-  PlanningVolunteerListItem,
 } from "@/types/activity";
 
 interface PlanningSessionDetailViewProps {
@@ -39,9 +41,7 @@ interface PlanningSessionDetailViewProps {
 const copy = PLANNING_COPY.sessions;
 
 function getStatusActionLabel(nextStatus: SessionStatus): string {
-  if (nextStatus === "proposed") return copy.statusActions.propose;
-  if (nextStatus === "confirmed") return copy.statusActions.confirm;
-  if (nextStatus === "draft") return copy.statusActions.backToDraft;
+  if (nextStatus === "confirmed") return copy.statusActions.publish;
   if (nextStatus === "completed") return copy.statusActions.complete;
   if (nextStatus === "cancelled") return copy.statusActions.cancel;
   return SESSION_STATUS_LABELS[nextStatus];
@@ -50,7 +50,6 @@ function getStatusActionLabel(nextStatus: SessionStatus): string {
 function statusVariant(
   status: SessionStatus,
 ): "neutral" | "attention" | "positive" {
-  if (status === "proposed") return "attention";
   if (status === "confirmed" || status === "completed") return "positive";
   return "neutral";
 }
@@ -66,8 +65,10 @@ function sortedIdsEqual(left: string[], right: string[]): boolean {
   return sortedLeft.every((id, index) => id === sortedRight[index]);
 }
 
-function statusRequiresSavedAssignments(status: SessionStatus): boolean {
-  return status === "proposed" || status === "confirmed";
+function formatRoleLabels(roleNames: string[]): string {
+  return roleNames
+    .map((role) => ROLE_LABELS[role as keyof typeof ROLE_LABELS] ?? role)
+    .join(", ");
 }
 
 interface SessionAssignmentsPanelProps {
@@ -76,9 +77,9 @@ interface SessionAssignmentsPanelProps {
   patients: PlanningPatientListItem[] | undefined;
   patientsLoading: boolean;
   patientsError: boolean;
-  volunteers: PlanningVolunteerListItem[] | undefined;
-  volunteersLoading: boolean;
-  volunteersError: boolean;
+  facilitators: PlanningFacilitatorCandidate[] | undefined;
+  facilitatorsLoading: boolean;
+  facilitatorsError: boolean;
 }
 
 function SessionAssignmentsPanel({
@@ -87,32 +88,36 @@ function SessionAssignmentsPanel({
   patients,
   patientsLoading,
   patientsError,
-  volunteers,
-  volunteersLoading,
-  volunteersError,
+  facilitators,
+  facilitatorsLoading,
+  facilitatorsError,
 }: SessionAssignmentsPanelProps) {
   const statusMutation = useUpdateSessionStatus(sessionId);
   const participantsMutation = useSetSessionParticipants(sessionId);
-  const volunteersMutation = useSetSessionVolunteers(sessionId);
+  const facilitatorsMutation = useSetSessionFacilitators(sessionId);
 
   const [selectedAdmissionIds, setSelectedAdmissionIds] = useState(
     () => detail.participantAdmissionIds,
   );
-  const [selectedVolunteerIds, setSelectedVolunteerIds] = useState(
-    () => detail.volunteerUserIds,
+  const [selectedFacilitatorIds, setSelectedFacilitatorIds] = useState(
+    () => detail.facilitatorUserIds,
   );
+  const [facilitatorSearch, setFacilitatorSearch] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
 
   const { session, activityTitle, activityDescription } = detail;
   const editable = isSessionEditable(session.status);
   const nextStatuses = SESSION_STATUS_TRANSITIONS[session.status];
   const isSavingAssignments =
-    participantsMutation.isPending || volunteersMutation.isPending;
-  const isBusy =
-    statusMutation.isPending || isSavingAssignments;
+    participantsMutation.isPending || facilitatorsMutation.isPending;
+  const isBusy = statusMutation.isPending || isSavingAssignments;
   const hasUnsavedAssignments =
     !sortedIdsEqual(selectedAdmissionIds, detail.participantAdmissionIds) ||
-    !sortedIdsEqual(selectedVolunteerIds, detail.volunteerUserIds);
+    !sortedIdsEqual(selectedFacilitatorIds, detail.facilitatorUserIds);
+  const belowMinParticipants = isBelowMinParticipants(
+    selectedAdmissionIds.length,
+    session.minParticipants,
+  );
 
   function toggleAdmission(admissionId: string) {
     setSelectedAdmissionIds((current) =>
@@ -122,8 +127,8 @@ function SessionAssignmentsPanel({
     );
   }
 
-  function toggleVolunteer(userId: string) {
-    setSelectedVolunteerIds((current) =>
+  function toggleFacilitator(userId: string) {
+    setSelectedFacilitatorIds((current) =>
       current.includes(userId)
         ? current.filter((id) => id !== userId)
         : [...current, userId],
@@ -135,7 +140,7 @@ function SessionAssignmentsPanel({
       return true;
     }
 
-    if (statusRequiresSavedAssignments(nextStatus) && hasUnsavedAssignments) {
+    if (nextStatus === "confirmed" && hasUnsavedAssignments) {
       return true;
     }
 
@@ -157,11 +162,20 @@ function SessionAssignmentsPanel({
 
     try {
       await participantsMutation.mutateAsync(selectedAdmissionIds);
-      await volunteersMutation.mutateAsync(selectedVolunteerIds);
+      await facilitatorsMutation.mutateAsync(selectedFacilitatorIds);
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "Opslaan mislukt.");
     }
   }
+
+  const filteredFacilitators = (facilitators ?? []).filter((facilitator) => {
+    if (!facilitatorSearch.trim()) {
+      return true;
+    }
+
+    const query = facilitatorSearch.trim().toLowerCase();
+    return (facilitator.fullName ?? "").toLowerCase().includes(query);
+  });
 
   return (
     <div className="space-y-4">
@@ -185,6 +199,9 @@ function SessionAssignmentsPanel({
             <StatusBadge variant={statusVariant(session.status)}>
               {SESSION_STATUS_LABELS[session.status]}
             </StatusBadge>
+            {session.isDetached ? (
+              <StatusBadge variant="attention">Aangepast</StatusBadge>
+            ) : null}
           </div>
           <p className="text-sm text-carbon-black-700">{activityDescription}</p>
           <p className="text-sm text-carbon-black-600">
@@ -195,12 +212,20 @@ function SessionAssignmentsPanel({
           <p className="text-sm text-carbon-black-600">
             Capaciteit: {session.minParticipants}–{session.maxParticipants} deelnemers
           </p>
+          {belowMinParticipants ? (
+            <p className="text-sm text-amber-800" role="status">
+              {copy.belowMinParticipantsWarning.replace(
+                "{min}",
+                String(session.minParticipants),
+              )}
+            </p>
+          ) : null}
           {session.notes ? (
             <p className="text-sm text-carbon-black-600">Notities: {session.notes}</p>
           ) : null}
           {session.confirmedAt ? (
             <p className="text-xs text-carbon-black-500">
-              Bevestigd op {formatDutchDateTime(session.confirmedAt)}
+              Gepubliceerd op {formatDutchDateTime(session.confirmedAt)}
             </p>
           ) : null}
         </div>
@@ -264,32 +289,44 @@ function SessionAssignmentsPanel({
         )}
       </DashboardCard>
 
-      <DashboardCard density="compact" title={copy.volunteersTitle}>
-        <p className="mb-3 text-sm text-carbon-black-600">{copy.volunteersHint}</p>
-        {volunteersLoading ? (
+      <DashboardCard density="compact" title={copy.facilitatorsTitle}>
+        <p className="mb-3 text-sm text-carbon-black-600">{copy.facilitatorsHint}</p>
+        {editable ? (
+          <input
+            type="search"
+            value={facilitatorSearch}
+            onChange={(event) => setFacilitatorSearch(event.target.value)}
+            placeholder={copy.facilitatorsSearchPlaceholder}
+            className="mb-3 h-11 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 text-sm"
+          />
+        ) : null}
+        {facilitatorsLoading ? (
           <p className="text-sm text-carbon-black-600">Laden...</p>
-        ) : volunteersError ? (
+        ) : facilitatorsError ? (
           <p className="text-sm text-red-600" role="alert">
-            {copy.volunteersLoadError}
+            {copy.facilitatorsLoadError}
           </p>
-        ) : !volunteers?.length ? (
-          <p className="text-sm text-carbon-black-600">{copy.emptyVolunteers}</p>
+        ) : !filteredFacilitators.length ? (
+          <p className="text-sm text-carbon-black-600">{copy.emptyFacilitators}</p>
         ) : (
           <div className="space-y-2">
-            {volunteers.map((volunteer) => (
+            {filteredFacilitators.map((facilitator) => (
               <label
-                key={volunteer.userId}
+                key={facilitator.userId}
                 className="flex items-center gap-3 rounded-lg border border-dust-grey-100 p-3"
               >
                 <input
                   type="checkbox"
                   disabled={!editable || isBusy}
-                  checked={selectedVolunteerIds.includes(volunteer.userId)}
-                  onChange={() => toggleVolunteer(volunteer.userId)}
+                  checked={selectedFacilitatorIds.includes(facilitator.userId)}
+                  onChange={() => toggleFacilitator(facilitator.userId)}
                   className="h-5 w-5 rounded border-dust-grey-300"
                 />
                 <span className="text-sm text-carbon-black-900">
-                  {volunteer.fullName ?? "Naamloos"}
+                  {facilitator.fullName ?? "Naamloos"}
+                  <span className="block text-xs text-carbon-black-500">
+                    {formatRoleLabels(facilitator.roleNames)}
+                  </span>
                 </span>
               </label>
             ))}
@@ -320,10 +357,10 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
     isError: patientsError,
   } = usePlanningPatients();
   const {
-    data: volunteers,
-    isLoading: volunteersLoading,
-    isError: volunteersError,
-  } = usePlanningVolunteers();
+    data: facilitators,
+    isLoading: facilitatorsLoading,
+    isError: facilitatorsError,
+  } = usePlanningFacilitatorCandidates();
 
   if (isLoading) {
     return <p className="text-sm text-carbon-black-600">Sessie laden…</p>;
@@ -337,7 +374,7 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
     );
   }
 
-  const assignmentKey = `${detail.participantAdmissionIds.join(",")}|${detail.volunteerUserIds.join(",")}`;
+  const assignmentKey = `${detail.participantAdmissionIds.join(",")}|${detail.facilitatorUserIds.join(",")}`;
 
   return (
     <SessionAssignmentsPanel
@@ -347,9 +384,9 @@ export function PlanningSessionDetailView({ sessionId }: PlanningSessionDetailVi
       patients={patients}
       patientsLoading={patientsLoading}
       patientsError={patientsError}
-      volunteers={volunteers}
-      volunteersLoading={volunteersLoading}
-      volunteersError={volunteersError}
+      facilitators={facilitators}
+      facilitatorsLoading={facilitatorsLoading}
+      facilitatorsError={facilitatorsError}
     />
   );
 }
