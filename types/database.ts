@@ -715,6 +715,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "patient_participation_evaluations_activity_session_id_fkey"
+            columns: ["activity_session_id"]
+            isOneToOne: false
+            referencedRelation: "activity_sessions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "patient_participation_evaluations_admission_id_fkey"
             columns: ["admission_id"]
             isOneToOne: false
@@ -853,6 +860,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteer_availability_exceptions: {
         Row: {
           created_at: string
@@ -938,39 +978,6 @@ export type Database = {
           },
         ]
       }
-      user_roles: {
-        Row: {
-          created_at: string
-          role_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          role_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          role_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -986,14 +993,14 @@ export type Database = {
       list_care_patients: {
         Args: never
         Returns: {
-          admission_id: string | null
-          birth_date: string | null
-          expected_discharge_on: string | null
+          admission_id: string
+          birth_date: string
+          expected_discharge_on: string
           first_name: string
           id: string
           last_name: string
-          sex: string | null
-          user_id: string | null
+          sex: string
+          user_id: string
         }[]
       }
       list_patient_activity_sessions: {
@@ -1005,17 +1012,17 @@ export type Database = {
           location: string
           session_id: string
           starts_at: string
-          volunteer_names: string | null
+          volunteer_names: string
         }[]
       }
       list_planning_patients: {
         Args: never
         Returns: {
           admission_id: string
-          department_id: string | null
-          department_name: string | null
+          department_id: string
+          department_name: string
           patient_display_name: string
-          room_number: string | null
+          room_number: string
         }[]
       }
       list_planning_sessions: {
@@ -1036,7 +1043,7 @@ export type Database = {
           max_participants: number
           min_participants: number
           participant_count: number
-          recurring_schedule_id: string | null
+          recurring_schedule_id: string
           session_id: string
           session_kind: string
           starts_at: string
@@ -1047,9 +1054,9 @@ export type Database = {
       list_planning_volunteers: {
         Args: never
         Returns: {
-          full_name: string | null
+          full_name: string
           user_id: string
-          volunteer_bio: string | null
+          volunteer_bio: string
         }[]
       }
       list_volunteer_sessions: {
@@ -1067,6 +1074,10 @@ export type Database = {
       materialize_recurring_sessions: {
         Args: { p_schedule_id: string; p_weeks_ahead?: number }
         Returns: number
+      }
+      planning_allowed_settings_valid: {
+        Args: { settings: string[] }
+        Returns: boolean
       }
       redeem_patient_link_code: { Args: { p_code: string }; Returns: string }
     }

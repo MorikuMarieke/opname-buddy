@@ -8,15 +8,25 @@ export const VOLUNTEER_COPY = {
     participantsLabel: "Deelnemers",
     pickupHint: "Ophaallocatie voor deelnemers",
   },
+  profile: {
+    pageTitle: "Mijn profiel",
+    pageDescription: "Bekijk je accountgegevens en vertel iets over jezelf.",
+    accountTitle: "Accountgegevens",
+    accountHint:
+      "Deze gegevens worden door de organisatie beheerd. Neem contact op als iets niet klopt.",
+    fullNameLabel: "Naam",
+    emailLabel: "E-mailadres",
+    notSet: "Niet ingevuld",
+    bioTitle: "Over mij",
+    bioHint:
+      "Vertel kort iets over jezelf: interesses, ervaring, voorkeuren of persoonlijkheid. Dit helpt bij toekomstige planning.",
+    bioLabel: "Over mij",
+    bioSave: "Opslaan",
+    bioSaved: "Over mij opgeslagen.",
+  },
   availability: {
     pageTitle: "Beschikbaarheid",
     pageDescription: "Geef aan wanneer je doorgaans kunt helpen.",
-    profileTitle: "Profiel",
-    profileHint:
-      "Vertel kort iets over jezelf: interesses, ervaring, voorkeuren of persoonlijkheid. Dit helpt bij toekomstige planning.",
-    bioLabel: "Over mij",
-    bioSave: "Profiel opslaan",
-    bioSaved: "Profiel opgeslagen.",
     recurringTitle: "Wekelijkse beschikbaarheid",
     recurringHint:
       "Voeg vaste tijdvakken toe per weekdag. Meerdere niet-overlappende tijdvakken op dezelfde dag zijn toegestaan (bijv. 09:00–12:00 en 13:00–17:00).",

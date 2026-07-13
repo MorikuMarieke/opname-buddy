@@ -13,6 +13,7 @@ import {
   Settings,
   Shield,
   Sun,
+  User,
   Users,
 } from "lucide-react";
 import { PATIENT_CONTEXT_COPY } from "@/lib/constants/patient-context-copy";
@@ -53,6 +54,7 @@ export const planningNavItems: NavItem[] = [
 export const volunteerNavItems: NavItem[] = [
   { label: "Mijn planning", href: "/volunteer", icon: CalendarDays },
   { label: "Beschikbaarheid", href: "/volunteer/availability", icon: Repeat2 },
+  { label: "Mijn profiel", href: "/volunteer/profile", icon: User },
 ];
 
 export const adminNavItems: NavItem[] = [

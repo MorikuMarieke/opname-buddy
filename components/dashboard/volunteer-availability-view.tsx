@@ -7,7 +7,6 @@ import { DutchDateInput } from "@/components/ui/dutch-date-input";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import { VolunteerAvailabilityExceptionCard } from "@/components/dashboard/volunteer-availability-exception-card";
-import { VolunteerBioSection } from "@/components/dashboard/volunteer-bio-section";
 import { VolunteerRecurringAvailabilityCard } from "@/components/dashboard/volunteer-recurring-availability-card";
 import {
   useCreateVolunteerAvailabilityException,
@@ -129,8 +128,6 @@ export function VolunteerAvailabilityView() {
         description={copy.pageDescription}
         size="compact"
       />
-
-      <VolunteerBioSection />
 
       <DashboardCard density="compact" title={copy.recurringTitle} className="min-w-0 max-w-full">
         <p className="mb-4 text-sm text-carbon-black-600">{copy.recurringHint}</p>

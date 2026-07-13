@@ -14,7 +14,7 @@ const textareaClasses =
   "min-h-28 w-full rounded-xl border border-dust-grey-200 bg-parchment-50 px-4 py-3 text-sm text-carbon-black-900";
 
 export function VolunteerBioSection() {
-  const copy = VOLUNTEER_COPY.availability;
+  const copy = VOLUNTEER_COPY.profile;
   const { data: profile, isLoading } = useVolunteerProfile();
   const updateBio = useUpdateVolunteerBio();
   const [bio, setBio] = useState("");
@@ -45,8 +45,8 @@ export function VolunteerBioSection() {
   }
 
   return (
-    <DashboardCard density="compact" title={copy.profileTitle} className="min-w-0 max-w-full">
-      <p className="mb-4 text-sm text-carbon-black-600">{copy.profileHint}</p>
+    <DashboardCard density="compact" title={copy.bioTitle} className="min-w-0 max-w-full">
+      <p className="mb-4 text-sm text-carbon-black-600">{copy.bioHint}</p>
 
       {isLoading ? (
         <p className="text-sm text-carbon-black-600">Laden...</p>
