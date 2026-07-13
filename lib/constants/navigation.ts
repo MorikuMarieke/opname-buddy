@@ -38,6 +38,7 @@ export const patientNavItems: NavItem[] = patientBottomNavItems;
 export const careNavItems: NavItem[] = [
   { label: "Overzicht", href: "/care", icon: LayoutDashboard },
   { label: "Patiënten", href: "/care/patients", icon: Users },
+  { label: "Geplande activiteiten", href: "/care/activities", icon: CalendarDays },
   { label: "Meldingen", href: "/care", icon: Bell, badge: 3 },
   { label: "Instellingen", href: "/care", icon: Settings },
 ];
@@ -45,15 +46,15 @@ export const careNavItems: NavItem[] = [
 export const planningNavItems: NavItem[] = [
   { label: "Planning", href: "/planning", icon: LayoutDashboard },
   { label: "Activiteit plannen", href: "/planning/plan", icon: Plus },
-  { label: "Activiteiten", href: "/planning/activities", icon: Activity },
   { label: "Sessies", href: "/planning/sessions", icon: CalendarDays },
-  { label: "Terugkerend", href: "/planning/recurring", icon: Repeat2 },
-  { label: "Vrijwilligers", href: "/planning/volunteers", icon: Users },
+  { label: "Reeksen", href: "/planning/series", icon: Repeat2 },
+  { label: "Mijn begeleiding", href: "/planning/facilitator", icon: Users },
   { label: "Kalender", href: "/planning/calendar", icon: Calendar },
+  { label: "Activiteiten", href: "/planning/activities", icon: Activity },
 ];
 
 export const volunteerNavItems: NavItem[] = [
-  { label: "Mijn planning", href: "/volunteer", icon: CalendarDays },
+  { label: "Geplande activiteiten", href: "/volunteer", icon: CalendarDays },
   { label: "Beschikbaarheid", href: "/volunteer/availability", icon: Repeat2 },
   { label: "Mijn profiel", href: "/volunteer/profile", icon: User },
 ];

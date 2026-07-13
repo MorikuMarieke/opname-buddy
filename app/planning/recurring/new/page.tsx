@@ -1,5 +1,5 @@
-import { PlanningRecurringCreateView } from "@/components/dashboard/planning-recurring-create-view";
+import { redirect } from "next/navigation";
 
-export default function PlanningRecurringNewPage() {
-  return <PlanningRecurringCreateView />;
+export default function PlanningRecurringNewRedirectPage() {
+  redirect("/planning/plan");
 }

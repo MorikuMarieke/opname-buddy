@@ -1,10 +1,10 @@
 export const VOLUNTEER_COPY = {
   home: {
-    pageTitle: "Mijn planning",
-    pageDescription: "Toegewezen activiteiten waar je aan meewerkt.",
+    pageTitle: "Geplande activiteiten",
+    pageDescription: "Toegewezen sessies waar je als begeleider aan meewerkt.",
     emptyTitle: "Geen geplande activiteiten",
     emptyDescription:
-      "Zodra een coördinator je toewijst aan een bevestigd of voorgesteld moment, zie je dat hier.",
+      "Zodra een coördinator je toewijst aan een sessie, zie je die hier.",
     participantsLabel: "Deelnemers",
     pickupHint: "Ophaallocatie voor deelnemers",
   },

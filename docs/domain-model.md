@@ -35,6 +35,8 @@ For each area:
 >
 > **Patient admission management — implemented (branch 6):** Caregiver workflows for Patiënt opnemen, Nieuwe opname, Ontslag, demographics edit, expected discharge date, duplicate-prevention search, and patient link-code redemption. Plan: [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md).
 >
+> **Activity planning refactor — implemented:** Optional user-only facilitator assignments (`activity_session_facilitators`, `activity_recurring_schedule_facilitators`), simplified session lifecycle (`draft` → `confirmed` → `completed | cancelled`), soft minimum-participant warnings, unified coordinator flow at `/planning/plan`, series management at `/planning/series`, and read-only facilitator views at `/volunteer` and `/care/activities`. Removed `proposed` status, `requires_supervision`, `requires_volunteer`, and volunteer-only session staffing gates.
+>
 > **Activity planning and volunteers — implemented (branch 7):** Activity catalog, weekly recurring schedules, one-off sessions, human approval workflow, volunteer portal, coordinator planning views, and patient read-only confirmed sessions. Plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). AI matching and activity feedback remain deferred (branches 8–9).
 >
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).

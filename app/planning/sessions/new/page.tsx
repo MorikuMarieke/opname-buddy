@@ -1,5 +1,5 @@
-import { PlanningSessionCreateView } from "@/components/dashboard/planning-session-create-view";
+import { redirect } from "next/navigation";
 
-export default function PlanningSessionNewPage() {
-  return <PlanningSessionCreateView />;
+export default function PlanningSessionNewRedirectPage() {
+  redirect("/planning/plan");
 }
