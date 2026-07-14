@@ -7,12 +7,17 @@ import { formInputClasses } from "@/components/forms/form-styles";
 import { FormTextarea } from "@/components/forms/form-textarea";
 import { LikertScale } from "@/components/forms/likert-scale";
 import { PainScale } from "@/components/forms/pain-scale";
+import { ParticipationNeedChips } from "@/components/forms/participation-need-chips";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import {
   useCreateCheckIn,
   useUpdateCheckIn,
 } from "@/hooks/use-patient-checkins";
+import {
+  PARTICIPATION_NEED_VALUES,
+  type ParticipationNeedValue,
+} from "@/lib/constants/daily-participation";
 import { getFieldErrors, getFirstErrorMessage } from "@/lib/validations/error-messages";
 import {
   patientCheckinFormSchema,
@@ -34,9 +39,16 @@ const defaultValues: PatientCheckinFormValues = {
   mood: 3,
   mobility_level: 3,
   motivation_score: 3,
+  participation_needs: [],
   symptoms: "",
   note: "",
 };
+
+function parseParticipationNeeds(needs: string[]): ParticipationNeedValue[] {
+  return needs.filter((need): need is ParticipationNeedValue =>
+    PARTICIPATION_NEED_VALUES.includes(need as ParticipationNeedValue),
+  );
+}
 
 function toFormValues(checkIn: PatientCheckin): PatientCheckinFormValues {
   return {
@@ -46,6 +58,7 @@ function toFormValues(checkIn: PatientCheckin): PatientCheckinFormValues {
     mood: checkIn.mood,
     mobility_level: checkIn.mobility_level,
     motivation_score: checkIn.motivation_score,
+    participation_needs: parseParticipationNeeds(checkIn.participation_needs),
     symptoms: checkIn.symptoms,
     note: checkIn.note ?? "",
   };
@@ -150,6 +163,22 @@ export function CheckinForm({
           setValues((current) => ({ ...current, mobility_level }))
         }
       />
+
+      <FormField
+        label="Wat zou je vandaag fijn vinden?"
+        htmlFor="participation_needs"
+        hint="Kies één of meer opties. Dit helpt bij het plannen van de dag."
+        error={fieldErrors.participation_needs}
+      >
+        <ParticipationNeedChips
+          id="participation_needs"
+          value={values.participation_needs}
+          disabled={isSubmitting}
+          onChange={(participation_needs) =>
+            setValues((current) => ({ ...current, participation_needs }))
+          }
+        />
+      </FormField>
 
       <LikertScale
         id="motivation_score"
