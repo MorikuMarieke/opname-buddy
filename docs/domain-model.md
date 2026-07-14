@@ -39,6 +39,8 @@ For each area:
 >
 > **Activity planning and volunteers — implemented (branch 7):** Activity catalog, weekly recurring schedules, one-off sessions, human approval workflow, volunteer portal, coordinator planning views, and patient read-only confirmed sessions. Plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). AI matching and activity feedback remain deferred (branches 8–9).
 >
+> **Daily participation PoC — in progress (Phase 1+):** Replaces branch-7 scheduling with a two-block daily model. Coordinator dashboard stays at `/planning` (simplified). Volunteers manage block-based availability and record afternoon activity communication. See [`docs/planning-poc-migration.md`](planning-poc-migration.md).
+>
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
 
 ### User / problem
@@ -298,7 +300,67 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 ## Activities and planning
 
-> **Branch 7 (`feature/activity-planning-volunteers`) — implemented:** structured activity catalog, weekly recurring schedules, one-off sessions, volunteer availability, human approval workflow (`draft` → `proposed` → `confirmed` → `completed` \| `cancelled`), coordinator planning UI, volunteer portal, and patient read-only confirmed sessions. Replaces the older `volunteer_slots` blueprint with `volunteer_recurring_availability` + `volunteer_availability_exceptions`. SECURITY DEFINER RPCs expose role-scoped read models (`list_planning_sessions`, `list_volunteer_sessions`, `list_patient_activity_sessions`, etc.). AI matching deferred to branch 8; activity feedback deferred to branch 9.
+> **Branch 7 (`feature/activity-planning-volunteers`) — deprecated (PoC refactor):** The catalog, recurring series, session workflow, facilitator assignments, and time-range volunteer availability described below are being replaced by a minimal daily participation proof-of-concept. Legacy tables and migrations (`00039`–`00049`) remain in the database but stop receiving application writes. See [`docs/planning-poc-migration.md`](planning-poc-migration.md) and [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
+
+### Daily participation proof-of-concept (planned — Phase 1–8)
+
+OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system.
+
+#### Fixed daily blocks (application constants)
+
+| Block | Time | Purpose |
+|-------|------|---------|
+| Morning | 10:00–12:00 | Individual patient–volunteer contact; coordinated outside the app |
+| Afternoon | 14:00–16:00 | One group activity in a fixed shared room (max 10, independent access required) |
+
+Constants live in `lib/constants/daily-participation.ts` (block times, room name, capacity, need labels).
+
+#### Entity: PatientCheckin needs (extension)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `participation_needs` | `text[]` | Subset of `social`, `movement`, `creative`, `relaxation`; multi-select at check-in |
+
+#### Entity: DailyParticipationPlan
+
+One optional record per calendar date (Europe/Amsterdam). Volunteers or coordinators record the **communication** of the afternoon group activity.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `plan_date` | date | UNIQUE |
+| `afternoon_category` | text | Aligns with need categories |
+| `afternoon_title` | text | Short title |
+| `participant_message` | text | Optional patient-facing message |
+| `recorded_by_user_id` | uuid | Audit: who last updated |
+| `updated_at` | timestamptz | Audit: when last updated |
+
+#### Entity: VolunteerWeeklyBlocks
+
+Replaces legacy `volunteer_recurring_availability`. Per weekday, boolean flags for morning and afternoon fixed blocks. No custom times.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `user_id`, `day_of_week` | | PK composite |
+| `morning_available` | boolean | |
+| `afternoon_available` | boolean | |
+
+#### Entity: VolunteerDayAbsence
+
+Replaces legacy `volunteer_availability_exceptions`. One-time unavailability for a date + block (`morning` \| `afternoon`). No recurring absences or partial hours.
+
+#### Coordinator dashboard (`/planning`)
+
+Single page: selected date and weekday, both blocks, aggregated patient needs, effective volunteer availability per block, recorded afternoon activity with audit fields. Complex planning subroutes are removed.
+
+#### AI boundary
+
+DailyBuddy is advisory only. It may receive a simple signal whether morning individual contact is reasonably available. It must not receive individual volunteer names, schedules, or staffing optimisation data.
+
+---
+
+### Branch 7 legacy (deprecated — reference only)
+
+> **Branch 7 (`feature/activity-planning-volunteers`) — was implemented:** structured activity catalog, weekly recurring schedules, one-off sessions, volunteer availability, human approval workflow, coordinator planning UI, volunteer portal, and patient read-only confirmed sessions.
 
 ### Activity
 

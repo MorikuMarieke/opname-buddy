@@ -1,4 +1,4 @@
----
+﻿---
 description: AI Agent architecture and tool calling
 alwaysApply: false
 ---
@@ -20,17 +20,40 @@ alwaysApply: false
 - Use maxSteps >= 3
 - Use streaming responses
 
-## OpnameBuddy
+## OpnameBuddy — DailyBuddy (daily participation PoC)
 
 The DailyBuddy agent may use:
 
-- getPatientCheckins
-- getPatientRestrictions
-- getAvailableActivities
-- getActivityFeedback
-- getOpenQuestions
-- saveDailyAdvice
+- `getPatientCheckins` — pain, energy, mood, mobility, symptoms, note, `participation_needs`
+- `getPatientRestrictions` — caregiver `patient_context`
+- `getDailyParticipationPlan` — recorded afternoon category, title, participant message (if any)
+- `getMorningContactAvailabilitySignal` — simple boolean/signal only: whether individual morning contact is reasonably available today (no volunteer names or schedules)
+- `getOpenQuestions` — open patient questions
+- `saveDailyAdvice` — optional persist to `daily_advice` when table exists
 
-The AI must never provide medical diagnoses or treatment recommendations.
+### Deprecated tools (do not implement)
+
+- `getAvailableActivities` — replaced by `getDailyParticipationPlan`
+- `getActivityFeedback` — deferred; use participation evaluations when UI exists
+
+### AI must never
+
+- Provide medical diagnoses or treatment recommendations
+- Override caregiver-defined clinical restrictions
+- Schedule patients or activities
+- Assign volunteers or optimise staffing
+- Replace absent volunteers
+- Receive individual volunteer names, schedules, or detailed staffing counts
+- Auto-select the afternoon group activity
+
+### AI advisory outputs
+
+May suggest (with cautious language):
+
+1. Rest may fit today's check-in
+2. Optional individual contact during the morning block (10:00–12:00)
+3. The recorded afternoon group activity may fit expressed needs — patient chooses
+
+Use Dutch phrasing such as: "kan passen", "zou geschikt kunnen zijn", "op basis van wat je invulde", "de keuze is aan jou", "bespreek met je zorgteam als je twijfelt".
 
 The AI may only support recovery participation within caregiver-defined boundaries.
