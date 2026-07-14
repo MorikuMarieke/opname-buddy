@@ -25,7 +25,7 @@ export function useUpdateVolunteerBio() {
         queryKey: queryKeys.volunteer.profile,
       });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.planning.coordinatorVolunteers.all,
+        queryKey: queryKeys.planning.coordinatorVolunteerOverview.all,
       });
     },
   });

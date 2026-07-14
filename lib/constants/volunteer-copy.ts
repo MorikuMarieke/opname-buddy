@@ -1,10 +1,10 @@
 export const VOLUNTEER_COPY = {
   home: {
-    pageTitle: "Geplande activiteiten",
-    pageDescription: "Toegewezen sessies waar je als begeleider aan meewerkt.",
-    emptyTitle: "Geen geplande activiteiten",
+    pageTitle: "Vandaag",
+    pageDescription: "Bekijk patiëntbehoeften en leg de middagactiviteit vast.",
+    emptyTitle: "Nog geen gegevens",
     emptyDescription:
-      "Zodra een coördinator je toewijst aan een sessie, zie je die hier.",
+      "Zodra er check-ins en beschikbaarheid zijn, zie je hier het dagoverzicht.",
     participantsLabel: "Deelnemers",
     pickupHint: "Ophaallocatie voor deelnemers",
   },
@@ -26,10 +26,10 @@ export const VOLUNTEER_COPY = {
   },
   availability: {
     pageTitle: "Beschikbaarheid",
-    pageDescription: "Geef aan wanneer je doorgaans kunt helpen.",
+    pageDescription: "Geef aan wanneer je beschikbaar bent voor de vaste dagdelen.",
     recurringTitle: "Wekelijkse beschikbaarheid",
     recurringHint:
-      "Voeg vaste tijdvakken toe per weekdag. Meerdere niet-overlappende tijdvakken op dezelfde dag zijn toegestaan (bijv. 09:00–12:00 en 13:00–17:00).",
+      "Geef per weekdag aan of je beschikbaar bent voor de ochtend- en middagblokken.",
     recurringListTitle: "Jouw vaste vrijwilligersdagen",
     exceptionsTitle: "Uitzonderingen",
     exceptionsHint: "Extra beschikbaarheid of afwezigheid op specifieke dagen.",
@@ -71,7 +71,7 @@ export const VOLUNTEER_COPY = {
     createSuccessLoginLabel: "Inlogpagina",
     createSuccessLoginPath: "/login",
     createSuccessNextSteps:
-      "Vraag de vrijwilliger om in te loggen en beschikbaarheid in te stellen onder Mijn planning → Beschikbaarheid.",
+      "Vraag de vrijwilliger om in te loggen en beschikbaarheid in te stellen onder Vandaag → Beschikbaarheid.",
     createSuccessViewAccount: "Naar accountdetails",
   },
 } as const;

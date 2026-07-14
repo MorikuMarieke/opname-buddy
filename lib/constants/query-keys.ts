@@ -21,9 +21,6 @@
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
   },
-  patientActivities: {
-    all: ["patient-activities"] as const,
-  },
   patientDailyParticipation: {
     all: ["patient-daily-participation"] as const,
     byDate: (planDate: string) =>
@@ -110,47 +107,15 @@
       byDate: (planDate: string) =>
         ["planning", "daily-participation", planDate] as const,
     },
-    activities: {
-      all: ["planning", "activities"] as const,
-      detail: (activityId: string) =>
-        ["planning", "activities", activityId] as const,
-    },
-    recurringSchedules: {
-      all: ["planning", "recurring-schedules"] as const,
-      detail: (scheduleId: string) =>
-        ["planning", "recurring-schedules", scheduleId] as const,
-    },
-    sessions: {
-      all: ["planning", "sessions"] as const,
-      list: (filters?: {
-        status?: string;
-        sessionKind?: string;
-        from?: string;
-        to?: string;
-      }) =>
+    coordinatorVolunteerOverview: {
+      all: ["planning", "coordinator-volunteer-overview"] as const,
+      byDate: (planDate: string, yearMonth: string) =>
         [
           "planning",
-          "sessions",
-          filters?.status ?? "all",
-          filters?.sessionKind ?? "all",
-          filters?.from ?? "default-from",
-          filters?.to ?? "default-to",
+          "coordinator-volunteer-overview",
+          planDate,
+          yearMonth,
         ] as const,
-      detail: (sessionId: string) =>
-        ["planning", "sessions", sessionId] as const,
-    },
-    patients: {
-      all: ["planning", "patients"] as const,
-    },
-    volunteers: {
-      all: ["planning", "volunteers"] as const,
-    },
-    coordinatorVolunteers: {
-      all: ["planning", "coordinator-volunteers"] as const,
-    },
-    facilitators: {
-      candidates: (search?: string) =>
-        ["planning", "facilitators", "candidates", search?.trim() ?? ""] as const,
     },
   },
   volunteer: {
@@ -165,18 +130,5 @@
       absences: (yearMonth: string) =>
         ["volunteer", "block-availability", "absences", yearMonth] as const,
     },
-    sessions: {
-      all: ["volunteer", "sessions"] as const,
-    },
-    facilitators: {
-      sessions: {
-        all: ["facilitator", "sessions"] as const,
-      },
-    },
-    availability: {
-      recurring: ["volunteer", "availability", "recurring"] as const,
-      exceptions: ["volunteer", "availability", "exceptions"] as const,
-    },
   },
 } as const;
-

@@ -6,7 +6,7 @@ import {
   DAY_OF_WEEK_LABELS,
   DAYS_OF_WEEK,
   type DayOfWeek,
-} from "@/lib/constants/planning-enums";
+} from "@/lib/constants/daily-participation";
 import {
   formatDutchDate,
   getDutchWeekdayLabelFromIsoDate,

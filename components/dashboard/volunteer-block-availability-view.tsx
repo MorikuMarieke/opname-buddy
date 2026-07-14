@@ -15,7 +15,7 @@ import {
   WEEKLY_AVAILABILITY_CHANGE_CONFIRMATION,
 } from "@/lib/constants/daily-participation";
 import { formInputClasses } from "@/components/forms/form-styles";
-import type { DayOfWeek } from "@/lib/constants/planning-enums";
+import type { DayOfWeek } from "@/lib/constants/daily-participation";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import {
   getMonthAbsenceSlots,

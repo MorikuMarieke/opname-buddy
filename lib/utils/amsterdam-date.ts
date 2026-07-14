@@ -11,7 +11,7 @@
 import {
   DAY_OF_WEEK_LABELS,
   type DayOfWeek,
-} from "@/lib/constants/planning-enums";
+} from "@/lib/constants/daily-participation";
 
 /**
  * Returns today's calendar date in Europe/Amsterdam as YYYY-MM-DD.

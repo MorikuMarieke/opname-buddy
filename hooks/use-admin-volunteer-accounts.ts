@@ -32,7 +32,7 @@ export function useCreateVolunteerAccount() {
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.adminRoles.all });
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.planning.volunteers.all,
+        queryKey: queryKeys.planning.coordinatorVolunteerOverview.all,
       });
     },
   });

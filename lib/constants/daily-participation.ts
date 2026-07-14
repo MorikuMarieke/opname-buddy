@@ -77,3 +77,18 @@ export const MORNING_CONTACT_AVAILABILITY_THRESHOLD = 1;
 /** Shown when a volunteer saves weekly availability changes */
 export const WEEKLY_AVAILABILITY_CHANGE_CONFIRMATION =
   "Het wijzigen van je wekelijkse beschikbaarheid kan invloed hebben op toekomstige vrijwilligersplanning.";
+
+/** 0 = Sunday … 6 = Saturday (matches PostgreSQL extract(dow)). */
+export const DAYS_OF_WEEK = [0, 1, 2, 3, 4, 5, 6] as const;
+
+export type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
+
+export const DAY_OF_WEEK_LABELS: Record<DayOfWeek, string> = {
+  0: "Zondag",
+  1: "Maandag",
+  2: "Dinsdag",
+  3: "Woensdag",
+  4: "Donderdag",
+  5: "Vrijdag",
+  6: "Zaterdag",
+};

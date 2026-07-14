@@ -16,7 +16,7 @@ export function PlanningShell({ children, userHeader }: PlanningShellProps) {
       <DashboardShell
         variant="professional"
         navItems={planningNavItems}
-        pageTitle="Planning"
+        pageTitle="Dagplanning"
         userHeader={userHeader}
       >
         {children}
