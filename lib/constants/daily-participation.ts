@@ -26,6 +26,12 @@ export const PARTICIPATION_BLOCKS = {
 
 export type ParticipationBlockId = keyof typeof PARTICIPATION_BLOCKS;
 
+/** Stable block identifiers for volunteer absences */
+export const PARTICIPATION_BLOCK_VALUES = [
+  "morning",
+  "afternoon",
+] as const satisfies readonly ParticipationBlockId[];
+
 /** Fixed shared room for the afternoon group block. */
 export const AFTERNOON_GROUP_ROOM_NAME =
   "Gemeenschappelijke activiteitenruimte";

@@ -486,6 +486,47 @@ export type Database = {
           },
         ]
       }
+      daily_participation_plans: {
+        Row: {
+          afternoon_category: string | null
+          afternoon_title: string | null
+          created_at: string
+          id: string
+          participant_message: string | null
+          plan_date: string
+          recorded_by_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          afternoon_category?: string | null
+          afternoon_title?: string | null
+          created_at?: string
+          id?: string
+          participant_message?: string | null
+          plan_date: string
+          recorded_by_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          afternoon_category?: string | null
+          afternoon_title?: string | null
+          created_at?: string
+          id?: string
+          participant_message?: string | null
+          plan_date?: string
+          recorded_by_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_participation_plans_recorded_by_user_id_fkey"
+            columns: ["recorded_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           code: string | null
@@ -567,6 +608,7 @@ export type Database = {
           motivation_score: number
           note: string | null
           pain_score: number
+          participation_needs: string[]
           symptoms: string
           updated_at: string
         }
@@ -581,6 +623,7 @@ export type Database = {
           motivation_score: number
           note?: string | null
           pain_score: number
+          participation_needs?: string[]
           symptoms?: string
           updated_at?: string
         }
@@ -595,6 +638,7 @@ export type Database = {
           motivation_score?: number
           note?: string | null
           pain_score?: number
+          participation_needs?: string[]
           symptoms?: string
           updated_at?: string
         }
@@ -992,6 +1036,38 @@ export type Database = {
           },
         ]
       }
+      volunteer_day_absences: {
+        Row: {
+          absence_date: string
+          block: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          absence_date: string
+          block: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          absence_date?: string
+          block?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_day_absences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       volunteer_recurring_availability: {
         Row: {
           created_at: string
@@ -1033,6 +1109,38 @@ export type Database = {
           },
         ]
       }
+      volunteer_weekly_blocks: {
+        Row: {
+          afternoon_available: boolean
+          day_of_week: number
+          morning_available: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          afternoon_available?: boolean
+          day_of_week: number
+          morning_available?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          afternoon_available?: boolean
+          day_of_week?: number
+          morning_available?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_weekly_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1040,6 +1148,36 @@ export type Database = {
     Functions: {
       current_admission_ids: { Args: never; Returns: string[] }
       current_patient_ids: { Args: never; Returns: string[] }
+      get_daily_needs_summary: {
+        Args: { p_plan_date: string }
+        Returns: {
+          need: string
+          need_count: number
+        }[]
+      }
+      get_daily_participation_for_patient: {
+        Args: { p_plan_date: string }
+        Returns: {
+          afternoon_category: string | null
+          afternoon_title: string | null
+          participant_message: string | null
+          plan_date: string
+          updated_at: string
+        }[]
+      }
+      get_morning_contact_availability_signal: {
+        Args: { p_plan_date: string }
+        Returns: boolean
+      }
+      get_volunteer_block_availability_overview: {
+        Args: { p_plan_date: string }
+        Returns: {
+          afternoon_effective: boolean
+          full_name: string
+          morning_effective: boolean
+          user_id: string
+        }[]
+      }
       has_role: { Args: { role_name: string }; Returns: boolean }
       issue_patient_link_code: {
         Args: { p_created_by_staff_id: string; p_patient_id: string }
@@ -1306,6 +1444,9 @@ export type VolunteerRecurringAvailabilityRow =
   Tables<"volunteer_recurring_availability">;
 export type VolunteerAvailabilityExceptionRow =
   Tables<"volunteer_availability_exceptions">;
+export type DailyParticipationPlanRow = Tables<"daily_participation_plans">;
+export type VolunteerWeeklyBlockRow = Tables<"volunteer_weekly_blocks">;
+export type VolunteerDayAbsenceRow = Tables<"volunteer_day_absences">;
 
 export type RoleName =
   | "patient"
