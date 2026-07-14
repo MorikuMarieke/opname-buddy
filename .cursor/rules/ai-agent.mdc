@@ -20,21 +20,29 @@ alwaysApply: false
 - Use maxSteps >= 3
 - Use streaming responses
 
-## OpnameBuddy — DailyBuddy (daily participation PoC)
+## OpnameBuddy — DailyBuddy (deferred)
 
-The DailyBuddy agent may use:
+DailyBuddy is **not implemented** on the daily participation PoC branch. Implementation is deferred to `feature/dailybuddy-participation-advice`.
+
+Keep these rules for the future AI branch. Specification: [`docs/dailybuddy-ai-boundary.md`](../../docs/dailybuddy-ai-boundary.md), [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](../../docs/branch-plans/branch-dailybuddy-participation-advice.md).
+
+### Planned tools (future branch only)
 
 - `getPatientCheckins` — pain, energy, mood, mobility, symptoms, note, `participation_needs`
 - `getPatientRestrictions` — caregiver `patient_context`
 - `getDailyParticipationPlan` — recorded afternoon category, title, participant message (if any)
-- `getMorningContactAvailabilitySignal` — simple boolean/signal only: whether individual morning contact is reasonably available today (no volunteer names or schedules)
+- `getMorningContactAvailabilitySignal` — simple boolean/signal only (no volunteer names or schedules)
+- `getVolunteerAvailabilityContext` — optional aggregate counts only; no names or schedules
 - `getOpenQuestions` — open patient questions
 - `saveDailyAdvice` — optional persist to `daily_advice` when table exists
 
-### Deprecated tools (do not implement)
+### Do not implement on the PoC branch
 
-- `getAvailableActivities` — replaced by `getDailyParticipationPlan`
-- `getActivityFeedback` — deferred; use participation evaluations when UI exists
+- DailyBuddy API route
+- AI SDK wiring for DailyBuddy
+- Streaming advice UI
+- Tool handlers or prompt integration
+- `daily_advice` persistence
 
 ### AI must never
 

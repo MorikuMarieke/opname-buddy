@@ -38,7 +38,7 @@ The account/domain model rules are defined in [Domain and identity model](#domai
 
 | Role | Primary route | Typical responsibilities |
 |------|---------------|------------------------|
-| **patient** | `/dashboard` | Check-ins, questions, activity feedback, DailyBuddy advice |
+| **patient** | `/dashboard` | Check-ins, questions, daily overview (`Vandaag`), DagBuddy placeholder |
 | **caregiver** | `/care` | Patient overview, restrictions, recovery context, review check-ins and questions |
 | **activity_coordinator** | `/planning` | Daily participation coordination: needs overview, volunteer block availability, afternoon activity record |
 | **admin** | `/admin` | User and role management |
@@ -215,8 +215,8 @@ The project is developed incrementally using feature branches. Each branch intro
 | 4 | `feature/account-domain-model` | Shipped | Clinical domain refactor introducing `patients`, `admissions`, admission-owned care data and secure patient account linking |
 | 5 | `feature/admin-account-management` | Shipped | Administrative management of staff accounts, user roles and account lifecycle |
 | 6 | `feature/patient-admission-management` | Shipped | Caregiver workflow for creating clinical patients, admissions and generating patient linking codes |
-| 7 | `feature/activity-planning-volunteers` | Shipped | Activities, sessions, volunteers, coordinator planning, patient read-only activities |
-| 8 | `feature/dagbuddy-agent` | Planned | DailyBuddy AI agent, tool calling, streaming and advice generation |
+| 7 | `feature/activity-planning-volunteers` | In progress | Daily participation PoC — schema, check-in needs, volunteer/coordinator views, legacy cleanup |
+| 8 | `feature/dailybuddy-participation-advice` | Planned | DailyBuddy AI — advisory tools, streaming `/dashboard/advice`, optional persistence |
 | 9 | `feature/activity-feedback` | Planned | Patient activity participation, progress tracking and AI-supported recovery feedback |
 | 10 | `feature/questionbuddy-agent` | Planned | QuestionBuddy AI assistant for patient questions |
 | 11 | `feature/final-polish-docs` | Planned | UI polish, accessibility, documentation, deployment and final QA |
@@ -257,7 +257,9 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan (shipped) |
 | [`docs/branch-plans/branch-05-admin-account-management.md`](branch-plans/branch-05-admin-account-management.md) | Branch 5 implementation plan (shipped) |
 | [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md) | Branch 6 implementation plan (shipped) |
-| [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md) | Branch 7 implementation plan (shipped) |
+| [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md) | Branch 7 implementation plan (superseded by daily participation PoC) |
+| [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md) | DailyBuddy AI — deferred next branch |
+| [`docs/planning-poc-migration.md`](planning-poc-migration.md) | Daily participation PoC migration plan |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 10) |
 | [`docs/branch-plans/branch-11-final-polish-docs.md`](branch-plans/branch-11-final-polish-docs.md) | Final polish, deployment QA, and known technical debt (branch 11) |

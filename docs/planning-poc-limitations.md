@@ -69,19 +69,31 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 - Patients express daily needs at check-in (multi-select).
 - Patients see a read-only daily overview (blocks, room, requirements, recorded activity).
 - **No** database-tracked enrollment, interest, or decline state in PoC.
-- Patient autonomy is supported through AI advisory language and optional participation framing.
+- Patient autonomy is supported through read-only daily overview and voluntary participation copy.
+- `/dashboard/advice` remains a **placeholder** until `feature/dailybuddy-participation-advice`.
 
 ---
 
-## AI (DailyBuddy)
+## AI (DailyBuddy) — deferred
 
-### AI may
+**Not in scope** for the daily participation PoC branch. No API route, tools, streaming UI, or `daily_advice` persistence on this branch.
+
+Future branch `feature/dailybuddy-participation-advice` will implement patient-facing advisory using:
+
+- Check-in data and `participation_needs`
+- Care restrictions (`patient_context`)
+- Recorded afternoon activity
+- Simple morning-contact availability signal (and optional aggregate availability summary)
+
+Specification: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md) and [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md).
+
+### Future AI may
 
 - Analyse check-in data, needs, care restrictions, and recorded afternoon activity
 - Suggest rest, optional morning individual contact, or afternoon group participation
-- Use a **simple availability signal** only: whether individual morning contact is reasonably available today
+- Use a **simple availability signal** only — no volunteer names or schedules
 
-### AI must not
+### Future AI must not
 
 - Diagnose or give treatment advice
 - Override clinical restrictions
@@ -89,9 +101,8 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 - Assign volunteers or optimise staffing
 - Replace absent volunteers
 - Receive individual volunteer names or detailed schedules
-- Receive detailed staffing counts (unless a future use case explicitly requires them)
 
-### Language
+### Language (future)
 
 Use cautious Dutch phrasing: “kan passen”, “zou geschikt kunnen zijn”, “op basis van wat je invulde”, “de keuze is aan jou”, “bespreek met je zorgteam als je twijfelt”.
 
@@ -101,7 +112,7 @@ Use cautious Dutch phrasing: “kan passen”, “zou geschikt kunnen zijn”, �
 
 | Role | PoC scope |
 |------|-----------|
-| `patient` | Check-in needs, daily overview (`Vandaag`), AI advice |
+| `patient` | Check-in needs, daily overview (`Vandaag`), DagBuddy placeholder |
 | `volunteer` | Availability self-service, shared effective availability overview, daily needs view, afternoon recording |
 | `activity_coordinator` | Dedicated `/planning` module (not `/care`): daily dashboard + afternoon record fallback + `/planning/volunteers` profile overview |
 | `caregiver` | Unchanged care workflows on `/care`; no volunteer availability overview; `/care/activities` removed |
@@ -130,11 +141,13 @@ Use cautious Dutch phrasing: “kan passen”, “zou geschikt kunnen zijn”, �
 - Patient-volunteer matching
 - Recurring activity planning
 - Evening participation evaluation UI (data layer may exist)
+- **DailyBuddy AI** (API, tools, streaming UI, persistence)
 
 ---
 
 ## Future extensions (not in PoC)
 
+- **DailyBuddy** on `feature/dailybuddy-participation-advice`
 - Caregiver read-only daily plan on `/care`
 - `daily_advice` persistence table
 - Capacity enforcement and enrollment tracking

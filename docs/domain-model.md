@@ -39,7 +39,7 @@ For each area:
 >
 > **Activity planning and volunteers — implemented (branch 7):** Activity catalog, weekly recurring schedules, one-off sessions, human approval workflow, volunteer portal, coordinator planning views, and patient read-only confirmed sessions. Plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). AI matching and activity feedback remain deferred (branches 8–9).
 >
-> **Daily participation PoC — in progress (Phase 1+):** Replaces branch-7 scheduling with a two-block daily model. Coordinator dashboard stays at `/planning` (simplified). Volunteers manage block-based availability and record afternoon activity communication. See [`docs/planning-poc-migration.md`](planning-poc-migration.md).
+> **Daily participation PoC — Phases 1–6 shipped; Phase 7 QA pending:** Replaces branch-7 scheduling with a two-block daily model. Coordinator dashboard at `/planning`. DailyBuddy deferred to `feature/dailybuddy-participation-advice`. See [`docs/planning-poc-migration.md`](planning-poc-migration.md).
 >
 > **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
 
@@ -302,7 +302,9 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 > **Branch 7 (`feature/activity-planning-volunteers`) — deprecated (PoC refactor):** The catalog, recurring series, session workflow, facilitator assignments, and time-range volunteer availability described below are being replaced by a minimal daily participation proof-of-concept. Legacy tables and migrations (`00039`–`00049`) remain in the database but stop receiving application writes. See [`docs/planning-poc-migration.md`](planning-poc-migration.md) and [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
 
-### Daily participation proof-of-concept (planned — Phase 1–8)
+### Daily participation proof-of-concept (Phases 1–6 shipped; Phase 7 QA pending)
+
+OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system. **DailyBuddy AI is deferred** to `feature/dailybuddy-participation-advice`.
 
 OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system.
 
@@ -363,9 +365,9 @@ Dedicated activity-coordinator environment (post-login redirect stays `/planning
 
 Migration `00051_volunteer_availability_auth.sql` enforces this at RLS and RPC level.
 
-#### AI boundary
+#### AI boundary (future branch)
 
-DailyBuddy is advisory only. It may receive a simple signal whether morning individual contact is reasonably available. It must not receive individual volunteer names, schedules, or staffing optimisation data.
+DailyBuddy is advisory and patient-facing only, on branch `feature/dailybuddy-participation-advice`. The PoC branch provides `get_morning_contact_availability_signal` and documentation only. See [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
 
 ---
 
