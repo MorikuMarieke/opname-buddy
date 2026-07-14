@@ -1,5 +1,5 @@
-import { VolunteerAvailabilityView } from "@/components/dashboard/volunteer-availability-view";
+import { VolunteerBlockAvailabilityView } from "@/components/dashboard/volunteer-block-availability-view";
 
 export default function VolunteerAvailabilityPage() {
-  return <VolunteerAvailabilityView />;
+  return <VolunteerBlockAvailabilityView />;
 }

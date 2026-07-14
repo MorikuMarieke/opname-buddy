@@ -1,5 +1,5 @@
-import { VolunteerPlanningView } from "@/components/dashboard/volunteer-planning-view";
+import { VolunteerDailyView } from "@/components/dashboard/volunteer-daily-view";
 
 export default function VolunteerHomePage() {
-  return <VolunteerPlanningView />;
+  return <VolunteerDailyView />;
 }

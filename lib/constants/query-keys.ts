@@ -100,6 +100,11 @@
     active: ["departments", "active"] as const,
   },
   planning: {
+    dailyParticipation: {
+      all: ["planning", "daily-participation"] as const,
+      byDate: (planDate: string) =>
+        ["planning", "daily-participation", planDate] as const,
+    },
     activities: {
       all: ["planning", "activities"] as const,
       detail: (activityId: string) =>
@@ -145,6 +150,16 @@
   },
   volunteer: {
     profile: ["volunteer", "profile"] as const,
+    dailyParticipation: {
+      all: ["volunteer", "daily-participation"] as const,
+      byDate: (planDate: string) =>
+        ["volunteer", "daily-participation", planDate] as const,
+    },
+    blockAvailability: {
+      weekly: ["volunteer", "block-availability", "weekly"] as const,
+      absences: (yearMonth: string) =>
+        ["volunteer", "block-availability", "absences", yearMonth] as const,
+    },
     sessions: {
       all: ["volunteer", "sessions"] as const,
     },
