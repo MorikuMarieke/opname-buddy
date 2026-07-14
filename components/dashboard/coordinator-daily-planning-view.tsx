@@ -109,6 +109,20 @@ export function CoordinatorDailyPlanningView() {
         <div className="space-y-6">
           <div>
             <h4 className="mb-3 text-sm font-semibold text-carbon-black-900">
+              Vrijwilligers beschikbaarheid middag
+            </h4>
+            {isLoading ? (
+              <p className="text-sm text-carbon-black-600">Laden...</p>
+            ) : (
+              <VolunteerAvailabilityOverview
+                volunteers={data?.availability ?? []}
+                block="afternoon"
+              />
+            )}
+          </div>
+
+          <div>
+            <h4 className="mb-3 text-sm font-semibold text-carbon-black-900">
               Patiëntbehoeften vandaag
             </h4>
             {isLoading ? (

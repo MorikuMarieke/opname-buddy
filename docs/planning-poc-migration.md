@@ -56,12 +56,18 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 |-----|---------|
 | `get_daily_needs_summary(plan_date)` | Aggregated patient need counts |
 | `get_daily_participation_for_patient(plan_date)` | Patient read model |
-| `get_volunteer_block_availability_overview(plan_date)` | Effective block availability per volunteer (coordinator UI only — not passed to AI with names) |
+| `get_volunteer_block_availability_overview(plan_date)` | Effective block availability per volunteer (volunteer, coordinator, admin — not caregivers or AI with names) |
 | `get_morning_contact_availability_signal(plan_date)` | Boolean/simple signal for AI: morning individual contact reasonably available |
 
 ---
 
 ## Routes — remove or replace
+
+### Activity coordinator environment (preserve)
+
+- **`activity_coordinator` always redirects to `/planning`** — never to `/care`.
+- `/planning` remains a **dedicated coordination module** for the PoC (not folded into care).
+- Remove only the old complex planning subroutes; keep a small coordinator dashboard.
 
 ### Remove (Phase 6) + redirect to `/planning`
 
@@ -74,29 +80,40 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 | `/planning/activities`, `/planning/activities/new`, `/planning/activities/[id]/edit` | Activity catalog |
 | `/planning/calendar` | Week calendar |
 | `/planning/facilitator` | Coordinator facilitator sessions |
-| `/planning/volunteers` | Coordinator volunteer availability panel |
 | `/planning/recurring/*` | Legacy recurring URLs |
-| `/care/activities` | Caregiver facilitator sessions |
+| `/care/activities` | Caregiver facilitator sessions (redirect to `/care`) |
 
 ### Keep and replace
 
 | Route | PoC purpose |
 |-------|-------------|
-| `/planning` | **Coordinator dashboard** — date, weekday, blocks, needs, volunteer availability, afternoon record + audit |
+| `/planning` | **Coordinator dashboard** — date picker, weekday, both blocks, aggregated needs, effective volunteer availability per block, recorded afternoon activity + audit, afternoon record form |
+| `/planning/volunteers` | **Simplified volunteer profile overview** — read-only list with block-based weekly availability and one-time absences (replaces legacy detailed volunteer planning UI) |
 | `/volunteer` | Volunteer daily page — needs summary, afternoon recording |
 | `/volunteer/availability` | Block-based weekly availability + monthly one-time absences |
 | `/volunteer/profile` | Volunteer profile |
 | `/dashboard/checkin` | Extended with `participation_needs` |
-| `/dashboard/activities` | Read-only patient daily participation overview |
+| `/dashboard/activities` | Read-only patient daily participation overview (`Vandaag`) |
 | `/dashboard/advice` | DailyBuddy advisory (Phase 7) |
 
 ### Navigation after PoC
 
 | Module | Items |
 |--------|-------|
-| Planning | **Dagplanning** → `/planning` only |
+| Planning | **Dagplanning** → `/planning`; **Vrijwilligers** → `/planning/volunteers` |
 | Volunteer | Vandaag, Beschikbaarheid, Mijn profiel |
-| Patient | Activiteiten → daily overview label TBD |
+| Patient | Vandaag → `/dashboard/activities` |
+| Care | No volunteer availability or activity planning links |
+
+### Routing rules
+
+| Role | Post-login redirect | Notes |
+|------|---------------------|-------|
+| `activity_coordinator` | `/planning` | Unchanged; do not redirect to `/care` |
+| `caregiver` | `/care` | Unchanged |
+| `admin` | `/admin` | May access volunteer availability overview when needed |
+
+All removed `/planning/*` URLs (except `/planning/volunteers`) redirect to `/planning`.
 
 ---
 
@@ -104,14 +121,20 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 
 ### Routes (`app/planning/`)
 
-- `plan/page.tsx`, `sessions/**`, `series/**`, `activities/**`, `calendar/page.tsx`, `facilitator/page.tsx`, `volunteers/page.tsx`, `recurring/**`
+- `plan/page.tsx`, `sessions/**`, `series/**`, `activities/**`, `calendar/page.tsx`, `facilitator/page.tsx`, `recurring/**`
+- **Keep** `volunteers/page.tsx` — replace implementation with simplified block-based profile overview
+
+### Redirect route (add in Phase 6)
+
+- `app/planning/[...legacy]/page.tsx` or per-route `redirect("/planning")` for removed subroutes
+- `app/care/activities/page.tsx` → redirect to `/care`
 
 ### Components (`components/dashboard/`)
 
 - `planning-overview-view.tsx`, `planning-plan-view.tsx`, `planning-sessions-view.tsx`, `planning-session-detail-view.tsx`
 - `planning-series-view.tsx`, `planning-series-detail-view.tsx`, `planning-activities-view.tsx`
 - `planning-activity-create-view.tsx`, `planning-activity-edit-view.tsx`, `planning-calendar-view.tsx`
-- `planning-coordinator-volunteers-view.tsx`, `planning-recurring-edit-view.tsx`
+- `planning-coordinator-volunteers-view.tsx` (replace with new block-based overview)
 - `planning-recurring-view.tsx`, `planning-recurring-create-view.tsx`, `planning-session-create-view.tsx` (orphans)
 - `facilitator-sessions-page-view.tsx`, `facilitator-sessions-view.tsx`, `volunteer-planning-view.tsx`
 - `patient-activities-view.tsx`
@@ -153,7 +176,7 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 | 3 | Check-in form/summary updates |
 | 4 | `coordinator-daily-planning-view.tsx`, `volunteer-daily-view.tsx`, `volunteer-block-availability-view.tsx`, services/hooks |
 | 5 | `patient-daily-participation-view.tsx` |
-| 6 | Redirects; delete legacy files listed above |
+| 6 | Redirects; delete legacy files; simplified `/planning/volunteers`; planning nav trim |
 | 7 | `lib/ai/dailybuddy.ts`, `lib/tools/*`, API route |
 
 ---
@@ -172,14 +195,48 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 
 `/planning` shows for the selected date:
 
-1. Date and Dutch weekday name
-2. Fixed morning block (10:00–12:00) with effective volunteer availability count/list
+1. Date picker and Dutch weekday name
+2. Fixed morning block (10:00–12:00) with effective volunteer availability
 3. Fixed afternoon block (14:00–16:00) with room constant, capacity 10, independent-access notice
-4. Aggregated patient needs (social, movement, creative, relaxation)
-5. Recorded afternoon activity (category, title, participant message) if present
-6. Audit: who last updated the afternoon record and when (`recorded_by_user_id`, `updated_at`)
+4. Effective volunteer availability for the afternoon block
+5. Aggregated patient needs (social, movement, creative, relaxation)
+6. Recorded afternoon activity (category, title, participant message) if present
+7. Audit: who last updated the afternoon record and when (`recorded_by_user_id`, `updated_at`)
+8. Form to create or correct the afternoon activity record (coordinator fallback)
+
+### Coordinator may
+
+- Select any date and review the daily picture
+- See aggregated patient participation needs
+- See effective volunteer availability per block
+- Create or correct the afternoon activity communication
+- Open `/planning/volunteers` for a read-only volunteer profile overview
+
+### Coordinator must not
+
+- Schedule individual patients
+- Assign volunteers to patients
+- Manage exact times or minute-level appointments
+- Create recurring activities or session series
+- Perform clinical patient actions (those remain on `/care`)
 
 Morning coordination happens outside the app using the availability overview. No minute-level scheduling.
+
+---
+
+## Authorization (volunteer availability)
+
+| Actor | Read effective overview | Edit weekly blocks | Edit one-time absences |
+|-------|-------------------------|--------------------|------------------------|
+| `volunteer` | Yes (shared overview) | Own rows only | Own rows only |
+| `activity_coordinator` | Yes | No | No |
+| `admin` | Yes | No | No |
+| `caregiver` | **No** (unless a future care workflow explicitly requires it) | No | No |
+| `patient` | No | No | No |
+
+Enforced in migration `00051_volunteer_availability_auth.sql` (RLS + `get_volunteer_block_availability_overview`).
+
+Volunteers edit only their own `volunteer_weekly_blocks` and `volunteer_day_absences`. Coordinators and admins have read-only oversight via the RPC and direct table select policies.
 
 ---
 

@@ -40,7 +40,7 @@ The account/domain model rules are defined in [Domain and identity model](#domai
 |------|---------------|------------------------|
 | **patient** | `/dashboard` | Check-ins, questions, activity feedback, DailyBuddy advice |
 | **caregiver** | `/care` | Patient overview, restrictions, recovery context, review check-ins and questions |
-| **activity_coordinator** | `/planning` | Activities, sessions, volunteer slots, calendar |
+| **activity_coordinator** | `/planning` | Daily participation coordination: needs overview, volunteer block availability, afternoon activity record |
 | **admin** | `/admin` | User and role management |
 
 ### Role rules
@@ -64,7 +64,7 @@ The MVP delivers four role-specific dashboards, patient and staff CRUD flows, pl
 
 - Patient daily check-ins and questions
 - Caregiver restrictions and open-ended context
-- Activity catalog, sessions, volunteer availability, and calendar
+- Daily participation coordination (two-block model), volunteer block availability, afternoon activity communication
 - Patient activity feedback
 - DailyBuddy (participation advice) and QuestionBuddy (question organization)
 - Supabase Auth, RLS, React Query CRUD, Vercel deployment
@@ -235,14 +235,15 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 |-------|---------|
 | `/dashboard/link` | Patient link-code redemption |
 | `/dashboard/context` | Patient read-only zorgcontext |
-| `/dashboard/activities` | Patient read-only confirmed upcoming activity sessions |
+| `/dashboard/activities` | Patient read-only daily participation overview (`Vandaag`) |
 | `/care/patients/admit` | New clinical patient + admission |
 | `/care/patients/[patientId]/admit` | Readmission for existing patient |
 | `/care/patients/[patientId]/edit` | Edit patient demographics |
 | `/admin/departments` | Department reference data management |
-| `/planning` | Coordinator activity planning overview |
-| `/planning/sessions` | Session planning and human approval workflow |
-| `/volunteer` | Volunteer assigned sessions and availability |
+| `/planning` | Activity coordinator daily participation dashboard |
+| `/planning/volunteers` | Coordinator read-only volunteer profile overview |
+| `/volunteer` | Volunteer daily participation and afternoon recording |
+| `/volunteer/availability` | Volunteer block-based weekly availability |
 
 ---
 

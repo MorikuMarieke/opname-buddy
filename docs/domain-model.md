@@ -350,7 +350,18 @@ Replaces legacy `volunteer_availability_exceptions`. One-time unavailability for
 
 #### Coordinator dashboard (`/planning`)
 
-Single page: selected date and weekday, both blocks, aggregated patient needs, effective volunteer availability per block, recorded afternoon activity with audit fields. Complex planning subroutes are removed.
+Dedicated activity-coordinator environment (post-login redirect stays `/planning`). Single page: date picker, weekday, both blocks, aggregated patient needs, effective volunteer availability per block, recorded afternoon activity with audit fields, afternoon record form. Coordinators may open `/planning/volunteers` for a simplified read-only volunteer profile overview. They must not schedule patients, assign volunteers, manage exact times, or create recurring activities. Complex planning subroutes redirect to `/planning`.
+
+#### Volunteer availability authorization
+
+| Role | Read overview RPC | Edit own availability |
+|------|-------------------|----------------------|
+| volunteer | Yes | Yes |
+| activity_coordinator | Yes | No |
+| admin | Yes | No |
+| caregiver | No | No |
+
+Migration `00051_volunteer_availability_auth.sql` enforces this at RLS and RPC level.
 
 #### AI boundary
 
