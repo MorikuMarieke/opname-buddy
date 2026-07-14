@@ -64,8 +64,8 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
         <ActionTile
           href="/dashboard/activities"
           icon={Calendar}
-          title="Activiteiten"
-          description="Bekijk activiteiten."
+          title="Vandaag"
+          description="Bekijk de vaste dagdelen en wat er gepland is."
           accent="blue-slate"
           size="kiosk"
         />

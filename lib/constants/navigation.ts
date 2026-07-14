@@ -29,7 +29,7 @@ export const patientBottomNavItems: NavItem[] = [
     href: "/dashboard/context",
     icon: Heart,
   },
-  { label: "Activiteiten", href: "/dashboard/activities", icon: Calendar },
+  { label: "Vandaag", href: "/dashboard/activities", icon: Calendar },
   { label: "DagBuddy", href: "/dashboard/advice", icon: Sun },
 ];
 

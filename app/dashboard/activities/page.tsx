@@ -1,5 +1,5 @@
-import { PatientActivitiesView } from "@/components/dashboard/patient-activities-view";
+import { PatientDailyParticipationView } from "@/components/dashboard/patient-daily-participation-view";
 
 export default function ActivitiesPage() {
-  return <PatientActivitiesView />;
+  return <PatientDailyParticipationView />;
 }

@@ -24,6 +24,11 @@
   patientActivities: {
     all: ["patient-activities"] as const,
   },
+  patientDailyParticipation: {
+    all: ["patient-daily-participation"] as const,
+    byDate: (planDate: string) =>
+      ["patient-daily-participation", planDate] as const,
+  },
   adminAccounts: {
     all: ["admin-accounts"] as const,
     staff: (filters?: { search?: string; status?: string; role?: string }) => {
