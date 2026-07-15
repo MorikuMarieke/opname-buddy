@@ -216,7 +216,7 @@ The project is developed incrementally using feature branches. Each branch intro
 | 5 | `feature/admin-account-management` | Shipped | Administrative management of staff accounts, user roles and account lifecycle |
 | 6 | `feature/patient-admission-management` | Shipped | Caregiver workflow for creating clinical patients, admissions and generating patient linking codes |
 | 7 | `feature/activity-planning-volunteers` | In progress | Daily participation PoC — schema, check-in needs, volunteer/coordinator views, legacy cleanup |
-| 8 | `feature/dailybuddy-participation-advice` | Planned | DailyBuddy AI — advisory tools, streaming `/dashboard/advice`, optional persistence |
+| 8 | `feature/dailybuddy-participation-advice` | In progress | DailyBuddy AI — advisory tools, structured `/dashboard/advice`, visit requests |
 | 9 | `feature/activity-feedback` | Planned | Patient activity participation, progress tracking and AI-supported recovery feedback |
 | 10 | `feature/questionbuddy-agent` | Planned | QuestionBuddy AI assistant for patient questions |
 | 11 | `feature/final-polish-docs` | Planned | UI polish, accessibility, documentation, deployment and final QA |

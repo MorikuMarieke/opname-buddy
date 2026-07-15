@@ -28,6 +28,7 @@ import {
   FALL_RISK_OPTIONS,
   GUIDANCE_LEVEL_OPTIONS,
   ISOLATION_TYPE_OPTIONS,
+  ACTIVITY_ROOM_ACCESS_OPTIONS,
   MOBILITY_AID_AVAILABLE_OPTIONS,
   MOBILITY_AID_TYPE_OPTIONS,
   MOBILITY_STATUS_OPTIONS,
@@ -218,6 +219,31 @@ export function PatientContextForm({
                 updateField(
                   "room_restriction",
                   event.target.value as PatientContextFormValues["room_restriction"],
+                )
+              }
+            />
+          </ContextFormField>
+
+          <ContextFormField
+            label={
+              PATIENT_CONTEXT_FIELD_LABELS.can_independently_reach_activity_room
+            }
+            htmlFor="can_independently_reach_activity_room"
+            error={fieldErrors.can_independently_reach_activity_room}
+            incomplete={isFieldIncomplete(
+              values,
+              "can_independently_reach_activity_room",
+            )}
+          >
+            <ContextFormSelect
+              id="can_independently_reach_activity_room"
+              value={values.can_independently_reach_activity_room}
+              options={ACTIVITY_ROOM_ACCESS_OPTIONS}
+              onChange={(event) =>
+                updateField(
+                  "can_independently_reach_activity_room",
+                  event.target
+                    .value as PatientContextFormValues["can_independently_reach_activity_room"],
                 )
               }
             />

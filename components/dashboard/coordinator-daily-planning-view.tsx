@@ -7,6 +7,7 @@ import {
   DailyNeedsSummary,
   getSuggestedNeedCategory,
 } from "@/components/dashboard/daily-needs-summary";
+import { MorningVisitRequestList } from "@/components/dashboard/morning-visit-request-list";
 import { VolunteerAvailabilityOverview } from "@/components/dashboard/volunteer-availability-overview";
 import { DashboardCard } from "@/components/ui/dashboard-card";
 import {
@@ -87,6 +88,8 @@ export function CoordinatorDailyPlanningView() {
           />
         )}
       </DashboardCard>
+
+      <MorningVisitRequestList requestDate={planDate} />
 
       <DashboardCard
         title={`Middag ${PARTICIPATION_BLOCKS.afternoon.label}`}

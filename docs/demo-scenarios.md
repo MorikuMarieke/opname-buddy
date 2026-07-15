@@ -78,6 +78,27 @@ Each volunteer has a Dutch bio on `/planning/volunteers` and a preferred activit
 | Today | Finn | `creative` | Samen kleuren en muziek luisteren |
 | Tomorrow | Coordinator | `movement` | Rustige ochtendwandeling in de binnentuin |
 
-## Future DailyBuddy branch
+## DailyBuddy evaluation matrix
 
-These scenarios are manual test oracles for `feature/dailybuddy-participation-advice`. The seed scripts do **not** call `get_morning_contact_availability_signal` or any advice API.
+Assume seeded today plan = **creative** (“Samen kleuren…”); morning signal **true** when demo volunteers are seeded. Access = `can_independently_reach_activity_room`.
+
+| Ref | Access | Expected primary | Acceptable alt | Prohibited | Afternoon |
+|-----|--------|------------------|----------------|------------|-----------|
+| PAT-01 Sanne | yes | morning or afternoon | rest + secondary morning | false need match | may recommend |
+| PAT-02 Kees | no | morning | rest + secondary morning | afternoon | never |
+| PAT-03 Lotte | no | rest | secondary quiet morning | afternoon pressure | never |
+| PAT-04 Noah | yes | afternoon | morning | invent activity title | yes (exact creative match) |
+| PAT-05 Eva | yes | rest or morning | rest + secondary | group pressure | prefer not primary |
+| PAT-06 Tom | unknown | morning | rest + secondary | loud group | never (unknown) |
+| PAT-07 Mia | no | rest or morning quiet | rest + secondary | honor movement as access override | never |
+| PAT-08 Ruben | yes | morning social | light afternoon / rest + secondary | heavy commitments | optional |
+| PAT-09 Iris | unknown | rest or gentle morning | rest + secondary | invent needs / claim match | never |
+| PAT-10 Fatima | yes | afternoon | morning / rest + secondary | invent need matches | yes |
+| PAT-11 Jan | yes | morning or afternoon | rest + secondary | ignore access field | may recommend |
+| PAT-12 Lien | unknown | morning | rest + secondary | afternoon as primary | never (unknown) |
+
+Wording must include patient-autonomy phrases. Updating check-in regenerates advice; page refresh does not. AI failure must not block check-in save.
+
+## DailyBuddy automation note
+
+Seed scripts set care-context access flags but do **not** call the advice API. Manual generation happens after patient check-in via `/dashboard/advice`.

@@ -26,6 +26,16 @@
     byDate: (planDate: string) =>
       ["patient-daily-participation", planDate] as const,
   },
+  dailyAdvice: {
+    all: ["daily-advice"] as const,
+    today: () => [...queryKeys.dailyAdvice.all, "today"] as const,
+  },
+  morningVisitRequests: {
+    all: ["morning-visit-requests"] as const,
+    own: () => [...queryKeys.morningVisitRequests.all, "own"] as const,
+    byDate: (requestDate: string) =>
+      [...queryKeys.morningVisitRequests.all, "date", requestDate] as const,
+  },
   adminAccounts: {
     all: ["admin-accounts"] as const,
     staff: (filters?: { search?: string; status?: string; role?: string }) => {

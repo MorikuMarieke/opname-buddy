@@ -39,6 +39,8 @@ export type MobilityAidType =
 
 export type MobilityAidAvailable = "unknown" | "yes" | "no";
 
+export type ActivityRoomAccess = "unknown" | "yes" | "no";
+
 export type IsolationType =
   | "unknown"
   | "none"
@@ -120,6 +122,12 @@ export const MOBILITY_AID_AVAILABLE_LABELS: Record<MobilityAidAvailable, string>
     no: "Nee",
   };
 
+export const ACTIVITY_ROOM_ACCESS_LABELS: Record<ActivityRoomAccess, string> = {
+  unknown: "Onbekend",
+  yes: "Ja, zelfstandig",
+  no: "Nee",
+};
+
 export const ISOLATION_TYPE_LABELS: Record<IsolationType, string> = {
   unknown: "Onbekend",
   none: "Geen",
@@ -169,6 +177,7 @@ export const PATIENT_CONTEXT_FIELD_LABELS: Record<string, string> = {
   mobility_aid_available: "Loophulpmiddel beschikbaar",
   isolation_type: "Isolatietype",
   room_restriction: "Bewegingsvrijheid",
+  can_independently_reach_activity_room: "Activiteitenruimte zelfstandig bereiken",
   notes: "Notities",
 };
 
@@ -179,6 +188,7 @@ export const CRITICAL_CONTEXT_FIELDS = [
   "requires_supervision",
   "isolation_type",
   "room_restriction",
+  "can_independently_reach_activity_room",
 ] as const;
 
 export type CriticalContextField = (typeof CRITICAL_CONTEXT_FIELDS)[number];
@@ -202,6 +212,9 @@ export const GUIDANCE_LEVEL_OPTIONS = enumOptionsWithUnknown(GUIDANCE_LEVEL_LABE
 export const MOBILITY_AID_TYPE_OPTIONS = enumOptionsWithUnknown(MOBILITY_AID_TYPE_LABELS);
 export const MOBILITY_AID_AVAILABLE_OPTIONS = enumOptionsWithUnknown(
   MOBILITY_AID_AVAILABLE_LABELS,
+);
+export const ACTIVITY_ROOM_ACCESS_OPTIONS = enumOptionsWithUnknown(
+  ACTIVITY_ROOM_ACCESS_LABELS,
 );
 export const ISOLATION_TYPE_OPTIONS = enumOptionsWithUnknown(ISOLATION_TYPE_LABELS);
 export const MOVEMENT_FREEDOM_OPTIONS = enumOptionsWithUnknown(MOVEMENT_FREEDOM_LABELS);

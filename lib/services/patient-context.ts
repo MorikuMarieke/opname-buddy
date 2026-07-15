@@ -71,6 +71,8 @@ function toDbPayload(
     mobility_aid_available: values.mobility_aid_available,
     isolation_type: values.isolation_type,
     room_restriction: values.room_restriction,
+    can_independently_reach_activity_room:
+      values.can_independently_reach_activity_room,
     additional_attention_points: values.additional_attention_points,
     additional_attention_notes: values.additional_attention_notes || null,
     notes: values.notes || null,

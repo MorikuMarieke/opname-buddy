@@ -4,6 +4,7 @@ import {
   FALL_RISK_LABELS,
   GUIDANCE_LEVEL_LABELS,
   ISOLATION_TYPE_LABELS,
+  ACTIVITY_ROOM_ACCESS_LABELS,
   MOBILITY_AID_AVAILABLE_LABELS,
   MOBILITY_AID_TYPE_LABELS,
   MOBILITY_STATUS_LABELS,
@@ -85,6 +86,14 @@ export function PatientContextReadOnlySections({
           value={displayEnum(
             (values?.room_restriction ?? "unknown") as never,
             MOVEMENT_FREEDOM_LABELS,
+          )}
+        />
+        <ReadOnlyRow
+          label="Activiteitenruimte zelfstandig bereiken"
+          value={displayEnum(
+            (values?.can_independently_reach_activity_room ??
+              "unknown") as never,
+            ACTIVITY_ROOM_ACCESS_LABELS,
           )}
         />
         <ReadOnlyRow

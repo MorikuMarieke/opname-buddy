@@ -17,32 +17,21 @@ alwaysApply: false
 
 ## Requirements
 - Use at least 3 tools
-- Use maxSteps >= 3
-- Use streaming responses
+- Use maxSteps / `stopWhen: stepCountIs(n)` with n >= 3
+- Prefer structured output for persisted advice; stream progress during first generation when useful
 
-## OpnameBuddy — DailyBuddy (deferred)
+## OpnameBuddy — DailyBuddy
 
-DailyBuddy is **not implemented** on the daily participation PoC branch. Implementation is deferred to `feature/dailybuddy-participation-advice`.
+Specification: [`docs/dailybuddy-ai-boundary.md`](../../docs/dailybuddy-ai-boundary.md), [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](../../docs/branch-plans/branch-dailybuddy-participation-advice.md).
 
-Keep these rules for the future AI branch. Specification: [`docs/dailybuddy-ai-boundary.md`](../../docs/dailybuddy-ai-boundary.md), [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](../../docs/branch-plans/branch-dailybuddy-participation-advice.md).
+### Tools (read-only)
 
-### Planned tools (future branch only)
+- `getPatientCheckin` — today's check-in including `participation_needs`
+- `getPatientContext` — caregiver context including `can_independently_reach_activity_room`
+- `getDailyParticipationPlan` — recorded afternoon plan (if any)
+- `getMorningVolunteerAvailabilitySignal` — boolean only (no names/schedules)
 
-- `getPatientCheckins` — pain, energy, mood, mobility, symptoms, note, `participation_needs`
-- `getPatientRestrictions` — caregiver `patient_context`
-- `getDailyParticipationPlan` — recorded afternoon category, title, participant message (if any)
-- `getMorningContactAvailabilitySignal` — simple boolean/signal only (no volunteer names or schedules)
-- `getVolunteerAvailabilityContext` — optional aggregate counts only; no names or schedules
-- `getOpenQuestions` — open patient questions
-- `saveDailyAdvice` — optional persist to `daily_advice` when table exists
-
-### Do not implement on the PoC branch
-
-- DailyBuddy API route
-- AI SDK wiring for DailyBuddy
-- Streaming advice UI
-- Tool handlers or prompt integration
-- `daily_advice` persistence
+Persist via **server-side** upsert after Zod validation — do **not** expose `saveDailyAdvice` as a tool unless required for graduation evidence.
 
 ### AI must never
 
@@ -52,16 +41,21 @@ Keep these rules for the future AI branch. Specification: [`docs/dailybuddy-ai-b
 - Assign volunteers or optimise staffing
 - Replace absent volunteers
 - Receive individual volunteer names, schedules, or detailed staffing counts
-- Auto-select the afternoon group activity
+- Invent or auto-select the afternoon group activity
+- Claim a participation-need match the patient did not select
+
+### Afternoon gate
+
+Only `can_independently_reach_activity_room === "yes"` may consider afternoon group. `no` and `unknown` must not recommend it.
 
 ### AI advisory outputs
 
 May suggest (with cautious language):
 
-1. Rest may fit today's check-in
+1. Rest may fit today's check-in (optional secondary quiet morning visit)
 2. Optional individual contact during the morning block (10:00–12:00)
-3. The recorded afternoon group activity may fit expressed needs — patient chooses
+3. The recorded afternoon group activity may fit — patient chooses
 
-Use Dutch phrasing such as: "kan passen", "zou geschikt kunnen zijn", "op basis van wat je invulde", "de keuze is aan jou", "bespreek met je zorgteam als je twijfelt".
+Use Dutch phrasing such as: "kan passen", "op basis van wat je hebt ingevuld", "de keuze is aan jou", "bespreek met je zorgteam als je twijfelt".
 
 The AI may only support recovery participation within caregiver-defined boundaries.

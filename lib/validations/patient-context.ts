@@ -35,6 +35,8 @@ const mobilityAidTypeSchema = z.enum([
 
 const mobilityAidAvailableSchema = z.enum(["unknown", "yes", "no"]);
 
+const activityRoomAccessSchema = z.enum(["unknown", "yes", "no"]);
+
 const isolationTypeSchema = z.enum([
   "unknown",
   "none",
@@ -77,6 +79,7 @@ export const patientContextFormSchema = z.object({
   mobility_aid_available: mobilityAidAvailableSchema,
   isolation_type: isolationTypeSchema,
   room_restriction: movementFreedomSchema,
+  can_independently_reach_activity_room: activityRoomAccessSchema,
   additional_attention_points: z.array(attentionPointSchema),
   additional_attention_notes: z.string(),
   notes: z.string(),
@@ -93,6 +96,7 @@ export const defaultPatientContextFormValues: PatientContextFormValues = {
   mobility_aid_available: "unknown",
   isolation_type: "unknown",
   room_restriction: "unknown",
+  can_independently_reach_activity_room: "unknown",
   additional_attention_points: [],
   additional_attention_notes: "",
   notes: "",
@@ -119,6 +123,9 @@ export function toFormValues(
       context.isolation_type as PatientContextFormValues["isolation_type"],
     room_restriction:
       context.room_restriction as PatientContextFormValues["room_restriction"],
+    can_independently_reach_activity_room:
+      (context.can_independently_reach_activity_room as PatientContextFormValues["can_independently_reach_activity_room"]) ??
+      "unknown",
     additional_attention_points:
       context.additional_attention_points as AttentionPoint[],
     additional_attention_notes: context.additional_attention_notes ?? "",

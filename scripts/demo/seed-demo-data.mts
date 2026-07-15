@@ -349,6 +349,8 @@ async function upsertDemoPatient(
     mobility_aid_available: scenario.context.mobilityAidAvailable,
     isolation_type: "none" as const,
     room_restriction: scenario.context.roomRestriction,
+    can_independently_reach_activity_room:
+      scenario.context.canIndependentlyReachActivityRoom,
     additional_attention_points: scenario.context.additionalAttentionPoints,
     additional_attention_notes: scenario.admissionReason,
     notes: scenario.context.notes,

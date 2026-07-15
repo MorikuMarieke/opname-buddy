@@ -10,6 +10,7 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionHeader } from "@/components/ui/section-header";
+import { requestDailyAdviceGeneration } from "@/hooks/use-daily-advice";
 import {
   useRecentCheckIns,
   useTodayCheckIn,
@@ -19,6 +20,7 @@ type CheckinMode = "summary" | "create" | "edit";
 
 export function CheckinView() {
   const [mode, setMode] = useState<CheckinMode>("summary");
+  const [showAdviceCta, setShowAdviceCta] = useState(false);
   const todayQuery = useTodayCheckIn();
   const recentQuery = useRecentCheckIns();
 
@@ -27,6 +29,8 @@ export function CheckinView() {
 
   function handleFormSuccess() {
     setMode("summary");
+    setShowAdviceCta(true);
+    requestDailyAdviceGeneration();
   }
 
   function renderContent() {
@@ -48,10 +52,23 @@ export function CheckinView() {
 
     if (todayCheckIn) {
       return (
-        <CheckinSummary
-          checkIn={todayCheckIn}
-          onEdit={() => setMode("edit")}
-        />
+        <>
+          <CheckinSummary
+            checkIn={todayCheckIn}
+            onEdit={() => setMode("edit")}
+          />
+          {showAdviceCta ? (
+            <DashboardCard density="compact" className="mt-4 space-y-3">
+              <p className="text-sm text-carbon-black-800">
+                Je check-in is opgeslagen. DagBuddy maakt je advies voor
+                vandaag.
+              </p>
+              <PrimaryButton href="/dashboard/advice">
+                Bekijk DagBuddy-advies
+              </PrimaryButton>
+            </DashboardCard>
+          ) : null}
+        </>
       );
     }
 
@@ -78,17 +95,10 @@ export function CheckinView() {
         size="kiosk"
       />
 
-      <DashboardCard density="comfortable" padding="lg">
-        {renderContent()}
-      </DashboardCard>
+      {renderContent()}
 
-      {!isLoading && recentQuery.data ? (
-        <DashboardCard density="comfortable" padding="lg">
-          <CheckinHistoryList
-            checkIns={recentQuery.data}
-            todayCheckInId={todayCheckIn?.id}
-          />
-        </DashboardCard>
+      {recentQuery.data && recentQuery.data.length > 0 ? (
+        <CheckinHistoryList checkIns={recentQuery.data} />
       ) : null}
     </div>
   );
