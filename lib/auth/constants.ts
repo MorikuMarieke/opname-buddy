@@ -4,6 +4,7 @@ export const ROLE_PRIORITY: RoleName[] = [
   "admin",
   "activity_coordinator",
   "caregiver",
+  "volunteer",
   "patient",
 ];
 
@@ -11,6 +12,7 @@ export const ROLE_ROUTES: Record<RoleName, string> = {
   admin: "/admin",
   activity_coordinator: "/planning",
   caregiver: "/care",
+  volunteer: "/volunteer",
   patient: "/dashboard",
 };
 

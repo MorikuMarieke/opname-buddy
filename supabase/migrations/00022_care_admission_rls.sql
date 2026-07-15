@@ -18,7 +18,7 @@
 -- running. Depends on 00019 (admission_id columns) and 00021 (helper).
 --
 -- Idempotent: drop policy if exists + create.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 2 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 2 plan).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

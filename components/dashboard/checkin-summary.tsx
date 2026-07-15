@@ -1,5 +1,7 @@
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PARTICIPATION_NEED_LABELS } from "@/lib/constants/daily-participation";
+import type { ParticipationNeedValue } from "@/lib/constants/daily-participation";
 import { formatDutchDate } from "@/lib/utils/amsterdam-date";
 import { LIKERT_LABELS } from "@/types/patient";
 import type { PatientCheckin } from "@/types/patient";
@@ -55,6 +57,24 @@ export function CheckinSummary({ checkIn, onEdit }: CheckinSummaryProps) {
           </dd>
         </div>
       </dl>
+
+      {checkIn.participation_needs.length > 0 ? (
+        <div>
+          <p className="text-sm text-carbon-black-600">
+            Wat je vandaag fijn zou vinden
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {checkIn.participation_needs.map((need) => (
+              <li key={need}>
+                <StatusBadge variant="neutral">
+                  {PARTICIPATION_NEED_LABELS[need as ParticipationNeedValue] ??
+                    need}
+                </StatusBadge>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {checkIn.symptoms ? (
         <div>

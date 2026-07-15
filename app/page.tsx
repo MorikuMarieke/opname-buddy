@@ -1,4 +1,4 @@
-import { Heart, LayoutDashboard, Settings, Users } from "lucide-react";
+import { Heart, HandHeart, LayoutDashboard, Settings, Users } from "lucide-react";
 import { OpnameBuddyLogo } from "@/components/layout/opname-buddy-logo";
 import { ActionTile } from "@/components/ui/action-tile";
 import { DashboardCard } from "@/components/ui/dashboard-card";
@@ -23,7 +23,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ActionTile
             href="/dashboard"
             icon={Heart}
@@ -49,6 +49,14 @@ export default function Home() {
             size="default"
           />
           <ActionTile
+            href="/volunteer"
+            icon={HandHeart}
+            title="Vrijwilliger"
+            description="Eigen planning en beschikbaarheid."
+            accent="copper"
+            size="default"
+          />
+          <ActionTile
             href="/admin"
             icon={Settings}
             title="Beheer"
@@ -56,11 +64,19 @@ export default function Home() {
             accent="blue-slate"
             size="default"
           />
+          <ActionTile
+            href="/login"
+            icon={Users}
+            title="Inloggen"
+            description="Bestaand account gebruiken."
+            accent="pearl-aqua"
+            size="default"
+          />
         </div>
 
         <DashboardCard className="mt-6 text-center" density="comfortable">
           <p className="text-sm text-carbon-black-600">
-            Ontwikkelaarsnavigatie — kies een module om de visuele basis te bekijken.
+            Ontwikkelaarsnavigatie — snelle links naar alle modules op localhost.
           </p>
         </DashboardCard>
       </main>

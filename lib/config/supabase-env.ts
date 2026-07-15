@@ -12,3 +12,24 @@ export function getMissingSupabasePublicEnvKeys(): SupabasePublicEnvKey[] {
 export function isSupabasePublicEnvConfigured(): boolean {
   return getMissingSupabasePublicEnvKeys().length === 0;
 }
+
+export function getSupabasePublicEnv(): {
+  url: string;
+  anonKey: string;
+} {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+
+  if (!url || !anonKey) {
+    throw new SupabaseConfigError();
+  }
+
+  return { url, anonKey };
+}
+
+export class SupabaseConfigError extends Error {
+  constructor(message = "Supabase public environment is not configured.") {
+    super(message);
+    this.name = "SupabaseConfigError";
+  }
+}

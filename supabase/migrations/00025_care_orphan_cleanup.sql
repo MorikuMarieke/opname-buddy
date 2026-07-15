@@ -20,7 +20,7 @@
 -- admission_id (verified), unblocking the NOT NULL flip in checkpoint 3.
 --
 -- Idempotent: re-running is a no-op once orphans are gone.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 3 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 3 plan).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

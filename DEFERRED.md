@@ -44,7 +44,7 @@ alter default privileges in schema public
 
 **Status:** Parked — branch 2 is editor only  
 **Added:** 2026-06-30  
-**Trigger:** Branch 8 QuestionBuddy agent with Vercel AI SDK.
+**Trigger:** Branch 10 (`feature/questionbuddy-agent`) — Vercel AI SDK integration
 
 **Context:** Patients write and label questions in branch 2. Organization into a daily summary for rounds happens later via QuestionBuddy — never medical answers in the app.
 
@@ -54,63 +54,7 @@ alter default privileges in schema public
 
 ## Patient entity vs account: `feature/account-domain-model`
 
-**Status:** Phase 1–3 applied 2026-07-03 (`00015`–`00027` on remote; types regenerated). Care schema fully hardened onto admission ownership; only organizational caregiver access remains.  
-**Added:** 2026-07-02 · **Started:** 2026-07-03  
-**Branch plan:** [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)  
-**Trigger:** Multiple patients per admission, patients existing before they have a login, cross-account patient data ownership, or hardening RLS beyond `patient_id = auth.uid()`.
+**Status:** Shipped — Phase 1–3 applied 2026-07-03 (`00015`–`00027`). Care data is admission-scoped; legacy `patient_id` columns removed.  
+**Branch plan:** [`docs/branch-plans/branch-04-account-domain-model.md`](docs/branch-plans/branch-04-account-domain-model.md)
 
-**Context:** Today `patient_id` on every patient-owned table (`patient_context`, `patient_checkins`, `patient_questions`, `patient_participation_evaluations`) is a direct FK to `profiles.id`, and RLS enforces `patient_id = auth.uid()`. This means the login account *is* the patient — there is no separate patient/admission entity, and staff accounts can end up owning care data.
-
-**Audit note (MVP limitation, not the final model):** The current real mis-attribution risk is `patient_context` only — its `patient_id` is caregiver-supplied from the URL, so a non-patient profile can become a "patient" row. `patient_checkins`, `patient_questions`, and `patient_participation_evaluations` are protected today only by `requireRole("patient")` route guards (see [`app/dashboard/layout.tsx`](app/dashboard/layout.tsx)), not by a clean schema. This is acceptable for the MVP but must not be treated as the target model.
-
-**Planned approach:** Foundation-first / incremental (patients + admissions model). Chosen defaults; revisit when the branch starts.
-
-**Assumptions**
-
-- Entity model: `patients` + `admissions` (a patient may have multiple stays; care data eventually attaches to an admission).
-- Phase 1 introduces the new entities, linking, audit + RLS helpers, and backfill. Existing `patient_id = auth.uid()` care-table ownership stays functional and untouched in Phase 1.
-
-**Target model**
-
-```mermaid
-erDiagram
-  patients ||--o{ admissions : has
-  patients ||--o{ patient_account_links : linkedTo
-  patients ||--o{ patient_link_codes : issues
-  profiles ||--o{ patient_account_links : account
-  admissions ||--o{ patient_context : scopes
-  admissions ||--o{ patient_checkins : scopes
-  admissions ||--o{ patient_questions : scopes
-  admissions ||--o{ patient_participation_evaluations : scopes
-```
-
-**Phase 1 (foundation branch)**
-
-- Migration `00015_patient_entity.sql`: `patients` (`id`, `full_name`, `birth_date?`, `external_ref?`, `created_by_staff_id`, timestamps) and `admissions` (`id`, `patient_id` FK, `admitted_on`, `discharged_on?`, `status` check active/discharged, optional `location`, `created_by_staff_id`, timestamps) with `set_updated_at` triggers. Follow conventions in `supabase/migrations/00001_auth_profiles_roles.sql`.
-- Migration `00016_patient_account_linking.sql`: `patient_account_links` (`patient_id`, `user_id` unique, `linked_at`, `method`) and `patient_link_codes` (`id`, `patient_id`, `code_hash` via pgcrypto — never raw, `expires_at`, `used_at`, `created_by_staff_id`). Security-definer helpers `current_patient_ids()` (patient ids linked to `auth.uid()`, for future care-table RLS) and `redeem_patient_link_code(code)` (verify hash + expiry + unused, create link, mark used). Codes generated server-side by staff with short TTL; consider attempt throttling.
-- Migration `00017_patient_entity_grants_rls.sql`: companion grants (like `00002_api_grants.sql`) + RLS — staff (`has_role('caregiver')`/`admin`) manage patients/admissions/codes; patients read own linked patient/admission via `current_patient_ids()`; never expose `code_hash`.
-- Idempotent backfill: for each existing `patient`-role profile, create a `patients` row (copy `full_name`), an `active` `admissions` row, and a `patient_account_links` row (links `patient@test.com` / `328d194e`).
-- Types + services + minimal UI: extend `types/database.ts`; add patients/admissions/redeem services + hooks; staff UI to create patient + admission and generate a link code; optional patient onboarding to redeem; bridge `list_care_patients()` to the new entities.
-- Docs: update `docs/domain-model.md` "Identity and access"; move this entry to "in progress" once Phase 1 lands.
-
-**Phase 2 — SHIPPED 2026-07-03** (`00019`–`00024`; full checkpoint log in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)):
-
-- Added `admission_id` (nullable) to all four care tables + `current_admission_ids()`; backfilled from links → active admission; patient services dual-write it.
-- Added admission-scoped care RLS, then cut over and **dropped the `patient_id = auth.uid()` care policies** (admission ownership is now the sole patient-side guard; verified by RLS simulation).
-- Caregiver read path re-keyed: `list_care_patients()` returns clinical `patients` + active admission + linked account; `/care/patients/[patientId]` is `patients.id`; `patient_context` read/written by admission.
-
-**Phase 3 — SHIPPED 2026-07-03** (`00025`–`00027`; full checkpoint log in [`docs/branch-plans/branch-account-domain-model.md`](docs/branch-plans/branch-account-domain-model.md)):
-
-- Cleaned the orphaned `patient_context` rows (`caregiver@test.com`, `staff@test.com`) after a defensive backfill.
-- Dropped the legacy care `patient_id` columns (and their FKs/indexes/unique), added `UNIQUE(admission_id)` on `patient_context`, and flipped `admission_id` to `NOT NULL` on all four care tables. Patient write services and the patient's own-context read no longer touch `patient_id`.
-- Renamed `patient_context.updated_by` → `updated_by_staff_id` (add + backfill + recreate caregiver policies + drop).
-
-**Still deferred (later branch):**
-
-- Organizational (department/team/admission) caregiver access instead of the global `caregiver` role; retire `requireRole("patient")`-only reliance. This is a larger feature (new assignment tables + care-RLS rewrite), tracked as its own future branch rather than part of this refactor.
-
-**Risks/guardrails:** Do not weaken existing RLS or expose `user_roles`/`code_hash`. Security-definer functions and migrations are high-impact remote writes (each apply needs approval). Store the 6-digit code hashed with short TTL.
-
-**Related fix (already shipped):** `list_care_patients()` SECURITY DEFINER RPC (`supabase/migrations/00014_list_care_patients.sql`) stops the caregiver patient list from exposing staff/self accounts, which was the mechanism producing the mis-attributed `patient_context` rows.
-
-**Detailed plan file:** captured at `.cursor/plans/patient_entity_account_linking_c03618ed.plan.md` (may be transient; this DEFERRED entry is the durable copy).
+**Still deferred (later branch):** Organizational (department/team/admission) caregiver access instead of the global `caregiver` role.

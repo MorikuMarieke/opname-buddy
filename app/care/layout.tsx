@@ -10,7 +10,7 @@ export default async function CareDashboardLayout({
 }>) {
   const { user, roles } = await requireRole("caregiver");
   const profile = await getCurrentUserProfile();
-  const userHeader = buildDashboardUserHeader(user, profile, roles);
+  const userHeader = buildDashboardUserHeader(user, profile, roles, "caregiver");
 
   return <CareShell userHeader={userHeader}>{children}</CareShell>;
 }

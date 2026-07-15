@@ -67,6 +67,361 @@ export type Database = {
           },
         ]
       }
+      activities: {
+        Row: {
+          allowed_settings: string[]
+          category: string
+          created_at: string
+          created_by_staff_id: string | null
+          default_duration_minutes: number | null
+          description: string
+          id: string
+          intensity: string
+          is_active: boolean
+          location: string | null
+          max_participants: number
+          min_participants: number
+          mobility_notes: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_settings?: string[]
+          category: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          default_duration_minutes?: number | null
+          description: string
+          id?: string
+          intensity?: string
+          is_active?: boolean
+          location?: string | null
+          max_participants: number
+          min_participants?: number
+          mobility_notes?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_settings?: string[]
+          category?: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          default_duration_minutes?: number | null
+          description?: string
+          id?: string
+          intensity?: string
+          is_active?: boolean
+          location?: string | null
+          max_participants?: number
+          min_participants?: number
+          mobility_notes?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_recurring_schedules: {
+        Row: {
+          activity_id: string
+          created_at: string
+          created_by_staff_id: string | null
+          day_of_week: number
+          end_time: string
+          ended_at: string | null
+          id: string
+          interval_weeks: number
+          is_active: boolean
+          location: string | null
+          max_participants: number | null
+          min_participants: number | null
+          series_ends_on: string
+          series_starts_on: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          day_of_week: number
+          end_time: string
+          ended_at?: string | null
+          id?: string
+          interval_weeks?: number
+          is_active?: boolean
+          location?: string | null
+          max_participants?: number | null
+          min_participants?: number | null
+          series_ends_on: string
+          series_starts_on: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          created_by_staff_id?: string | null
+          day_of_week?: number
+          end_time?: string
+          ended_at?: string | null
+          id?: string
+          interval_weeks?: number
+          is_active?: boolean
+          location?: string | null
+          max_participants?: number | null
+          min_participants?: number | null
+          series_ends_on?: string
+          series_starts_on?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_recurring_schedules_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedules_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_session_participants: {
+        Row: {
+          admission_id: string
+          assigned_at: string
+          assigned_by_staff_id: string | null
+          session_id: string
+        }
+        Insert: {
+          admission_id: string
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          session_id: string
+        }
+        Update: {
+          admission_id?: string
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_session_participants_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_session_participants_assigned_by_staff_id_fkey"
+            columns: ["assigned_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "activity_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_session_facilitators: {
+        Row: {
+          assigned_at: string
+          assigned_by_staff_id: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_session_facilitators_assigned_by_staff_id_fkey"
+            columns: ["assigned_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_session_facilitators_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "activity_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_session_facilitators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_recurring_schedule_facilitators: {
+        Row: {
+          assigned_at: string
+          assigned_by_staff_id: string | null
+          recurring_schedule_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          recurring_schedule_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          recurring_schedule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_assigned_by_staff_id_fkey"
+            columns: ["assigned_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "activity_recurring_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_sessions: {
+        Row: {
+          activity_id: string
+          confirmed_at: string | null
+          confirmed_by_staff_id: string | null
+          created_at: string
+          created_by_staff_id: string | null
+          ends_at: string
+          id: string
+          is_detached: boolean
+          location: string
+          max_participants: number
+          min_participants: number
+          notes: string | null
+          recurring_occurrence_date: string | null
+          recurring_schedule_id: string | null
+          session_kind: string
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          confirmed_at?: string | null
+          confirmed_by_staff_id?: string | null
+          created_at?: string
+          created_by_staff_id?: string | null
+          ends_at: string
+          id?: string
+          is_detached?: boolean
+          location: string
+          max_participants: number
+          min_participants: number
+          notes?: string | null
+          recurring_occurrence_date?: string | null
+          recurring_schedule_id?: string | null
+          session_kind: string
+          starts_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          confirmed_at?: string | null
+          confirmed_by_staff_id?: string | null
+          created_at?: string
+          created_by_staff_id?: string | null
+          ends_at?: string
+          id?: string
+          is_detached?: boolean
+          location?: string
+          max_participants?: number
+          min_participants?: number
+          notes?: string | null
+          recurring_occurrence_date?: string | null
+          recurring_schedule_id?: string | null
+          session_kind?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_sessions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_sessions_confirmed_by_staff_id_fkey"
+            columns: ["confirmed_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_sessions_created_by_staff_id_fkey"
+            columns: ["created_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_sessions_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "activity_recurring_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admissions: {
         Row: {
           admitted_on: string
@@ -127,6 +482,47 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_participation_plans: {
+        Row: {
+          afternoon_category: string | null
+          afternoon_title: string | null
+          created_at: string
+          id: string
+          participant_message: string | null
+          plan_date: string
+          recorded_by_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          afternoon_category?: string | null
+          afternoon_title?: string | null
+          created_at?: string
+          id?: string
+          participant_message?: string | null
+          plan_date: string
+          recorded_by_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          afternoon_category?: string | null
+          afternoon_title?: string | null
+          created_at?: string
+          id?: string
+          participant_message?: string | null
+          plan_date?: string
+          recorded_by_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_participation_plans_recorded_by_user_id_fkey"
+            columns: ["recorded_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -212,6 +608,7 @@ export type Database = {
           motivation_score: number
           note: string | null
           pain_score: number
+          participation_needs: string[]
           symptoms: string
           updated_at: string
         }
@@ -226,6 +623,7 @@ export type Database = {
           motivation_score: number
           note?: string | null
           pain_score: number
+          participation_needs?: string[]
           symptoms?: string
           updated_at?: string
         }
@@ -240,6 +638,7 @@ export type Database = {
           motivation_score?: number
           note?: string | null
           pain_score?: number
+          participation_needs?: string[]
           symptoms?: string
           updated_at?: string
         }
@@ -415,6 +814,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "patient_participation_evaluations_activity_session_id_fkey"
+            columns: ["activity_session_id"]
+            isOneToOne: false
+            referencedRelation: "activity_sessions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "patient_participation_evaluations_admission_id_fkey"
             columns: ["admission_id"]
             isOneToOne: false
@@ -513,22 +919,28 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_active: boolean
           preferred_language: string
           updated_at: string
+          volunteer_bio: string | null
         }
         Insert: {
           created_at?: string
           full_name?: string | null
           id: string
+          is_active?: boolean
           preferred_language?: string
           updated_at?: string
+          volunteer_bio?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean
           preferred_language?: string
           updated_at?: string
+          volunteer_bio?: string | null
         }
         Relationships: []
       }
@@ -580,6 +992,155 @@ export type Database = {
           },
         ]
       }
+      volunteer_availability_exceptions: {
+        Row: {
+          created_at: string
+          end_time: string
+          exception_date: string
+          id: string
+          kind: string
+          note: string | null
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          exception_date: string
+          id?: string
+          kind: string
+          note?: string | null
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          exception_date?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_availability_exceptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_day_absences: {
+        Row: {
+          absence_date: string
+          block: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          absence_date: string
+          block: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          absence_date?: string
+          block?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_day_absences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_recurring_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_recurring_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_weekly_blocks: {
+        Row: {
+          afternoon_available: boolean
+          day_of_week: number
+          morning_available: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          afternoon_available?: boolean
+          day_of_week: number
+          morning_available?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          afternoon_available?: boolean
+          day_of_week?: number
+          morning_available?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_weekly_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -587,6 +1148,36 @@ export type Database = {
     Functions: {
       current_admission_ids: { Args: never; Returns: string[] }
       current_patient_ids: { Args: never; Returns: string[] }
+      get_daily_needs_summary: {
+        Args: { p_plan_date: string }
+        Returns: {
+          need: string
+          need_count: number
+        }[]
+      }
+      get_daily_participation_for_patient: {
+        Args: { p_plan_date: string }
+        Returns: {
+          afternoon_category: string | null
+          afternoon_title: string | null
+          participant_message: string | null
+          plan_date: string
+          updated_at: string
+        }[]
+      }
+      get_morning_contact_availability_signal: {
+        Args: { p_plan_date: string }
+        Returns: boolean
+      }
+      get_volunteer_block_availability_overview: {
+        Args: { p_plan_date: string }
+        Returns: {
+          afternoon_effective: boolean
+          full_name: string
+          morning_effective: boolean
+          user_id: string
+        }[]
+      }
       has_role: { Args: { role_name: string }; Returns: boolean }
       issue_patient_link_code: {
         Args: { p_created_by_staff_id: string; p_patient_id: string }
@@ -595,15 +1186,102 @@ export type Database = {
       list_care_patients: {
         Args: never
         Returns: {
-          admission_id: string | null
-          birth_date: string | null
-          expected_discharge_on: string | null
+          admission_id: string
+          birth_date: string
+          expected_discharge_on: string
           first_name: string
           id: string
           last_name: string
-          sex: string | null
-          user_id: string | null
+          sex: string
+          user_id: string
         }[]
+      }
+      list_facilitator_sessions: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          activity_description: string
+          activity_title: string
+          ends_at: string
+          location: string
+          participant_count: number
+          participants: Json
+          session_id: string
+          starts_at: string
+          status: string
+        }[]
+      }
+      list_patient_activity_sessions: {
+        Args: never
+        Returns: {
+          activity_description: string
+          activity_title: string
+          ends_at: string
+          facilitator_names: string
+          location: string
+          session_id: string
+          starts_at: string
+        }[]
+      }
+      list_planning_patients: {
+        Args: never
+        Returns: {
+          admission_id: string
+          department_id: string
+          department_name: string
+          patient_display_name: string
+          room_number: string
+        }[]
+      }
+      list_planning_facilitator_candidates: {
+        Args: { p_search?: string }
+        Returns: {
+          full_name: string
+          role_names: string[]
+          user_id: string
+        }[]
+      }
+      list_planning_sessions: {
+        Args: {
+          p_from?: string
+          p_session_kind?: string
+          p_status?: string
+          p_to?: string
+        }
+        Returns: {
+          activity_category: string
+          activity_description: string
+          activity_id: string
+          activity_intensity: string
+          activity_title: string
+          ends_at: string
+          facilitator_count: number
+          is_detached: boolean
+          location: string
+          max_participants: number
+          min_participants: number
+          participant_count: number
+          recurring_schedule_id: string
+          session_id: string
+          session_kind: string
+          starts_at: string
+          status: string
+        }[]
+      }
+      list_planning_volunteers: {
+        Args: never
+        Returns: {
+          full_name: string
+          user_id: string
+          volunteer_bio: string
+        }[]
+      }
+      materialize_recurring_sessions: {
+        Args: { p_schedule_id: string; p_weeks_ahead?: number }
+        Returns: number
+      }
+      planning_allowed_settings_valid: {
+        Args: { settings: string[] }
+        Returns: boolean
       }
       redeem_patient_link_code: { Args: { p_code: string }; Returns: string }
     }
@@ -755,11 +1433,26 @@ export type Patient = Tables<"patients">;
 export type Admission = Tables<"admissions">;
 export type PatientAccountLink = Tables<"patient_account_links">;
 export type PatientLinkCode = Tables<"patient_link_codes">;
+export type ActivityRow = Tables<"activities">;
+export type ActivityRecurringScheduleRow = Tables<"activity_recurring_schedules">;
+export type ActivitySessionRow = Tables<"activity_sessions">;
+export type ActivitySessionParticipantRow = Tables<"activity_session_participants">;
+export type ActivitySessionFacilitatorRow = Tables<"activity_session_facilitators">;
+export type ActivityRecurringScheduleFacilitatorRow =
+  Tables<"activity_recurring_schedule_facilitators">;
+export type VolunteerRecurringAvailabilityRow =
+  Tables<"volunteer_recurring_availability">;
+export type VolunteerAvailabilityExceptionRow =
+  Tables<"volunteer_availability_exceptions">;
+export type DailyParticipationPlanRow = Tables<"daily_participation_plans">;
+export type VolunteerWeeklyBlockRow = Tables<"volunteer_weekly_blocks">;
+export type VolunteerDayAbsenceRow = Tables<"volunteer_day_absences">;
 
 export type RoleName =
   | "patient"
   | "caregiver"
   | "activity_coordinator"
+  | "volunteer"
   | "admin";
 
 export type AccountAuditEventRow = Tables<"account_audit_events">;

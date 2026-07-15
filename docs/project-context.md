@@ -28,9 +28,9 @@ Caregivers and activity coordinators gain structured visibility into how patient
 
 ## Current architectural priority
 
-The **account/domain model refactor** — the foundation for ownership, access control, and RLS across later branches — has shipped. `patients`, `admissions`, and secure patient↔account linking are live, and patient-owned care data (context, check-ins, questions, participation evaluations) is now scoped to the clinical **admission** rather than the login account.
+Branch 7 (`feature/planning-activities-volunteers`) is the active workstream: activities, sessions, volunteers, and recovery planning. Foundations through branch 6 are shipped — clinical domain model, admin account management, and patient admission workflows.
 
-The rules for this model are defined in [Domain and identity model](#domain-and-identity-model) below. Full sequencing, migrations, verification, and remaining deferrals live in the branch plan: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md). The care schema is fully hardened (legacy `patient_id` columns dropped, `admission_id` `NOT NULL`, `updated_by_staff_id` audit field). Still deferred: organizational (department/team) caregiver access.
+The account/domain model rules are defined in [Domain and identity model](#domain-and-identity-model) below. Full sequencing, migrations, verification, and remaining deferrals live in the branch plan: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md). The care schema is fully hardened (legacy `patient_id` columns dropped, `admission_id` `NOT NULL`, `updated_by_staff_id` audit field). Still deferred: organizational (department/team) caregiver access.
 
 ---
 
@@ -38,9 +38,9 @@ The rules for this model are defined in [Domain and identity model](#domain-and-
 
 | Role | Primary route | Typical responsibilities |
 |------|---------------|------------------------|
-| **patient** | `/dashboard` | Check-ins, questions, activity feedback, DailyBuddy advice |
+| **patient** | `/dashboard` | Check-ins, questions, daily overview (`Vandaag`), DagBuddy placeholder |
 | **caregiver** | `/care` | Patient overview, restrictions, recovery context, review check-ins and questions |
-| **activity_coordinator** | `/planning` | Activities, sessions, volunteer slots, calendar |
+| **activity_coordinator** | `/planning` | Daily participation coordination: needs overview, volunteer block availability, afternoon activity record |
 | **admin** | `/admin` | User and role management |
 
 ### Role rules
@@ -64,7 +64,7 @@ The MVP delivers four role-specific dashboards, patient and staff CRUD flows, pl
 
 - Patient daily check-ins and questions
 - Caregiver restrictions and open-ended context
-- Activity catalog, sessions, volunteer availability, and calendar
+- Daily participation coordination (two-block model), volunteer block availability, afternoon activity communication
 - Patient activity feedback
 - DailyBuddy (participation advice) and QuestionBuddy (question organization)
 - Supabase Auth, RLS, React Query CRUD, Vercel deployment
@@ -207,19 +207,19 @@ The `feature/supabase-auth-roles` branch established:
 
 The project is developed incrementally using feature branches. Each branch introduces a complete vertical slice or architectural improvement before moving to the next feature.
 
-| # | Branch | Focus |
-|---|--------|-------|
-| 1 | `feature/supabase-auth-roles` | Authentication, profiles and role-based authorization |
-| 2 | `feature/patient-checkins-questions` | Patient check-ins, questions and core patient interaction |
-| 3 | `feature/care-restrictions-context` | Caregiver-managed care context (`patient_context`) and recovery boundaries |
-| 4 | `feature/account-domain-model` | Clinical domain refactor introducing `patients`, `admissions`, admission-owned care data and secure patient account linking |
-| 5 | `feature/admin-account-management` | Administrative management of staff accounts, user roles and account lifecycle |
-| 6 | `feature/patient-admission-management` | Caregiver workflow for creating clinical patients, admissions and generating patient linking codes |
-| 7 | `feature/planning-activities` | Activities, sessions, volunteers and recovery planning |
-| 8 | `feature/dagbuddy-agent` | DailyBuddy AI agent, tool calling, streaming and advice generation |
-| 9 | `feature/activity-feedback` | Patient activity participation, progress tracking and AI-supported recovery feedback |
-| 10 | `feature/questionbuddy-agent` | QuestionBuddy AI assistant for patient questions |
-| 11 | `feature/final-polish-docs` | UI polish, accessibility, documentation, deployment and final QA |
+| # | Branch | Status | Focus |
+|---|--------|--------|-------|
+| 1 | `feature/supabase-auth-roles` | Shipped | Authentication, profiles and role-based authorization |
+| 2 | `feature/patient-checkins-questions` | Shipped | Patient check-ins, questions and core patient interaction |
+| 3 | `feature/care-restrictions-context` | Shipped | Caregiver-managed care context (`patient_context`) and recovery boundaries |
+| 4 | `feature/account-domain-model` | Shipped | Clinical domain refactor introducing `patients`, `admissions`, admission-owned care data and secure patient account linking |
+| 5 | `feature/admin-account-management` | Shipped | Administrative management of staff accounts, user roles and account lifecycle |
+| 6 | `feature/patient-admission-management` | Shipped | Caregiver workflow for creating clinical patients, admissions and generating patient linking codes |
+| 7 | `feature/activity-planning-volunteers` | In progress | Daily participation PoC — schema, check-in needs, volunteer/coordinator views, legacy cleanup |
+| 8 | `feature/dailybuddy-participation-advice` | Planned | DailyBuddy AI — advisory tools, streaming `/dashboard/advice`, optional persistence |
+| 9 | `feature/activity-feedback` | Planned | Patient activity participation, progress tracking and AI-supported recovery feedback |
+| 10 | `feature/questionbuddy-agent` | Planned | QuestionBuddy AI assistant for patient questions |
+| 11 | `feature/final-polish-docs` | Planned | UI polish, accessibility, documentation, deployment and final QA |
 
 ### Deferred
 
@@ -229,6 +229,22 @@ The project is developed incrementally using feature branches. Each branch intro
 
 Detailed implementation plans live in `docs/branch-plans/`. The living data blueprint lives in `docs/domain-model.md`.
 
+### Key routes (shipped through branch 7)
+
+| Route | Purpose |
+|-------|---------|
+| `/dashboard/link` | Patient link-code redemption |
+| `/dashboard/context` | Patient read-only zorgcontext |
+| `/dashboard/activities` | Patient read-only daily participation overview (`Vandaag`) |
+| `/care/patients/admit` | New clinical patient + admission |
+| `/care/patients/[patientId]/admit` | Readmission for existing patient |
+| `/care/patients/[patientId]/edit` | Edit patient demographics |
+| `/admin/departments` | Department reference data management |
+| `/planning` | Activity coordinator daily participation dashboard |
+| `/planning/volunteers` | Coordinator read-only volunteer profile overview |
+| `/volunteer` | Volunteer daily participation and afternoon recording |
+| `/volunteer/availability` | Volunteer block-based weekly availability |
+
 ---
 
 ## Related documentation
@@ -236,10 +252,14 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 | Document | Purpose |
 |----------|---------|
 | [`docs/domain-model.md`](domain-model.md) | Entities, relationships, business rules, database blueprint |
-| [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md) | Account/domain model refactor plan (branch 4 — shipped) |
+| [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md) | Account/domain model refactor plan (branch 4 — shipped) |
 | [`docs/branch-plans/branch-02-patient-checkins-questions.md`](branch-plans/branch-02-patient-checkins-questions.md) | Branch 2 implementation plan |
-| [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan |
-| [`docs/future-admin-users-roles.md`](future-admin-users-roles.md) | Admin account management design notes (branch 5 — `feature/admin-account-management`) |
+| [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) | Branch 3 implementation plan (shipped) |
+| [`docs/branch-plans/branch-05-admin-account-management.md`](branch-plans/branch-05-admin-account-management.md) | Branch 5 implementation plan (shipped) |
+| [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md) | Branch 6 implementation plan (shipped) |
+| [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md) | Branch 7 implementation plan (superseded by daily participation PoC) |
+| [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md) | DailyBuddy AI — deferred next branch |
+| [`docs/planning-poc-migration.md`](planning-poc-migration.md) | Daily participation PoC migration plan |
 | [`docs/future-participation-scheduling.md`](future-participation-scheduling.md) | Deferred morning/evening scheduling and reminders |
 | [`docs/future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md) | Deferred daily question summary (QuestionBuddy, branch 10) |
 | [`docs/branch-plans/branch-11-final-polish-docs.md`](branch-plans/branch-11-final-polish-docs.md) | Final polish, deployment QA, and known technical debt (branch 11) |

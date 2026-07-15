@@ -128,11 +128,3 @@ export function formatAuditEventUserDetailParts(
     actionPhrase: getUserDetailActionPhrase(event.action, roleLabel),
   };
 }
-
-/** @deprecated Use structured formatters for UI. */
-export function formatAuditEventMessage(event: AccountAuditEvent): string {
-  const parts = formatAuditEventOverviewParts(event);
-  const trailing = parts.trailingPhrase ? ` ${parts.trailingPhrase}` : "";
-
-  return `${parts.actorName} ${parts.leadPhrase} ${parts.targetName}${trailing}.`;
-}

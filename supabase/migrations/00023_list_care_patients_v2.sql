@@ -18,7 +18,7 @@
 -- running. Depends on 00015 (patients/admissions) and 00016 (links).
 --
 -- Idempotent: drop function if exists + create.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 2 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 2 plan).
 -- =============================================================================
 
 drop function if exists public.list_care_patients();

@@ -52,18 +52,16 @@ Caregiver-maintained practical care facts for safe participation. Planning decis
 
 ---
 
-## Parked until branch 5 (`feature/admin-users-roles`)
+## Resolved in branch 5 (`feature/admin-account-management`)
 
-Staff identity and role provisioning are not part of branch 3. Documented in [`docs/future-admin-users-roles.md`](../future-admin-users-roles.md).
+Staff identity and role provisioning shipped in branch 5. See [`docs/branch-plans/branch-05-admin-account-management.md`](../branch-plans/branch-05-admin-account-management.md).
 
-| Topic | Current behaviour | Resolved in branch 5 |
-|-------|-------------------|----------------------|
-| Role assignment | Manual SQL on `user_roles` | Admin UI + server-side assignment flow |
-| Staff `full_name` | Optional at signup; often empty on test accounts | Employee accounts with required display name |
-| Zorgcontext “Bijgewerkt door” | Fallback label **“Zorgverlener”** | Resolve `updated_by` → `profiles.full_name` |
-| Caregiver reads staff profiles | RLS limited to own + patients | Migration `00011_profiles_select_staff_for_caregivers.sql` (prepared, apply with branch 5) |
-
-Application code already joins `updated_by` → `profiles` and passes `updatedByName`; enabling real names depends on profile data + migration above.
+| Topic | Shipped behaviour |
+|-------|-------------------|
+| Role assignment | Admin UI + server-side assignment flow |
+| Staff `full_name` | Employee accounts with display name |
+| Zorgcontext “Bijgewerkt door” | Resolves `updated_by_staff_id` → `profiles.full_name` |
+| Caregiver reads staff profiles | `00028_profiles_staff_select_and_patient_role.sql` |
 
 ---
 
@@ -91,4 +89,4 @@ Patient list uses real UUIDs from `profiles` + `user_roles`.
 
 - [`docs/domain-model.md`](../domain-model.md) — `patient_context` entity
 - [`docs/project-context.md`](../project-context.md) — branch roadmap
-- [`docs/future-admin-users-roles.md`](../future-admin-users-roles.md) — parked staff profiles and role assignment (branch 5)
+- [`docs/branch-plans/branch-05-admin-account-management.md`](../branch-plans/branch-05-admin-account-management.md) — staff profiles and role assignment (shipped)

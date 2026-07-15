@@ -30,11 +30,21 @@ export type Patient = Tables<"patients">;
 export type Admission = Tables<"admissions">;
 export type PatientAccountLink = Tables<"patient_account_links">;
 export type PatientLinkCode = Tables<"patient_link_codes">;
+export type ActivityRow = Tables<"activities">;
+export type ActivityRecurringScheduleRow = Tables<"activity_recurring_schedules">;
+export type ActivitySessionRow = Tables<"activity_sessions">;
+export type ActivitySessionParticipantRow = Tables<"activity_session_participants">;
+export type ActivitySessionVolunteerRow = Tables<"activity_session_volunteers">;
+export type VolunteerRecurringAvailabilityRow =
+  Tables<"volunteer_recurring_availability">;
+export type VolunteerAvailabilityExceptionRow =
+  Tables<"volunteer_availability_exceptions">;
 
 export type RoleName =
   | "patient"
   | "caregiver"
   | "activity_coordinator"
+  | "volunteer"
   | "admin";
 
 export type AccountAuditEventRow = Tables<"account_audit_events">;

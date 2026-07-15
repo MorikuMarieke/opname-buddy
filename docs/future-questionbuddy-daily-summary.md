@@ -2,7 +2,7 @@
 
 **Status:** Parked — branch 2 provides patient question editor only  
 **Added:** 2026-06-30  
-**Trigger:** Branch 8 (`feature/questionbuddy-agent`) — Vercel AI SDK integration
+**Trigger:** Branch 10 (`feature/questionbuddy-agent`) — Vercel AI SDK integration
 
 Related: [`docs/domain-model.md`](domain-model.md) (`patient_questions`), [`docs/project-context.md`](project-context.md) (QuestionBuddy).
 
@@ -15,13 +15,13 @@ Patient questions are **never answered** by the app or AI.
 | Phase | What the patient gets |
 |-------|------------------------|
 | **Branch 2 (now)** | Preparation editor — write questions, label by hospital specialism, edit/delete open items |
-| **Branch 8 (later)** | **Daily summary** — QuestionBuddy organizes open questions into a concise list for rounds or caregiver conversations |
+| **Branch 10 (later)** | **Daily summary** — QuestionBuddy organizes open questions into a concise list for rounds or caregiver conversations |
 
 Medical answers always stay in the **caregiver conversation** (in person). `answer_notes` on `patient_questions` is written by caregivers in branch 3, not by AI.
 
 ---
 
-## What QuestionBuddy may do (branch 8)
+## What QuestionBuddy may do (branch 10)
 
 - Read the patient’s **open** questions for today (tool: `getOpenQuestions` or similar)
 - Group similar questions by specialism (`target_type`)
@@ -41,7 +41,7 @@ interface DailyQuestionSummary {
 }
 ```
 
-Storage TBD in branch 8 — e.g. `patient_question_summaries` table or section inside `daily_advice`. Do not implement until agent branch.
+Storage TBD in branch 10 — e.g. `patient_question_summaries` table or section inside `daily_advice`. Do not implement until agent branch.
 
 ---
 
@@ -68,7 +68,7 @@ Optional UI copy may mention that a daily summary is planned with QuestionBuddy.
 
 ---
 
-## Suggested implementation (branch 8)
+## Suggested implementation (branch 10)
 
 1. **Tools** (Vercel AI SDK, `maxSteps >= 3`, streaming)
    - `getOpenQuestions` — patient’s open questions for today/recent

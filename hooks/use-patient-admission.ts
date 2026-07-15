@@ -65,7 +65,7 @@ export function usePatientAdmission(patientId: string) {
   return usePatientAdmissionQuery(patientId);
 }
 
-export function usePatientAdmissionQuery(patientId: string, enabled = true) {
+function usePatientAdmissionQuery(patientId: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.clinicalPatients.admission(patientId),
     queryFn: async () => {

@@ -1,17 +1,17 @@
 import {
-  Activity,
   Bell,
   Building2,
   Calendar,
-  CalendarDays,
   ClipboardList,
   Heart,
   Home,
   LayoutDashboard,
   MessageCircleQuestion,
+  Repeat2,
   Settings,
   Shield,
   Sun,
+  User,
   Users,
 } from "lucide-react";
 import { PATIENT_CONTEXT_COPY } from "@/lib/constants/patient-context-copy";
@@ -26,7 +26,7 @@ export const patientBottomNavItems: NavItem[] = [
     href: "/dashboard/context",
     icon: Heart,
   },
-  { label: "Activiteiten", href: "/dashboard/activities", icon: Calendar },
+  { label: "Vandaag", href: "/dashboard/activities", icon: Calendar },
   { label: "DagBuddy", href: "/dashboard/advice", icon: Sun },
 ];
 
@@ -40,12 +40,14 @@ export const careNavItems: NavItem[] = [
 ];
 
 export const planningNavItems: NavItem[] = [
-  { label: "Planning", href: "/planning", icon: LayoutDashboard },
-  { label: "Activiteiten", href: "/planning/activities", icon: Activity },
-  { label: "Sessies", href: "/planning/sessions", icon: CalendarDays },
+  { label: "Dagplanning", href: "/planning", icon: LayoutDashboard },
   { label: "Vrijwilligers", href: "/planning/volunteers", icon: Users },
-  { label: "Kalender", href: "/planning/calendar", icon: Calendar },
-  { label: "Instellingen", href: "/planning", icon: Settings },
+];
+
+export const volunteerNavItems: NavItem[] = [
+  { label: "Vandaag", href: "/volunteer", icon: Calendar },
+  { label: "Beschikbaarheid", href: "/volunteer/availability", icon: Repeat2 },
+  { label: "Mijn profiel", href: "/volunteer/profile", icon: User },
 ];
 
 export const adminNavItems: NavItem[] = [

@@ -17,11 +17,14 @@
   },
   patientContext: {
     all: ["patient-context"] as const,
-    byPatient: (patientId: string) =>
-      [...queryKeys.patientContext.all, patientId] as const,
     byAdmission: (admissionId: string) =>
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
+  },
+  patientDailyParticipation: {
+    all: ["patient-daily-participation"] as const,
+    byDate: (planDate: string) =>
+      ["patient-daily-participation", planDate] as const,
   },
   adminAccounts: {
     all: ["admin-accounts"] as const,
@@ -43,6 +46,17 @@
 
       return [...queryKeys.adminAccounts.all, "patients", linkStatus] as const;
     },
+    volunteers: (filters?: { search?: string; status?: string }) => {
+      const search = filters?.search?.trim() ?? "";
+      const status = filters?.status ?? "all";
+
+      return [
+        ...queryKeys.adminAccounts.all,
+        "volunteers",
+        search,
+        status,
+      ] as const;
+    },
     detail: (userId: string) =>
       [...queryKeys.adminAccounts.all, "detail", userId] as const,
     audit: (userId: string, limit: number) =>
@@ -58,8 +72,6 @@
   },
   carePatients: {
     all: ["care-patients"] as const,
-    detail: (patientId: string) =>
-      [...queryKeys.carePatients.all, "detail", patientId] as const,
     search: (filters: { firstName: string; lastName: string; birthDate?: string }) =>
       [
         ...queryKeys.carePatients.all,
@@ -89,5 +101,34 @@
     all: ["departments"] as const,
     active: ["departments", "active"] as const,
   },
+  planning: {
+    dailyParticipation: {
+      all: ["planning", "daily-participation"] as const,
+      byDate: (planDate: string) =>
+        ["planning", "daily-participation", planDate] as const,
+    },
+    coordinatorVolunteerOverview: {
+      all: ["planning", "coordinator-volunteer-overview"] as const,
+      byDate: (planDate: string, yearMonth: string) =>
+        [
+          "planning",
+          "coordinator-volunteer-overview",
+          planDate,
+          yearMonth,
+        ] as const,
+    },
+  },
+  volunteer: {
+    profile: ["volunteer", "profile"] as const,
+    dailyParticipation: {
+      all: ["volunteer", "daily-participation"] as const,
+      byDate: (planDate: string) =>
+        ["volunteer", "daily-participation", planDate] as const,
+    },
+    blockAvailability: {
+      weekly: ["volunteer", "block-availability", "weekly"] as const,
+      absences: (yearMonth: string) =>
+        ["volunteer", "block-availability", "absences", yearMonth] as const,
+    },
+  },
 } as const;
-

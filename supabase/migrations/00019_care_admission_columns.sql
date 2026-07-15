@@ -16,7 +16,7 @@
 --
 -- Idempotent: safe to re-run (add column if not exists, create index if not exists).
 -- Table-level grants (00004/00007/00009) already cover new columns.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 2 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 2 plan).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

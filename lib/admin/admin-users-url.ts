@@ -1,7 +1,7 @@
 import type { StaffRoleName } from "@/lib/constants/admin-account-copy";
 import type { RoleName } from "@/types/database";
 
-export type AdminUsersTab = "staff" | "patients";
+export type AdminUsersTab = "staff" | "patients" | "volunteers";
 
 export type AdminUsersStatus = "active" | "inactive";
 
@@ -27,7 +27,7 @@ function isStaffRole(value: string): value is StaffRoleName {
 }
 
 function isValidTab(value: string | null): value is AdminUsersTab {
-  return value === "staff" || value === "patients";
+  return value === "staff" || value === "patients" || value === "volunteers";
 }
 
 function isValidStatus(value: string | null): value is AdminUsersStatus {
@@ -48,16 +48,26 @@ export function parseAdminUsersFilters(
     tab = "patients";
   }
 
+  if (rawRole === "volunteer") {
+    tab = "volunteers";
+  }
+
   const role =
-    rawRole && rawRole !== "patient" && isStaffRole(rawRole) ? rawRole : undefined;
+    rawRole &&
+    rawRole !== "patient" &&
+    rawRole !== "volunteer" &&
+    isStaffRole(rawRole)
+      ? rawRole
+      : undefined;
 
   const status = isValidStatus(rawStatus) ? rawStatus : undefined;
 
   return {
     tab,
     role: tab === "staff" ? role : undefined,
-    status: tab === "staff" ? status : undefined,
-    search: tab === "staff" && search ? search : undefined,
+    status: tab === "staff" || tab === "volunteers" ? status : undefined,
+    search:
+      (tab === "staff" || tab === "volunteers") && search ? search : undefined,
   };
 }
 
@@ -70,6 +80,8 @@ export function buildAdminUsersUrl(
 
   if (tab === "patients") {
     params.set("tab", "patients");
+  } else if (tab === "volunteers") {
+    params.set("tab", "volunteers");
   } else if (filters.role || filters.status || filters.search) {
     params.set("tab", "staff");
   }
@@ -86,6 +98,14 @@ export function buildAdminUsersUrl(
     params.set("search", filters.search.trim());
   }
 
+  if (tab === "volunteers" && filters.status) {
+    params.set("status", filters.status);
+  }
+
+  if (tab === "volunteers" && filters.search?.trim()) {
+    params.set("search", filters.search.trim());
+  }
+
   const query = params.toString();
   return query ? `/admin/users?${query}` : "/admin/users";
 }
@@ -93,6 +113,10 @@ export function buildAdminUsersUrl(
 export function getUsersUrlForRole(role: RoleName): string {
   if (role === "patient") {
     return buildAdminUsersUrl({ tab: "patients" });
+  }
+
+  if (role === "volunteer") {
+    return buildAdminUsersUrl({ tab: "volunteers" });
   }
 
   if (isStaffRole(role)) {

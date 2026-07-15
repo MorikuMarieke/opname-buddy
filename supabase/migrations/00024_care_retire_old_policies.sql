@@ -20,7 +20,7 @@
 -- approval before running. Depends on 00019–00023.
 --
 -- Idempotent: drop policy if exists + guarded UPDATEs.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 2 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 2 plan).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

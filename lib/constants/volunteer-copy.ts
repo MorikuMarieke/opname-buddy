@@ -1,0 +1,77 @@
+export const VOLUNTEER_COPY = {
+  home: {
+    pageTitle: "Vandaag",
+    pageDescription: "Bekijk patiëntbehoeften en leg de middagactiviteit vast.",
+    emptyTitle: "Nog geen gegevens",
+    emptyDescription:
+      "Zodra er check-ins en beschikbaarheid zijn, zie je hier het dagoverzicht.",
+    participantsLabel: "Deelnemers",
+    pickupHint: "Ophaallocatie voor deelnemers",
+  },
+  profile: {
+    pageTitle: "Mijn profiel",
+    pageDescription: "Bekijk je accountgegevens en vertel iets over jezelf.",
+    accountTitle: "Accountgegevens",
+    accountHint:
+      "Deze gegevens worden door de organisatie beheerd. Neem contact op als iets niet klopt.",
+    fullNameLabel: "Naam",
+    emailLabel: "E-mailadres",
+    notSet: "Niet ingevuld",
+    bioTitle: "Over mij",
+    bioHint:
+      "Vertel kort iets over jezelf: interesses, ervaring, voorkeuren of persoonlijkheid. Dit helpt bij toekomstige planning.",
+    bioLabel: "Over mij",
+    bioSave: "Opslaan",
+    bioSaved: "Over mij opgeslagen.",
+  },
+  availability: {
+    pageTitle: "Beschikbaarheid",
+    pageDescription: "Geef aan wanneer je beschikbaar bent voor de vaste dagdelen.",
+    recurringTitle: "Wekelijkse beschikbaarheid",
+    recurringHint:
+      "Geef per weekdag aan of je beschikbaar bent voor de ochtend- en middagblokken.",
+    recurringListTitle: "Jouw vaste vrijwilligersdagen",
+    exceptionsTitle: "Uitzonderingen",
+    exceptionsHint: "Extra beschikbaarheid of afwezigheid op specifieke dagen.",
+    addRecurring: "Weekdag toevoegen",
+    addException: "Uitzondering toevoegen",
+    saveRecurring: "Opslaan",
+    saveException: "Opslaan",
+    deleteException: "Verwijderen",
+    deleteExceptionAriaLabel: "Uitzondering verwijderen",
+    deleteConfirmPrompt: "Wil je deze uitzondering verwijderen?",
+    deleteConfirmYes: "Ja",
+    deleteConfirmCancel: "Annuleer",
+    deleteConfirmBusy: "Bezig...",
+    deleteRecurringAriaLabel: "Wekelijkse beschikbaarheid verwijderen",
+    deleteRecurringConfirmPrompt: "Wil je deze weekdag verwijderen?",
+    editRecurring: "Bewerken",
+    editRecurringAriaLabel: "Wekelijkse beschikbaarheid bewerken",
+    saveRecurringEdit: "Opslaan",
+    cancelRecurringEdit: "Annuleren",
+    datePickerAriaLabel: "Datum kiezen",
+    kindExtra: "Extra beschikbaar",
+    kindUnavailable: "Niet beschikbaar",
+    emptyRecurring: "Nog geen vaste beschikbaarheid ingesteld.",
+    emptyExceptions: "Geen uitzonderingen.",
+  },
+  admin: {
+    createTitle: "Vrijwilliger toevoegen",
+    createDescription:
+      "Maak een vrijwilligersaccount aan. Inloggegevens worden niet per e-mail verstuurd — deel het tijdelijke wachtwoord veilig met de vrijwilliger. Vrijwilligers loggen in via de gewone inlogpagina.",
+    createButton: "Vrijwilliger toevoegen",
+    tabLabel: "Vrijwilligers",
+    tabHint:
+      "Vrijwilligers loggen in via de gewone inlogpagina met het wachtwoord dat je aanmaakt.",
+    emptyList: "Geen vrijwilligersaccounts gevonden.",
+    emptyListCta: "Eerste vrijwilliger toevoegen",
+    createSuccessTitle: "Vrijwilligersaccount aangemaakt",
+    createSuccessPasswordHint:
+      "Deel het tijdelijke wachtwoord veilig met de vrijwilliger. Dit scherm toont het wachtwoord niet opnieuw.",
+    createSuccessLoginLabel: "Inlogpagina",
+    createSuccessLoginPath: "/login",
+    createSuccessNextSteps:
+      "Vraag de vrijwilliger om in te loggen en beschikbaarheid in te stellen onder Vandaag → Beschikbaarheid.",
+    createSuccessViewAccount: "Naar accountdetails",
+  },
+} as const;

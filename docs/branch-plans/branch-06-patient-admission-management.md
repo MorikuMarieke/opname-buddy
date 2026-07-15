@@ -1,7 +1,7 @@
 # Branch plan — feature/patient-admission-management
 
 **Branch:** `feature/patient-admission-management`  
-**Status:** Implemented in codebase (apply migrations `00031`–`00034` on remote before deploy)  
+**Status:** Implemented in codebase (migrations `00031`–`00037` on remote)  
 **Depends on:** `feature/account-domain-model`, `feature/admin-account-management`
 
 ---
@@ -18,6 +18,7 @@
 | `00034_issue_patient_link_code.sql` | Service-role function to issue 6-digit link codes |
 | `00035_departments.sql` | `departments` reference table + seed data + admin/caregiver RLS |
 | `00036_admissions_department_room.sql` | `department_id`, `room_number`; drop `location` |
+| `00037_patient_department_read.sql` | Patient read access to department name on own admission |
 
 ### Refinements (post-ship)
 

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { PARTICIPATION_NEED_VALUES } from "@/lib/constants/daily-participation";
+
 export const patientCheckinSchema = z.object({
   check_in_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
     message: "Ongeldige datum.",
@@ -9,6 +11,9 @@ export const patientCheckinSchema = z.object({
   mood: z.number().int().min(1).max(5),
   mobility_level: z.number().int().min(1).max(5),
   motivation_score: z.number().int().min(1).max(5),
+  participation_needs: z
+    .array(z.enum(PARTICIPATION_NEED_VALUES))
+    .default([]),
   symptoms: z.string().trim().max(500),
   note: z.string().trim().max(1000).optional().or(z.literal("")),
 });

@@ -219,7 +219,7 @@ Verified: only `updated_by_staff_id` remains; FK `patient_context_updated_by_sta
 
 - `lib/services/patient-checkins.ts`, `patient-questions.ts`, `patient-participation-evaluations.ts`: add `admission_id` + audit fields on writes; reads move from implicit `auth.uid()` scoping to admission scoping (RLS handles it).
 - `lib/services/patient-context.ts`: key context on `admission_id`; `getPatientContext(patientId)` becomes admission-based; keep writing `updated_by` (staff audit field, unchanged this phase); update `list_care_patients()` consumer to the new patient-entity shape.
-- `hooks/use-care-patients.ts`, `components/dashboard/care-patient-shell.tsx`, `components/dashboard/care-patient-detail-view.tsx`: consume clinical `patients` + active admission.
+- `hooks/use-care-patients.ts`, `components/dashboard/care-patient-shell.tsx`, `components/dashboard/care-patient-overview-view.tsx`: consume clinical `patients` + active admission.
 - `app/care/patients/[patientId]/…`: `patientId` now = clinical `patients.id`.
 - Patient dashboard: resolve the caller's active admission (via a small `getActiveAdmission()` helper using `current_admission_ids()`).
 

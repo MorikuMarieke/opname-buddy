@@ -3,9 +3,6 @@ import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { RoleName } from "@/types/database";
 
-export { fetchRolesForUser } from "@/lib/auth/fetch-roles-for-user";
-export type { FetchRolesResult } from "@/lib/auth/fetch-roles-for-user";
-
 export async function getCurrentUserRoles(): Promise<RoleName[]> {
   const user = await getCurrentUser();
 

@@ -35,7 +35,13 @@ For each area:
 >
 > **Patient admission management — implemented (branch 6):** Caregiver workflows for Patiënt opnemen, Nieuwe opname, Ontslag, demographics edit, expected discharge date, duplicate-prevention search, and patient link-code redemption. Plan: [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md).
 >
-> **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-account-domain-model.md`](branch-plans/branch-account-domain-model.md).
+> **Activity planning refactor — implemented:** Optional user-only facilitator assignments (`activity_session_facilitators`, `activity_recurring_schedule_facilitators`), simplified session lifecycle (`draft` → `confirmed` → `completed | cancelled`), soft minimum-participant warnings, unified coordinator flow at `/planning/plan`, series management at `/planning/series`, and read-only facilitator views at `/volunteer` and `/care/activities`. Removed `proposed` status, `requires_supervision`, `requires_volunteer`, and volunteer-only session staffing gates.
+>
+> **Activity planning and volunteers — implemented (branch 7):** Activity catalog, weekly recurring schedules, one-off sessions, human approval workflow, volunteer portal, coordinator planning views, and patient read-only confirmed sessions. Plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). AI matching and activity feedback remain deferred (branches 8–9).
+>
+> **Daily participation PoC — Phases 1–6 shipped; Phase 7 QA pending:** Replaces branch-7 scheduling with a two-block daily model. Coordinator dashboard at `/planning`. DailyBuddy deferred to `feature/dailybuddy-participation-advice`. See [`docs/planning-poc-migration.md`](planning-poc-migration.md).
+>
+> **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
 
 ### User / problem
 
@@ -69,10 +75,29 @@ Canonical role names and assignments.
 
 **Business rules**
 
-- Role names: `patient`, `caregiver`, `activity_coordinator`, `admin`
+- Role names: `patient`, `caregiver`, `activity_coordinator`, `volunteer`, `admin`
 - Clients may read their own role assignments only
 - Clients cannot assign or remove roles (prevents privilege escalation)
-- Staff may have multiple roles; patients normally have only `patient`
+- **One auth identity per email:** Supabase Auth enforces unique email addresses; `profiles.id` is a 1:1 FK to `auth.users.id`. A second signup with the same email is rejected before any profile or role row is created.
+- **Multi-role ready:** `user_roles` uses composite PK `(user_id, role_id)`, so one account may hold multiple roles. Staff already use this (`setStaffRoles`). Future cross-type roles (e.g. patient + volunteer) can be added by inserting into `user_roles` on the existing `user_id` — no schema change required.
+- Staff may have multiple roles; patients normally have only `patient` until explicitly linked or assigned another role
+- Volunteer accounts are admin-created with the `volunteer` role only (no auto-patient; see migration `00047`)
+- **`account_type` in auth metadata** is a signup hint for `handle_new_user()` (staff/volunteer skip auto-patient). Authorization uses `user_roles` / `has_role()`, not `account_type`. When multi-role assignment is implemented later, roles remain the source of truth.
+
+**Admin volunteer creation — duplicate email (current MVP behavior)**
+
+When an admin submits `/admin/users/new/volunteer` with an email that already belongs to an auth user:
+
+1. `admin.auth.admin.createUser` fails (Supabase unique email constraint).
+2. No new `auth.users` row, no `profiles` row, and no `user_roles` rows are created (`handle_new_user` runs only on successful INSERT).
+3. The admin sees: **"Dit e-mailadres is al geregistreerd."**
+4. **No** "add volunteer role to existing account" flow exists yet. That is the intended future path: look up the existing user by email, insert `volunteer` into `user_roles`, audit the assignment — same pattern as `setStaffRoles`.
+
+**Login with multiple roles (current behavior, unchanged)**
+
+- Post-login redirect uses `getPrimaryRole()` and `ROLE_PRIORITY` (admin → activity_coordinator → caregiver → volunteer → patient).
+- Route guards use `requireRole()` — a user with multiple roles can open any module they hold a role for (no role switcher UI yet).
+- Multi-role dashboards and explicit role switching are out of scope until product requirements define them.
 
 ### Blueprint: implemented tables
 
@@ -275,6 +300,81 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 ## Activities and planning
 
+> **Branch 7 (`feature/activity-planning-volunteers`) — deprecated (PoC refactor):** The catalog, recurring series, session workflow, facilitator assignments, and time-range volunteer availability described below are being replaced by a minimal daily participation proof-of-concept. Legacy tables and migrations (`00039`–`00049`) remain in the database but stop receiving application writes. See [`docs/planning-poc-migration.md`](planning-poc-migration.md) and [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
+
+### Daily participation proof-of-concept (Phases 1–6 shipped; Phase 7 QA pending)
+
+OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system. **DailyBuddy AI is deferred** to `feature/dailybuddy-participation-advice`.
+
+OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system.
+
+#### Fixed daily blocks (application constants)
+
+| Block | Time | Purpose |
+|-------|------|---------|
+| Morning | 10:00–12:00 | Individual patient–volunteer contact; coordinated outside the app |
+| Afternoon | 14:00–16:00 | One group activity in a fixed shared room (max 10, independent access required) |
+
+Constants live in `lib/constants/daily-participation.ts` (block times, room name, capacity, need labels).
+
+#### Entity: PatientCheckin needs (extension)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `participation_needs` | `text[]` | Subset of `social`, `movement`, `creative`, `relaxation`; multi-select at check-in |
+
+#### Entity: DailyParticipationPlan
+
+One optional record per calendar date (Europe/Amsterdam). Volunteers or coordinators record the **communication** of the afternoon group activity.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `plan_date` | date | UNIQUE |
+| `afternoon_category` | text | Aligns with need categories |
+| `afternoon_title` | text | Short title |
+| `participant_message` | text | Optional patient-facing message |
+| `recorded_by_user_id` | uuid | Audit: who last updated |
+| `updated_at` | timestamptz | Audit: when last updated |
+
+#### Entity: VolunteerWeeklyBlocks
+
+Replaces legacy `volunteer_recurring_availability`. Per weekday, boolean flags for morning and afternoon fixed blocks. No custom times.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `user_id`, `day_of_week` | | PK composite |
+| `morning_available` | boolean | |
+| `afternoon_available` | boolean | |
+
+#### Entity: VolunteerDayAbsence
+
+Replaces legacy `volunteer_availability_exceptions`. One-time unavailability for a date + block (`morning` \| `afternoon`). No recurring absences or partial hours.
+
+#### Coordinator dashboard (`/planning`)
+
+Dedicated activity-coordinator environment (post-login redirect stays `/planning`). Single page: date picker, weekday, both blocks, aggregated patient needs, effective volunteer availability per block, recorded afternoon activity with audit fields, afternoon record form. Coordinators may open `/planning/volunteers` for a simplified read-only volunteer profile overview. They must not schedule patients, assign volunteers, manage exact times, or create recurring activities. Complex planning subroutes redirect to `/planning`.
+
+#### Volunteer availability authorization
+
+| Role | Read overview RPC | Edit own availability |
+|------|-------------------|----------------------|
+| volunteer | Yes | Yes |
+| activity_coordinator | Yes | No |
+| admin | Yes | No |
+| caregiver | No | No |
+
+Migration `00051_volunteer_availability_auth.sql` enforces this at RLS and RPC level.
+
+#### AI boundary (future branch)
+
+DailyBuddy is advisory and patient-facing only, on branch `feature/dailybuddy-participation-advice`. The PoC branch provides `get_morning_contact_availability_signal` and documentation only. See [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
+
+---
+
+### Branch 7 legacy (deprecated — reference only)
+
+> **Branch 7 (`feature/activity-planning-volunteers`) — was implemented:** structured activity catalog, weekly recurring schedules, one-off sessions, volunteer availability, human approval workflow, coordinator planning UI, volunteer portal, and patient read-only confirmed sessions.
+
 ### Activity
 
 #### User / problem
@@ -297,17 +397,20 @@ Examples: short walk, breathing exercise, chair exercise, social coffee moment, 
 - Non-medical participation only
 - Properties may include type, intensity, location, supervision required, and where it can be done (bed, chair, room, ward, outside)
 
-#### Blueprint: `activities` (branch 4)
+#### Blueprint: `activities` (branch 7 — **Implemented**, migration `00039`)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
-| `title`, `description` | text | |
-| `activity_type` | text | |
-| `intensity` | text | e.g. low, medium, high |
+| `title`, `description` | text | description **required** (AI context) |
+| `category` | text | creative, movement, social, relaxation, other |
+| `intensity` | text | low, medium, high |
 | `location` | text | Default location |
-| `requires_supervision` | boolean | |
-| `allowed_locations` | text[] or flags | bed, chair, room, ward, outside |
+| `allowed_settings` | text[] | bed, chair, room, ward, outside |
+| `requires_supervision`, `requires_volunteer` | boolean | Structured requirement flags |
+| `min_participants`, `max_participants` | int | Capacity on template |
+| `mobility_notes` | text | Optional supplement |
+| `is_active` | boolean | Soft deactivate |
 | timestamps | timestamptz | |
 
 ---
@@ -322,39 +425,41 @@ Patients and coordinators need scheduled instances of activities with time, plac
 
 A scheduled occurrence of an activity.
 
-#### Blueprint: `activity_sessions` (branch 4)
+#### Blueprint: `activity_sessions` (branch 7 — **Implemented**, migration `00040`)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
 | `id` | uuid PK | |
 | `activity_id` | uuid FK | |
-| `starts_at` | timestamptz | |
-| `location` | text | Override per session |
-| `capacity` | integer | |
-| `requires_volunteer` | boolean | Optional |
+| `recurring_schedule_id` | uuid FK | Nullable; null = one-off |
+| `session_kind` | text | recurring_instance, one_off |
+| `starts_at`, `ends_at` | timestamptz | |
+| `location` | text | Snapshot per session |
+| `min_participants`, `max_participants` | int | Snapshot |
+| `status` | text | draft, proposed, confirmed, completed, cancelled |
+| `confirmed_at`, `confirmed_by_staff_id` | timestamptz / uuid | Human approval audit |
 | timestamps | timestamptz | |
 
 ---
 
-### Volunteer slot
+### Volunteer availability
 
 #### User / problem
 
-Some activities need a volunteer. Coordinators register availability so DailyBuddy knows whether guided activities are feasible.
+Volunteers manage when they can help. Coordinators read availability when manually assigning volunteers to sessions. Future DagBuddy uses this structured data for feasibility checks.
 
-#### Entity: VolunteerSlot
+#### Entity: VolunteerRecurringAvailability / VolunteerAvailabilityException
 
-Availability window linked to activities or sessions.
+Weekly windows owned by the volunteer, plus one-off extras or unavailability blocks.
 
-#### Blueprint: `volunteer_slots` (branch 4)
+#### Blueprint: `volunteer_recurring_availability` + `volunteer_availability_exceptions` (branch 7 — **Implemented**, migration `00042`)
 
-| Field | Type (planned) | Notes |
-|-------|----------------|-------|
-| `id` | uuid PK | |
-| `activity_id` | uuid FK | |
-| `starts_at`, `ends_at` | timestamptz | |
-| `volunteer_name` or profile ref | text / uuid | TBD in branch 4 |
-| timestamps | timestamptz | |
+| Table | Key fields |
+|-------|------------|
+| `volunteer_recurring_availability` | `user_id`, `day_of_week`, `start_time`, `end_time`, `is_active` |
+| `volunteer_availability_exceptions` | `user_id`, `exception_date`, `start_time`, `end_time`, `kind` (extra \| unavailable) |
+
+**Deprecated blueprint:** `volunteer_slots` — superseded by volunteer-owned availability (branch 7).
 
 ---
 
@@ -376,9 +481,9 @@ Patient response to a completed or offered activity.
 **Business rules**
 
 - Fields: completed/skipped, difficulty, enjoyment, optional note
-- Branch 7 implementation
+- Deferred to branch 9 (`feature/activity-feedback`)
 
-#### Blueprint: `activity_feedback` (branch 7)
+#### Blueprint: `activity_feedback` (branch 9 — **Planned**)
 
 | Field | Type (planned) | Notes |
 |-------|----------------|-------|
@@ -469,14 +574,20 @@ erDiagram
   admissions ||--o{ patient_questions : has
   admissions ||--o{ patient_participation_evaluations : has
   admissions ||--o| patient_context : has
+  activities ||--o{ activity_recurring_schedules : repeats
   activities ||--o{ activity_sessions : schedules
-  activities ||--o{ volunteer_slots : supports
+  activity_recurring_schedules ||--o{ activity_sessions : materializes
+  activity_sessions ||--o{ activity_session_participants : includes
+  activity_sessions ||--o{ activity_session_volunteers : staffed_by
+  admissions ||--o{ activity_session_participants : assigned_via
+  profiles ||--o{ volunteer_recurring_availability : owns
+  profiles ||--o{ volunteer_availability_exceptions : owns
   activity_sessions ||--o{ activity_feedback : receives
   admissions ||--o{ activity_feedback : has
   admissions ||--o{ daily_advice : has
 ```
 
-*Dashed conceptual entities (restrictions, activities, advice) are future branches.*
+*`activity_feedback` and `daily_advice` are planned for later branches (9 and 8).*
 
 ---
 

@@ -1,4 +1,4 @@
----
+﻿---
 description: AI Agent architecture and tool calling
 alwaysApply: false
 ---
@@ -20,17 +20,48 @@ alwaysApply: false
 - Use maxSteps >= 3
 - Use streaming responses
 
-## OpnameBuddy
+## OpnameBuddy — DailyBuddy (deferred)
 
-The DailyBuddy agent may use:
+DailyBuddy is **not implemented** on the daily participation PoC branch. Implementation is deferred to `feature/dailybuddy-participation-advice`.
 
-- getPatientCheckins
-- getPatientRestrictions
-- getAvailableActivities
-- getActivityFeedback
-- getOpenQuestions
-- saveDailyAdvice
+Keep these rules for the future AI branch. Specification: [`docs/dailybuddy-ai-boundary.md`](../../docs/dailybuddy-ai-boundary.md), [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](../../docs/branch-plans/branch-dailybuddy-participation-advice.md).
 
-The AI must never provide medical diagnoses or treatment recommendations.
+### Planned tools (future branch only)
+
+- `getPatientCheckins` — pain, energy, mood, mobility, symptoms, note, `participation_needs`
+- `getPatientRestrictions` — caregiver `patient_context`
+- `getDailyParticipationPlan` — recorded afternoon category, title, participant message (if any)
+- `getMorningContactAvailabilitySignal` — simple boolean/signal only (no volunteer names or schedules)
+- `getVolunteerAvailabilityContext` — optional aggregate counts only; no names or schedules
+- `getOpenQuestions` — open patient questions
+- `saveDailyAdvice` — optional persist to `daily_advice` when table exists
+
+### Do not implement on the PoC branch
+
+- DailyBuddy API route
+- AI SDK wiring for DailyBuddy
+- Streaming advice UI
+- Tool handlers or prompt integration
+- `daily_advice` persistence
+
+### AI must never
+
+- Provide medical diagnoses or treatment recommendations
+- Override caregiver-defined clinical restrictions
+- Schedule patients or activities
+- Assign volunteers or optimise staffing
+- Replace absent volunteers
+- Receive individual volunteer names, schedules, or detailed staffing counts
+- Auto-select the afternoon group activity
+
+### AI advisory outputs
+
+May suggest (with cautious language):
+
+1. Rest may fit today's check-in
+2. Optional individual contact during the morning block (10:00–12:00)
+3. The recorded afternoon group activity may fit expressed needs — patient chooses
+
+Use Dutch phrasing such as: "kan passen", "zou geschikt kunnen zijn", "op basis van wat je invulde", "de keuze is aan jou", "bespreek met je zorgteam als je twijfelt".
 
 The AI may only support recovery participation within caregiver-defined boundaries.

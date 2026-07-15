@@ -13,25 +13,6 @@ export function formatPatientDisplayName(patient: PatientNameFields): string {
   return combined || "Naamloos";
 }
 
-export function formatPatientFormalSalutation(patient: PatientNameFields): string {
-  const lastName = patient.last_name?.trim();
-  const firstName = patient.first_name?.trim();
-
-  if (patient.sex === "F" && lastName) {
-    return `Mevrouw ${lastName}`;
-  }
-
-  if (patient.sex === "M" && lastName) {
-    return `Meneer ${lastName}`;
-  }
-
-  if (firstName) {
-    return `Patiënt ${firstName}`;
-  }
-
-  return formatPatientDisplayName(patient);
-}
-
 export function calculateAge(birthDate: string, referenceDate?: string): number | null {
   if (!birthDate) {
     return null;

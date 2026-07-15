@@ -16,7 +16,7 @@
 -- running. Depends on 00015 (admissions) and 00016 (current_patient_ids).
 --
 -- Idempotent: create or replace.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 2 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 2 plan).
 -- =============================================================================
 
 create or replace function public.current_admission_ids()

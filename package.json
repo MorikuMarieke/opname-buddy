@@ -7,7 +7,10 @@
     "prebuild": "node scripts/clean-next-dev-types.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "demo:seed": "tsx scripts/demo/seed-demo-data.mts",
+    "demo:cleanup": "tsx scripts/demo/cleanup-demo-data.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -27,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.20.3",
     "typescript": "^5"
   }
 }

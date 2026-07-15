@@ -21,7 +21,7 @@
 -- APPLIED 2026-07-03 (with approval). Destructive DDL. Depends on 00019–00025.
 --
 -- Idempotent: `drop column if exists` + guarded constraint add.
--- See docs/branch-plans/branch-account-domain-model.md (Phase 3 plan).
+-- See docs/branch-plans/branch-04-account-domain-model.md (Phase 3 plan).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

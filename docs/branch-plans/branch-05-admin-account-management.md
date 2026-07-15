@@ -1,34 +1,34 @@
 ---
 name: Admin Account Management
-overview: Implement administrative staff account lifecycle management on top of the shipped account/domain model (`profiles`, `roles`, `user_roles`, `patient_account_links`), replacing mock `/admin` UI with secured server-side operations while keeping the existing domain model unchanged.
+overview: Administrative staff account lifecycle management on top of the shipped account/domain model (`profiles`, `roles`, `user_roles`, `patient_account_links`).
 todos:
   - id: phase-1-db
     content: "Migrations 00028–00030: staff profile RLS, patient role trigger, audit table, patient role backfill"
-    status: in_progress
+    status: completed
   - id: phase-2-services
     content: Add types/admin-account.ts, validations, lib/services/admin-accounts.ts, lib/auth/admin-actions.ts
-    status: pending
+    status: completed
   - id: phase-3-register
     content: Patient self-registration server action with account_type patient and role assignment
-    status: pending
+    status: completed
   - id: phase-4-staff-ui
     content: Wire /admin/users staff list, create form, /admin/users/[userId] detail/edit
-    status: pending
+    status: completed
   - id: phase-5-overview
     content: Patient accounts read-only tab, roles catalog, admin dashboard stats + audit
-    status: pending
+    status: completed
   - id: phase-6-docs
     content: Verify caregiver audit names; update domain-model.md and branch plan doc
-    status: pending
+    status: completed
 isProject: false
 ---
 
 # Branch plan — feature/admin-account-management
 
 **Branch:** `feature/admin-account-management`  
+**Status:** Shipped  
 **Depends on:** `feature/account-domain-model` (merged)  
-**Durable source:** [`docs/branch-plans/branch-admin-account-management.md`](docs/branch-plans/branch-admin-account-management.md) (to be created on implementation start)  
-**Design notes:** [`docs/future-admin-users-roles.md`](docs/future-admin-users-roles.md)
+**Durable source:** This file — [`docs/branch-plans/branch-05-admin-account-management.md`](docs/branch-plans/branch-05-admin-account-management.md)
 
 ---
 
@@ -365,7 +365,7 @@ adminAudit: { recent: ["admin-audit"] }
 | Audit integrity | `account_audit_events` writable only by service role; append-only (no UPDATE/DELETE policies) |
 | Email enumeration | Admin-only routes; acceptable for internal hospital admin tool |
 
-**RLS philosophy for this branch:** Add the minimum policy needed (`00011` staff name reads). Do **not** add broad `profiles_select_admin` — admin aggregation stays server-side with service role, matching [`docs/future-admin-users-roles.md`](docs/future-admin-users-roles.md).
+**RLS philosophy for this branch:** Add the minimum policy needed (`00011` staff name reads). Do **not** add broad `profiles_select_admin` — admin aggregation stays server-side with service role.
 
 ---
 
@@ -398,8 +398,7 @@ adminAudit: { recent: ["admin-audit"] }
 ### Phase 6 — Integration verification + docs
 - Verify caregiver Zorgcontext shows real `updated_by_staff_id` name
 - Update [`docs/domain-model.md`](docs/domain-model.md) blueprint status for admin-managed roles
-- Update [`docs/future-admin-users-roles.md`](docs/future-admin-users-roles.md) → implemented / archive
-- Add [`docs/branch-plans/branch-admin-account-management.md`](docs/branch-plans/branch-admin-account-management.md) as shipped record
+- This file serves as the shipped record for branch 5
 
 ---
 
