@@ -117,7 +117,8 @@ function isClaimExpired(generationStartedAt: string | null): boolean {
 /**
  * Idempotent generate controller.
  * `writeClient` must be service-role (patients cannot insert/update daily_advice).
- * `readClient` may be session or service-role; admissionId must already be verified.
+ * `readClient` must be the authenticated session client (RLS + morning RPC).
+ * `admissionId` must already be verified via the session client.
  */
 export async function ensureDailyAdviceGenerated(
   writeClient: ServerSupabase,

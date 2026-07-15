@@ -13,9 +13,9 @@ import type { DailyAdvice } from "@/types/daily-advice";
  * Resolves the caller's active admission via session RLS.
  * Never accept a client-supplied admission id.
  */
-async function resolveActiveAdmissionId(): Promise<string> {
-  const supabase = await createClient();
-
+async function resolveActiveAdmissionId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<string> {
   const { data, error } = await supabase
     .from("admissions")
     .select("id")
@@ -53,17 +53,22 @@ export async function requirePatientSession() {
 export async function generateAdviceForCurrentPatient(options?: {
   forceRetry?: boolean;
 }): Promise<{ advice: DailyAdvice; startedGeneration: boolean }> {
-  await requirePatientSession();
-  const admissionId = await resolveActiveAdmissionId();
+  const { supabase: readClient } = await requirePatientSession();
+  const admissionId = await resolveActiveAdmissionId(readClient);
   // Writes require service role after admission was verified via session RLS.
-  const admin = createAdminClient();
-  return ensureDailyAdviceGenerated(admin, admin, admissionId, options);
+  const writeClient = createAdminClient();
+  return ensureDailyAdviceGenerated(
+    writeClient,
+    readClient,
+    admissionId,
+    options,
+  );
 }
 
 export async function readAdviceForCurrentPatient(): Promise<DailyAdvice | null> {
-  const { supabase } = await requirePatientSession();
-  const admissionId = await resolveActiveAdmissionId();
-  return getOwnDailyAdvice(supabase, admissionId);
+  const { supabase: readClient } = await requirePatientSession();
+  const admissionId = await resolveActiveAdmissionId(readClient);
+  return getOwnDailyAdvice(readClient, admissionId);
 }
 
 export async function patchAfternoonAdviceForToday(): Promise<{
