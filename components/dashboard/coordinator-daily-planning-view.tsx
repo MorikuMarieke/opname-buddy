@@ -135,7 +135,7 @@ export function CoordinatorDailyPlanningView() {
             )}
           </div>
 
-          {data?.plan ? (
+          {!isLoading && data?.plan ? (
             <div className="rounded-xl border border-parchment-200 bg-parchment-50 p-4">
               <h4 className="text-sm font-semibold text-carbon-black-900">
                 Vastgelegde middagactiviteit
@@ -156,6 +156,12 @@ export function CoordinatorDailyPlanningView() {
                 {formatDutchDateTime(data.plan.updated_at)}
               </p>
             </div>
+          ) : null}
+
+          {!isLoading && !data?.plan ? (
+            <p className="rounded-xl border border-dashed border-parchment-300 bg-parchment-50 px-4 py-3 text-sm text-carbon-black-600">
+              Nog geen middagactiviteit vastgelegd voor deze datum.
+            </p>
           ) : null}
 
           <div>

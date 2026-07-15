@@ -54,6 +54,9 @@ export function useUpsertDailyParticipationPlan(planDate: string) {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.volunteer.dailyParticipation.byDate(planDate),
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.patientDailyParticipation.byDate(planDate),
+      });
     },
   });
 }

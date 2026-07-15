@@ -53,6 +53,8 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 
 `volunteer_recurring_availability` and `volunteer_availability_exceptions` remain in the database for remote compatibility but are **not used** by the PoC.
 
+**Phase 7 audit (2026-07-15):** No active application code in `app/` or `lib/services/` writes to legacy planning tables (`activities`, `activity_recurring_schedules`, `activity_sessions`, facilitator tables) or legacy volunteer availability tables. Demo seed scripts write only to PoC tables (`volunteer_weekly_blocks`, `volunteer_day_absences`, `daily_participation_plans`). The `patient_participation_evaluations` service remains for a future evaluation UI and does not link new records to activity sessions from the PoC UI.
+
 ---
 
 ## Afternoon activity recording

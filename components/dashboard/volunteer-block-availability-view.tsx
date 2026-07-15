@@ -29,14 +29,26 @@ function getCurrentYearMonth(): string {
 }
 
 export function VolunteerBlockAvailabilityView() {
-  const { data: weeklyBlocks, isLoading } = useMyWeeklyBlocks();
+  const {
+    data: weeklyBlocks,
+    isLoading,
+    isError: weeklyBlocksError,
+    error: weeklyBlocksErrorDetail,
+  } = useMyWeeklyBlocks();
   const saveWeeklyBlocks = useSaveMyWeeklyBlocks();
   const [draftBlocks, setDraftBlocks] = useState<VolunteerWeeklyBlockInput[] | null>(
     null,
   );
   const [yearMonth, setYearMonth] = useState(getCurrentYearMonth());
-  const { data: absences } = useMyDayAbsencesForMonth(yearMonth);
+  const {
+    data: absences,
+    isError: absencesError,
+    error: absencesErrorDetail,
+  } = useMyDayAbsencesForMonth(yearMonth);
   const setDayAbsence = useSetMyDayAbsence(yearMonth);
+  const [absenceActionError, setAbsenceActionError] = useState<string | null>(
+    null,
+  );
 
   const blocks = useMemo<VolunteerWeeklyBlockInput[]>(() => {
     const source = draftBlocks ?? weeklyBlocks;
@@ -123,8 +135,12 @@ export function VolunteerBlockAvailabilityView() {
       return;
     }
 
-    await saveWeeklyBlocks.mutateAsync(blocks);
-    setDraftBlocks(null);
+    try {
+      await saveWeeklyBlocks.mutateAsync(blocks);
+      setDraftBlocks(null);
+    } catch {
+      // Mutation error is surfaced below via saveWeeklyBlocks.error.
+    }
   }
 
   async function handleToggleAbsence(
@@ -132,11 +148,21 @@ export function VolunteerBlockAvailabilityView() {
     block: "morning" | "afternoon",
     checked: boolean,
   ) {
-    await setDayAbsence.mutateAsync({
-      absenceDate,
-      block,
-      isAbsent: checked,
-    });
+    setAbsenceActionError(null);
+
+    try {
+      await setDayAbsence.mutateAsync({
+        absenceDate,
+        block,
+        isAbsent: checked,
+      });
+    } catch (error) {
+      setAbsenceActionError(
+        error instanceof Error
+          ? error.message
+          : "Afwezigheid kon niet worden opgeslagen. Probeer het opnieuw.",
+      );
+    }
   }
 
   return (
@@ -147,9 +173,17 @@ export function VolunteerBlockAvailabilityView() {
           blokken.
         </p>
 
+        {weeklyBlocksError ? (
+          <p className="text-sm text-red-600" role="alert">
+            {weeklyBlocksErrorDetail instanceof Error
+              ? weeklyBlocksErrorDetail.message
+              : "Wekelijkse beschikbaarheid kon niet worden geladen."}
+          </p>
+        ) : null}
+
         {isLoading ? (
           <p className="text-sm text-carbon-black-600">Laden...</p>
-        ) : (
+        ) : !weeklyBlocksError ? (
           <div className="space-y-4">
             {WEEKLY_BLOCK_DISPLAY_ORDER.map((dayOfWeek) => {
               const block = getBlockForDay(dayOfWeek);
@@ -200,12 +234,22 @@ export function VolunteerBlockAvailabilityView() {
               );
             })}
           </div>
-        )}
+        ) : null}
+
+        {saveWeeklyBlocks.error ? (
+          <p className="mt-4 text-sm text-red-600" role="alert">
+            {saveWeeklyBlocks.error instanceof Error
+              ? saveWeeklyBlocks.error.message
+              : "Opslaan is mislukt. Probeer het opnieuw."}
+          </p>
+        ) : null}
 
         <div className="mt-4">
           <PrimaryButton
             type="button"
-            disabled={saveWeeklyBlocks.isPending || isLoading}
+            disabled={
+              saveWeeklyBlocks.isPending || isLoading || weeklyBlocksError
+            }
             onClick={() => void handleSaveWeeklyBlocks()}
           >
             {saveWeeklyBlocks.isPending
@@ -237,12 +281,26 @@ export function VolunteerBlockAvailabilityView() {
           />
         </div>
 
-        {monthSlots.length === 0 ? (
+        {absencesError ? (
+          <p className="text-sm text-red-600" role="alert">
+            {absencesErrorDetail instanceof Error
+              ? absencesErrorDetail.message
+              : "Afwezigheden konden niet worden geladen."}
+          </p>
+        ) : null}
+
+        {absenceActionError ? (
+          <p className="mb-4 text-sm text-red-600" role="alert">
+            {absenceActionError}
+          </p>
+        ) : null}
+
+        {!absencesError && monthSlots.length === 0 ? (
           <p className="text-sm text-carbon-black-600">
             Geen beschikbare dagdelen in deze maand volgens je wekelijkse
             planning.
           </p>
-        ) : (
+        ) : !absencesError ? (
           <ul className="space-y-3">
             {monthSlots.map((slot) => {
               const key = `${slot.absenceDate}:${slot.block}`;
@@ -270,7 +328,7 @@ export function VolunteerBlockAvailabilityView() {
               );
             })}
           </ul>
-        )}
+        ) : null}
       </DashboardCard>
     </div>
   );

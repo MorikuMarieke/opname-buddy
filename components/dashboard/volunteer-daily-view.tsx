@@ -23,6 +23,7 @@ import {
 } from "@/lib/constants/daily-participation";
 import {
   formatDutchDate,
+  formatDutchDateTime,
   getAmsterdamDateString,
   getDutchWeekdayLabelFromIsoDate,
 } from "@/lib/utils/amsterdam-date";
@@ -119,6 +120,35 @@ export function VolunteerDailyView() {
               />
             )}
           </div>
+
+          {!isLoading && data?.plan ? (
+            <div className="rounded-xl border border-parchment-200 bg-parchment-50 p-4">
+              <h4 className="text-sm font-semibold text-carbon-black-900">
+                Vastgelegde middagactiviteit
+              </h4>
+              {data.plan.afternoon_title ? (
+                <p className="mt-2 text-lg font-medium text-carbon-black-900">
+                  {data.plan.afternoon_title}
+                </p>
+              ) : null}
+              {data.plan.participant_message ? (
+                <p className="mt-2 text-sm text-carbon-black-700">
+                  {data.plan.participant_message}
+                </p>
+              ) : null}
+              <p className="mt-3 text-xs text-carbon-black-600">
+                Laatst bijgewerkt door{" "}
+                {data.plan.recorded_by_name ?? "onbekend"} op{" "}
+                {formatDutchDateTime(data.plan.updated_at)}
+              </p>
+            </div>
+          ) : null}
+
+          {!isLoading && !data?.plan ? (
+            <p className="rounded-xl border border-dashed border-parchment-300 bg-parchment-50 px-4 py-3 text-sm text-carbon-black-600">
+              Nog geen middagactiviteit vastgelegd voor deze datum.
+            </p>
+          ) : null}
 
           <div>
             <h4 className="mb-3 text-sm font-semibold text-carbon-black-900">
