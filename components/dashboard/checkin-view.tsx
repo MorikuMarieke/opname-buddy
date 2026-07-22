@@ -98,7 +98,10 @@ export function CheckinView() {
       {renderContent()}
 
       {recentQuery.data && recentQuery.data.length > 0 ? (
-        <CheckinHistoryList checkIns={recentQuery.data} />
+        <CheckinHistoryList
+          checkIns={recentQuery.data}
+          todayCheckInId={todayCheckIn?.id}
+        />
       ) : null}
     </div>
   );
