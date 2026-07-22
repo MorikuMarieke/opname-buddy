@@ -62,3 +62,10 @@ export function getPatientContextCompleteness(
     unknownCriticalFieldLabels: [],
   };
 }
+
+/** True when existing completeness rules report `complete` (including conditional mobility-aid). */
+export function isEssentialCareContextComplete(
+  context: PatientContext | null,
+): boolean {
+  return getPatientContextCompleteness(context).level === "complete";
+}

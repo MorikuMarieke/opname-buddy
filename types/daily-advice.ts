@@ -11,12 +11,36 @@ export type MorningVolunteerVisitRequestInsert =
 export type MorningVolunteerVisitRequestUpdate =
   TablesUpdate<"morning_volunteer_visit_requests">;
 
-export type AdviceStatus = "generating" | "ready" | "failed" | "stale";
+export type AdviceStatus =
+  | "generating"
+  | "ready"
+  | "failed"
+  | "stale"
+  | "superseded";
+
+export type AdviceGenerationKind = "standard" | "dev_iteration";
 
 export type AdvicePrimaryOutcome =
   | "rest"
   | "morning_volunteer_visit"
-  | "afternoon_group_activity";
+  | "afternoon_group_activity"
+  | "awaiting_afternoon_programme";
+
+export type AfternoonGroupInterestSignal =
+  Tables<"afternoon_group_interest_signals">;
+
+export type AfternoonInterestStatus = "interested" | "withdrawn";
+
+export interface AfternoonInterestListItem {
+  id: string;
+  admission_id: string;
+  interest_date: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  patient_display_name: string;
+  room_number: string | null;
+}
 
 export type AdviceAfternoonStatus =
   | "pending_plan"
@@ -40,6 +64,10 @@ export interface MorningVisitRequestListItem {
   created_at: string;
   patient_display_name: string;
   room_number: string | null;
+  /** Derived: afternoon group route is blocked by care-context policy. */
+  cannot_participate_in_afternoon_activity: boolean;
+  /** Derived: visit_activity_possibility requires protection on ward visit. */
+  requires_protection_before_room_entry: boolean;
 }
 
 export const ADVICE_PRIMARY_OUTCOME_LABELS: Record<
@@ -47,8 +75,9 @@ export const ADVICE_PRIMARY_OUTCOME_LABELS: Record<
   string
 > = {
   rest: "Rust",
-  morning_volunteer_visit: "Persoonlijk vrijwilligersbezoek (ochtend)",
+  morning_volunteer_visit: "Bezoek op de afdeling (ochtend)",
   afternoon_group_activity: "Middag groepsactiviteit",
+  awaiting_afternoon_programme: "Middagactiviteit",
 };
 
 export const ACTIVITY_ROOM_ACCESS_LABELS: Record<ActivityRoomAccess, string> = {

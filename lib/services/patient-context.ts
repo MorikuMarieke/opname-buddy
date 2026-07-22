@@ -69,7 +69,7 @@ function toDbPayload(
     requires_supervision: values.requires_supervision,
     mobility_aid_type: values.mobility_aid_type,
     mobility_aid_available: values.mobility_aid_available,
-    isolation_type: values.isolation_type,
+    visit_activity_possibility: values.visit_activity_possibility,
     room_restriction: values.room_restriction,
     can_independently_reach_activity_room:
       values.can_independently_reach_activity_room,

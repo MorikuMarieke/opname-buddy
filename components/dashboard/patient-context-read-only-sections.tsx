@@ -3,7 +3,7 @@ import { PATIENT_CONTEXT_COPY } from "@/lib/constants/patient-context-copy";
 import {
   FALL_RISK_LABELS,
   GUIDANCE_LEVEL_LABELS,
-  ISOLATION_TYPE_LABELS,
+  VISIT_ACTIVITY_POSSIBILITY_LABELS,
   ACTIVITY_ROOM_ACCESS_LABELS,
   MOBILITY_AID_AVAILABLE_LABELS,
   MOBILITY_AID_TYPE_LABELS,
@@ -97,10 +97,10 @@ export function PatientContextReadOnlySections({
           )}
         />
         <ReadOnlyRow
-          label="Isolatietype"
+          label="Mogelijkheden voor bezoek en activiteiten"
           value={displayEnum(
-            (values?.isolation_type ?? "unknown") as never,
-            ISOLATION_TYPE_LABELS,
+            (values?.visit_activity_possibility ?? "unknown") as never,
+            VISIT_ACTIVITY_POSSIBILITY_LABELS,
           )}
         />
         {values &&

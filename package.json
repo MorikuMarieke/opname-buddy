@@ -10,6 +10,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:dailybuddy": "tsx scripts/test-dailybuddy-safety.mts",
+    "test:dailybuddy-cache": "tsx scripts/test-dailybuddy-client-cache.mts",
+    "test:dailybuddy-progress": "tsx scripts/test-dailybuddy-progress.mts",
+    "test:morning-visit-context": "tsx scripts/test-morning-visit-decision-context.mts",
     "demo:seed": "tsx scripts/demo/seed-demo-data.mts",
     "demo:cleanup": "tsx scripts/demo/cleanup-demo-data.mts"
   },

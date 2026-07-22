@@ -1,13 +1,19 @@
 import { getCurrentUserRoles } from "@/lib/auth/get-current-user-roles";
+import { assertDailyBuddyDevIterateAllowed } from "@/lib/config/dailybuddy-dev";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   ensureDailyAdviceGenerated,
   getOwnDailyAdvice,
+  markAdviceStaleIfOutdated,
   refreshAfternoonAdviceForDate,
+  type GenerateAdviceResult,
 } from "@/lib/services/daily-advice";
+import { resolveDailyBuddyPrerequisites } from "@/lib/services/daily-advice-prerequisites";
+import type { DailyBuddyProgressEvent } from "@/lib/daily-advice/progress";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import type { DailyAdvice } from "@/types/daily-advice";
+import type { DailyBuddyPrerequisite } from "@/types/daily-advice-prerequisites";
 
 /**
  * Resolves the caller's active admission via session RLS.
@@ -52,7 +58,13 @@ export async function requirePatientSession() {
 
 export async function generateAdviceForCurrentPatient(options?: {
   forceRetry?: boolean;
-}): Promise<{ advice: DailyAdvice; startedGeneration: boolean }> {
+  devIterate?: boolean;
+  onProgress?: (event: DailyBuddyProgressEvent) => void;
+}): Promise<GenerateAdviceResult> {
+  if (options?.devIterate) {
+    assertDailyBuddyDevIterateAllowed();
+  }
+
   const { supabase: readClient } = await requirePatientSession();
   const admissionId = await resolveActiveAdmissionId(readClient);
   // Writes require service role after admission was verified via session RLS.
@@ -65,10 +77,55 @@ export async function generateAdviceForCurrentPatient(options?: {
   );
 }
 
-export async function readAdviceForCurrentPatient(): Promise<DailyAdvice | null> {
+export interface ReadAdviceForCurrentPatientResult {
+  advice: DailyAdvice | null;
+  /**
+   * Present only when authoritative gates block generation and the row is not
+   * already `ready` / `generating` (those paths skip prerequisite lookups so
+   * foreign-generation polling does not re-query check-in/context).
+   */
+  prerequisite?: DailyBuddyPrerequisite;
+}
+
+/**
+ * Read today's advice. Prerequisite lookups are skipped for `ready` and
+ * `generating` rows so the 2s poll path does not add check-in/context work.
+ */
+export async function readAdviceForCurrentPatient(): Promise<ReadAdviceForCurrentPatientResult> {
   const { supabase: readClient } = await requirePatientSession();
   const admissionId = await resolveActiveAdmissionId(readClient);
-  return getOwnDailyAdvice(readClient, admissionId);
+  const adviceDate = getAmsterdamDateString();
+  let advice = await getOwnDailyAdvice(readClient, admissionId, adviceDate);
+
+  if (advice?.status === "ready") {
+    const writeClient = createAdminClient();
+    advice = await markAdviceStaleIfOutdated(
+      writeClient,
+      readClient,
+      admissionId,
+      advice,
+      adviceDate,
+    );
+  }
+
+  if (advice?.status === "ready" || advice?.status === "generating") {
+    return { advice };
+  }
+
+  const prerequisites = await resolveDailyBuddyPrerequisites(
+    readClient,
+    admissionId,
+    adviceDate,
+  );
+
+  if (!prerequisites.ok) {
+    return {
+      advice,
+      prerequisite: prerequisites.prerequisite,
+    };
+  }
+
+  return { advice };
 }
 
 export async function patchAfternoonAdviceForToday(): Promise<{

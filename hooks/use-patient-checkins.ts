@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/constants/query-keys";
+import { syncCachesAfterCheckInMutation } from "@/lib/daily-advice/checkin-cache-sync";
 import {
   createCheckIn,
   getRecentCheckIns,
@@ -32,8 +33,8 @@ export function useCreateCheckIn() {
 
   return useMutation({
     mutationFn: (input: PatientCheckinFormValues) => createCheckIn(input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.checkIns.all });
+    onSuccess: async (created) => {
+      await syncCachesAfterCheckInMutation(queryClient, created);
     },
   });
 }
@@ -49,8 +50,8 @@ export function useUpdateCheckIn() {
       id: string;
       input: PatientCheckinFormValues;
     }) => updateCheckIn(id, input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.checkIns.all });
+    onSuccess: async (updated) => {
+      await syncCachesAfterCheckInMutation(queryClient, updated);
     },
   });
 }

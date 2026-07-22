@@ -268,7 +268,7 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 **Critical completeness fields:**
 
-- `mobility_status`, `transfer_support`, `fall_risk`, `requires_supervision` (Begeleiding), `isolation_type`, `room_restriction` (Bewegingsvrijheid)
+- `mobility_status`, `transfer_support`, `fall_risk`, `requires_supervision` (Begeleiding), `visit_activity_possibility` (Mogelijkheden voor bezoek en activiteiten), `room_restriction` (Bewegingsvrijheid)
 - `mobility_aid_available` when mobility status requires an aid
 - Attention chips and notes do **not** block completeness
 
@@ -284,7 +284,7 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 | `requires_supervision` | text | unknown, not_required, required (UI: Begeleiding) |
 | `mobility_aid_type` | text | Conditional; unknown, cane, walker, wheelchair, own_aid, other |
 | `mobility_aid_available` | text | Conditional critical; unknown, yes, no |
-| `isolation_type` | text | unknown, none, contact, droplet, airborne, strict, protective |
+| `visit_activity_possibility` | text | unknown, no_relevant_restriction, visit_allowed_with_protection, no_non_care_contact (UI: Mogelijkheden voor bezoek en activiteiten; not a clinical isolation diagnosis) |
 | `room_restriction` | text | unknown, room_only, ward_only, no_restriction (UI: Bewegingsvrijheid) |
 | `additional_attention_points` | text[] | iv_pump, oxygen, catheter, wound_or_drain, post_surgery, fatigue, wandering_risk, language_barrier, cognitive_support, hearing_support, vision_support, communication_support, other |
 | `additional_attention_notes` | text | Optional; UI when `other` chip selected |

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { AfternoonActivityRecordForm } from "@/components/dashboard/afternoon-activity-record-form";
+import { AfternoonInterestList } from "@/components/dashboard/afternoon-interest-list";
 import {
   DailyNeedsSummary,
   getSuggestedNeedCategory,
@@ -14,6 +15,7 @@ import {
   useDailyParticipation,
   useUpsertDailyParticipationPlan,
 } from "@/hooks/use-daily-participation";
+import { formInputClasses } from "@/components/forms/form-styles";
 import {
   AFTERNOON_GROUP_MAX_CAPACITY,
   AFTERNOON_GROUP_ROOM_NAME,
@@ -21,7 +23,6 @@ import {
   AFTERNOON_REQUIRES_INDEPENDENT_ACCESS,
   PARTICIPATION_BLOCKS,
 } from "@/lib/constants/daily-participation";
-import { formInputClasses } from "@/components/forms/form-styles";
 import {
   formatDutchDate,
   formatDutchDateTime,
@@ -90,6 +91,8 @@ export function CoordinatorDailyPlanningView() {
       </DashboardCard>
 
       <MorningVisitRequestList requestDate={planDate} />
+
+      <AfternoonInterestList interestDate={planDate} />
 
       <DashboardCard
         title={`Middag ${PARTICIPATION_BLOCKS.afternoon.label}`}

@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { deriveParticipationFacts } from "@/lib/ai/participation-advice-policy";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import type { Database } from "@/types/database";
 
@@ -55,13 +56,13 @@ export function createDailyBuddyTools(ctx: DailyBuddyToolContext) {
 
     getPatientContext: tool({
       description:
-        "Haal de zorgcontext op: mobiliteit, begeleiding, isolatie, bewegingsvrijheid en of de patiënt zelfstandig de activiteitenruimte kan bereiken (can_independently_reach_activity_room). Alleen yes mag voor middaggroep.",
+        "Haal goedgekeurde participatiefeiten en praktische zorgcontext op. Gebruik participation_routes als autoritatieve route-feiten (niet zelf afleiden). Alleen can_independently_reach_activity_room=yes mag middaggroep overwegen wanneer afternoon_activity dat toelaat. additional_attention_points zijn alleen praktische herinneringen, geen routebeslissing.",
       inputSchema: z.object({}),
       execute: async () => {
         const { data, error } = await ctx.supabase
           .from("patient_context")
           .select(
-            "mobility_status, transfer_support, fall_risk, requires_supervision, mobility_aid_type, mobility_aid_available, isolation_type, room_restriction, can_independently_reach_activity_room, additional_attention_points, notes",
+            "mobility_status, transfer_support, fall_risk, requires_supervision, mobility_aid_type, mobility_aid_available, visit_activity_possibility, room_restriction, can_independently_reach_activity_room, additional_attention_points",
           )
           .eq("admission_id", ctx.admissionId)
           .maybeSingle();
@@ -73,13 +74,30 @@ export function createDailyBuddyTools(ctx: DailyBuddyToolContext) {
           );
         }
 
-        return { ok: true as const, context: data };
+        if (!data) {
+          return { ok: true as const, context: null };
+        }
+
+        const {
+          visit_activity_possibility: visitActivityPossibility,
+          ...practicalContext
+        } = data;
+
+        return {
+          ok: true as const,
+          context: {
+            ...practicalContext,
+            participation_routes: deriveParticipationFacts(
+              visitActivityPossibility,
+            ),
+          },
+        };
       },
     }),
 
     getDailyParticipationPlan: tool({
       description:
-        "Haal het geregistreerde middagplan van vandaag op (categorie, titel, deelnemersbericht). Verzin nooit zelf een activiteit. plan=null betekent dat er nog geen plan is (geen fout).",
+        "Haal het geregistreerde middagplan van vandaag op (categorie, titel, deelnemersbericht). Verzin nooit zelf een activiteit. plan=null of ontbrekende titel betekent dat de concrete invulling nog niet bekend is (er is wel een vast middagvak); dat is geen fout.",
       inputSchema: z.object({}),
       execute: async () => {
         const { data, error } = await ctx.supabase

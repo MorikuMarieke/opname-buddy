@@ -13,7 +13,7 @@ export interface InspirationCareContext {
   transfer_support?: string | null;
   fall_risk?: string | null;
   room_restriction?: string | null;
-  isolation_type?: string | null;
+  visit_activity_possibility?: string | null;
   mobility_aid_available?: string | null;
   can_independently_reach_activity_room?: string | null;
   requires_supervision?: string | null;
@@ -33,14 +33,6 @@ const RESTRICTIVE_FALL = new Set(["unknown", "medium", "high"]);
 
 const RESTRICTIVE_ROOM = new Set(["unknown", "room_only"]);
 
-const ACTIVE_ISOLATION = new Set([
-  "contact",
-  "droplet",
-  "airborne",
-  "strict",
-  "protective",
-]);
-
 /**
  * Movement inspirations are only allowed when care context clearly supports
  * light independent movement on the ward. Fail closed otherwise.
@@ -56,7 +48,7 @@ export function movementInspirationsAllowed(
   const transfer = context.transfer_support ?? "unknown";
   const fallRisk = context.fall_risk ?? "unknown";
   const room = context.room_restriction ?? "unknown";
-  const isolation = context.isolation_type ?? "unknown";
+  const visitPossibility = context.visit_activity_possibility ?? "unknown";
   const aid = context.mobility_aid_available ?? "unknown";
   const roomAccess = context.can_independently_reach_activity_room ?? "unknown";
   const supervision = context.requires_supervision ?? "unknown";
@@ -81,7 +73,12 @@ export function movementInspirationsAllowed(
     return false;
   }
 
-  if (isolation === "unknown" || ACTIVE_ISOLATION.has(isolation)) {
+  // Fail closed when visit/activity is unknown or all non-care contact is blocked.
+  // visit_allowed_with_protection does not by itself clear on-ward social inspirations.
+  if (
+    visitPossibility === "unknown" ||
+    visitPossibility === "no_non_care_contact"
+  ) {
     return false;
   }
 
@@ -108,8 +105,8 @@ export function getAllowedVisitInspirations(
       return allowMovement;
     }
 
-    // Social / creative / relaxation stay available unless isolation requires extra caution —
-    // isolation already blocks movement; quiet bedside social remains allowed.
+    // Social / creative / relaxation stay available unless visits are fully blocked —
+    // no_non_care_contact clears inspirations via policy; quiet bedside social remains allowed under protection.
     return true;
   });
 }

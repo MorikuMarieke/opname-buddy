@@ -6,6 +6,7 @@ export const advicePrimaryOutcomeSchema = z.enum([
   "rest",
   "morning_volunteer_visit",
   "afternoon_group_activity",
+  "awaiting_afternoon_programme",
 ]);
 
 export const dailyBuddyStructuredOutputSchema = z.object({

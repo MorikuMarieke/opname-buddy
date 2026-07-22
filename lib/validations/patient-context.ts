@@ -37,14 +37,11 @@ const mobilityAidAvailableSchema = z.enum(["unknown", "yes", "no"]);
 
 const activityRoomAccessSchema = z.enum(["unknown", "yes", "no"]);
 
-const isolationTypeSchema = z.enum([
+const visitActivityPossibilitySchema = z.enum([
   "unknown",
-  "none",
-  "contact",
-  "droplet",
-  "airborne",
-  "strict",
-  "protective",
+  "no_relevant_restriction",
+  "visit_allowed_with_protection",
+  "no_non_care_contact",
 ]);
 
 const movementFreedomSchema = z.enum([
@@ -77,7 +74,7 @@ export const patientContextFormSchema = z.object({
   requires_supervision: guidanceLevelSchema,
   mobility_aid_type: mobilityAidTypeSchema,
   mobility_aid_available: mobilityAidAvailableSchema,
-  isolation_type: isolationTypeSchema,
+  visit_activity_possibility: visitActivityPossibilitySchema,
   room_restriction: movementFreedomSchema,
   can_independently_reach_activity_room: activityRoomAccessSchema,
   additional_attention_points: z.array(attentionPointSchema),
@@ -94,7 +91,7 @@ export const defaultPatientContextFormValues: PatientContextFormValues = {
   requires_supervision: "unknown",
   mobility_aid_type: "unknown",
   mobility_aid_available: "unknown",
-  isolation_type: "unknown",
+  visit_activity_possibility: "unknown",
   room_restriction: "unknown",
   can_independently_reach_activity_room: "unknown",
   additional_attention_points: [],
@@ -119,8 +116,8 @@ export function toFormValues(
       context.mobility_aid_type as PatientContextFormValues["mobility_aid_type"],
     mobility_aid_available:
       context.mobility_aid_available as PatientContextFormValues["mobility_aid_available"],
-    isolation_type:
-      context.isolation_type as PatientContextFormValues["isolation_type"],
+    visit_activity_possibility:
+      context.visit_activity_possibility as PatientContextFormValues["visit_activity_possibility"],
     room_restriction:
       context.room_restriction as PatientContextFormValues["room_restriction"],
     can_independently_reach_activity_room:

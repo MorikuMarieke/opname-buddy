@@ -23,7 +23,7 @@ const FIELD_LABELS: Record<string, string> = {
   requires_supervision: "Begeleiding",
   mobility_aid_type: "Type loophulpmiddel",
   mobility_aid_available: "Loophulpmiddel beschikbaar",
-  isolation_type: "Isolatietype",
+  visit_activity_possibility: "Mogelijkheden voor bezoek en activiteiten",
   room_restriction: "Bewegingsvrijheid",
   additional_attention_notes: "Overige toelichting",
 };

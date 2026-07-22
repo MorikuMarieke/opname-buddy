@@ -2,6 +2,10 @@ import { createClient } from "@/lib/supabase/client";
 import { filterValidInspirationIds } from "@/lib/constants/visit-inspirations";
 import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import { getActiveAdmissionId } from "@/lib/services/admissions";
+import {
+  assertVolunteerSafeMorningVisitDto,
+  deriveMorningVisitDecisionContext,
+} from "@/lib/services/morning-visit-decision-context";
 import type {
   MorningVisitRequestListItem,
   MorningVolunteerVisitRequest,
@@ -111,16 +115,35 @@ export async function listMorningVisitRequestsForDate(
     throw new Error(getSupabaseErrorMessage(error));
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    admission_id: row.admission_id,
-    request_date: row.request_date,
-    block: row.block,
-    patient_message: row.patient_message,
-    inspiration_ids: row.inspiration_ids ?? [],
-    status: row.status,
-    created_at: row.created_at,
-    patient_display_name: row.patient_display_name,
-    room_number: row.room_number,
-  }));
+  return (data ?? []).map((row) => {
+    const decision = deriveMorningVisitDecisionContext({
+      can_independently_reach_activity_room:
+        row.can_independently_reach_activity_room,
+      visit_activity_possibility: row.visit_activity_possibility,
+      room_restriction: row.room_restriction,
+    });
+
+    const item: MorningVisitRequestListItem = {
+      id: row.id,
+      admission_id: row.admission_id,
+      request_date: row.request_date,
+      block: row.block,
+      patient_message: row.patient_message,
+      inspiration_ids: row.inspiration_ids ?? [],
+      status: row.status,
+      created_at: row.created_at,
+      patient_display_name: row.patient_display_name,
+      room_number: row.room_number,
+      cannot_participate_in_afternoon_activity:
+        decision.cannot_participate_in_afternoon_activity,
+      requires_protection_before_room_entry:
+        decision.requires_protection_before_room_entry,
+    };
+
+    assertVolunteerSafeMorningVisitDto(
+      item as unknown as Record<string, unknown>,
+    );
+
+    return item;
+  });
 }

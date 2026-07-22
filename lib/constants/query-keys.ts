@@ -36,6 +36,14 @@
     byDate: (requestDate: string) =>
       [...queryKeys.morningVisitRequests.all, "date", requestDate] as const,
   },
+  afternoonInterest: {
+    all: ["afternoon-interest"] as const,
+    own: () => [...queryKeys.afternoonInterest.all, "own"] as const,
+    byDate: (interestDate: string) =>
+      [...queryKeys.afternoonInterest.all, "date", interestDate] as const,
+    count: (interestDate: string) =>
+      [...queryKeys.afternoonInterest.all, "count", interestDate] as const,
+  },
   adminAccounts: {
     all: ["admin-accounts"] as const,
     staff: (filters?: { search?: string; status?: string; role?: string }) => {

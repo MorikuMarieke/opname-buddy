@@ -491,6 +491,9 @@ export type Database = {
           generation_started_at: string | null
           id: string
           inspiration_ids: string[]
+          is_active: boolean
+          iteration: number
+          generation_kind: string
           model_id: string | null
           motivation: string | null
           primary_outcome: string | null
@@ -498,6 +501,7 @@ export type Database = {
           secondary_morning_note: string | null
           secondary_morning_visit: boolean
           source_checkin_id: string | null
+          source_context_fingerprint: string | null
           source_plan_updated_at: string | null
           stale_reason: string | null
           status: string
@@ -516,8 +520,11 @@ export type Database = {
           explanation?: string | null
           generated_at?: string | null
           generation_started_at?: string | null
+          generation_kind?: string
           id?: string
           inspiration_ids?: string[]
+          is_active?: boolean
+          iteration?: number
           model_id?: string | null
           motivation?: string | null
           primary_outcome?: string | null
@@ -525,6 +532,7 @@ export type Database = {
           secondary_morning_note?: string | null
           secondary_morning_visit?: boolean
           source_checkin_id?: string | null
+          source_context_fingerprint?: string | null
           source_plan_updated_at?: string | null
           stale_reason?: string | null
           status?: string
@@ -543,8 +551,11 @@ export type Database = {
           explanation?: string | null
           generated_at?: string | null
           generation_started_at?: string | null
+          generation_kind?: string
           id?: string
           inspiration_ids?: string[]
+          is_active?: boolean
+          iteration?: number
           model_id?: string | null
           motivation?: string | null
           primary_outcome?: string | null
@@ -552,6 +563,7 @@ export type Database = {
           secondary_morning_note?: string | null
           secondary_morning_visit?: boolean
           source_checkin_id?: string | null
+          source_context_fingerprint?: string | null
           source_plan_updated_at?: string | null
           stale_reason?: string | null
           status?: string
@@ -644,6 +656,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      afternoon_group_interest_signals: {
+        Row: {
+          admission_id: string
+          created_at: string
+          id: string
+          interest_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          created_at?: string
+          id?: string
+          interest_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          created_at?: string
+          id?: string
+          interest_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afternoon_group_interest_signals_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       morning_volunteer_visit_requests: {
         Row: {
@@ -793,7 +840,7 @@ export type Database = {
           created_at: string
           fall_risk: string
           id: string
-          isolation_type: string
+          visit_activity_possibility: string
           mobility_aid_available: string
           mobility_aid_type: string
           mobility_status: string
@@ -812,7 +859,7 @@ export type Database = {
           created_at?: string
           fall_risk?: string
           id?: string
-          isolation_type?: string
+          visit_activity_possibility?: string
           mobility_aid_available?: string
           mobility_aid_type?: string
           mobility_status?: string
@@ -831,7 +878,7 @@ export type Database = {
           created_at?: string
           fall_risk?: string
           id?: string
-          isolation_type?: string
+          visit_activity_possibility?: string
           mobility_aid_available?: string
           mobility_aid_type?: string
           mobility_status?: string
@@ -1355,6 +1402,7 @@ export type Database = {
         Returns: {
           admission_id: string
           block: string
+          can_independently_reach_activity_room: string
           created_at: string
           id: string
           inspiration_ids: string[]
@@ -1362,8 +1410,27 @@ export type Database = {
           patient_message: string
           request_date: string
           room_number: string
+          room_restriction: string
           status: string
+          visit_activity_possibility: string
         }[]
+      }
+      list_afternoon_group_interest_signals: {
+        Args: { p_interest_date: string }
+        Returns: {
+          admission_id: string
+          created_at: string
+          id: string
+          interest_date: string
+          patient_display_name: string
+          room_number: string
+          status: string
+          updated_at: string
+        }[]
+      }
+      count_afternoon_group_interest_signals: {
+        Args: { p_interest_date: string }
+        Returns: number
       }
       list_patient_activity_sessions: {
         Args: never

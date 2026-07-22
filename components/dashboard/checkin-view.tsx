@@ -10,7 +10,6 @@ import { DashboardCard } from "@/components/ui/dashboard-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { SectionHeader } from "@/components/ui/section-header";
-import { requestDailyAdviceGeneration } from "@/hooks/use-daily-advice";
 import {
   useRecentCheckIns,
   useTodayCheckIn,
@@ -30,7 +29,6 @@ export function CheckinView() {
   function handleFormSuccess() {
     setMode("summary");
     setShowAdviceCta(true);
-    requestDailyAdviceGeneration();
   }
 
   function renderContent() {
@@ -60,7 +58,7 @@ export function CheckinView() {
           {showAdviceCta ? (
             <DashboardCard density="compact" className="mt-4 space-y-3">
               <p className="text-sm text-carbon-black-800">
-                Je check-in is opgeslagen. DagBuddy maakt je advies voor
+                Je check-in is opgeslagen. Ga naar DagBuddy voor je advies van
                 vandaag.
               </p>
               <PrimaryButton href="/dashboard/advice">
