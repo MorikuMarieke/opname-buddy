@@ -50,6 +50,8 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 | `list_planning_patients` | None |
 | `list_planning_volunteers` | Volunteer profile list if still needed |
 
+**Hardening (migration `00054`, Jul 2026):** Deprecated legacy planning tables remain in place to avoid a risky late schema drop. Direct `PUBLIC` / `anon` / `authenticated` `EXECUTE` on the six unused SECURITY DEFINER RPCs above (excluding still-active `list_planning_volunteers`) was revoked. Active PoC RPCs and application flows are unchanged.
+
 ### New RPCs (Phase 2)
 
 | RPC | Purpose |
