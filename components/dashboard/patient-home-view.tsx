@@ -1,6 +1,5 @@
 import type { User } from "@supabase/supabase-js";
 import {
-  Calendar,
   ClipboardList,
   LineChart,
   MessageCircleQuestion,
@@ -59,14 +58,6 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
           title="Mijn vragen"
           description="Schrijf vragen op per specialisme."
           accent="copper"
-          size="kiosk"
-        />
-        <ActionTile
-          href="/dashboard/activities"
-          icon={Calendar}
-          title="Vandaag"
-          description="Bekijk de vaste dagdelen en wat er gepland is."
-          accent="blue-slate"
           size="kiosk"
         />
         <ActionTile
