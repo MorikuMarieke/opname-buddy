@@ -213,12 +213,11 @@ export function isRestUnsuitableForGroupInterest(checkin: {
   );
 }
 
-/** Interest CTA eligibility — independent of DailyBuddy primary outcome. */
+/** Interest CTA eligibility — independent of DailyBuddy primary outcome and plan title. */
 export function canShowAfternoonInterestCta(input: {
   access: string | null | undefined;
   visitActivityPossibility?: string | null | undefined;
   roomRestriction?: string | null | undefined;
-  hasPlan: boolean;
   hasCheckIn: boolean;
   careContextComplete: boolean;
   energy_level: number;
@@ -231,7 +230,6 @@ export function canShowAfternoonInterestCta(input: {
       visitActivityPossibility: input.visitActivityPossibility,
       roomRestriction: input.roomRestriction,
     }) &&
-    !input.hasPlan &&
     input.hasCheckIn &&
     input.careContextComplete &&
     !isRestUnsuitableForGroupInterest(input)

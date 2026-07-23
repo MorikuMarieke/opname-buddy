@@ -105,7 +105,7 @@ Log out between patients. Password remains `Demo123!`.
 
 | Patient | Email | Routes | What to show |
 |---------|-------|--------|--------------|
-| Fatima (PAT-10) | `patient10.demo@opnamebuddy.test` | `/dashboard/checkin`, `/dashboard/activities` | Enthusiastic social + creative needs; afternoon message |
+| Fatima (PAT-10) | `patient10.demo@opnamebuddy.test` | `/dashboard/checkin`, `/dashboard/advice` | Enthusiastic social + creative needs; DagBuddy afternoon advice when a plan exists |
 | Mia (PAT-07) | `patient7.demo@opnamebuddy.test` | `/dashboard/checkin` | Movement need vs pain/mobility conflict |
 | Lien (PAT-12) | `patient12.demo@opnamebuddy.test` | `/dashboard/checkin` | Individual morning preference in note |
 | Iris (PAT-09) | `patient9.demo@opnamebuddy.test` | `/dashboard/checkin` | Empty `participation_needs` — no preference |

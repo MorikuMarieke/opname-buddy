@@ -21,11 +21,6 @@
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
   },
-  patientDailyParticipation: {
-    all: ["patient-daily-participation"] as const,
-    byDate: (planDate: string) =>
-      ["patient-daily-participation", planDate] as const,
-  },
   dailyAdvice: {
     all: ["daily-advice"] as const,
     today: () => [...queryKeys.dailyAdvice.all, "today"] as const,

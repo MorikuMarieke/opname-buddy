@@ -27,9 +27,6 @@ export async function syncCachesAfterCheckInMutation(
     queryClient.invalidateQueries({ queryKey: queryKeys.checkIns.all }),
     queryClient.invalidateQueries({ queryKey: queryKeys.dailyAdvice.all }),
     queryClient.invalidateQueries({
-      queryKey: queryKeys.patientDailyParticipation.all,
-    }),
-    queryClient.invalidateQueries({
       queryKey: queryKeys.afternoonInterest.all,
     }),
   ]);
@@ -39,6 +36,5 @@ export async function syncCachesAfterCheckInMutation(
 export const CHECKIN_DEPENDENT_QUERY_KEYS = [
   queryKeys.checkIns.all,
   queryKeys.dailyAdvice.all,
-  queryKeys.patientDailyParticipation.all,
   queryKeys.afternoonInterest.all,
 ] as const;

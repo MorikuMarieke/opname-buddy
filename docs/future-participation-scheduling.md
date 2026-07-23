@@ -94,7 +94,7 @@ Example headlines:
 
 ### 4. Routes / UI (follow-up slices)
 
-- **Shipped (branch 7):** read-only confirmed upcoming sessions on `/dashboard/activities` (title, time, location, volunteer name when assigned)
+- **Removed:** standalone patient `/dashboard/activities` (“Vandaag”) overview — patients use DagBuddy instead; legacy URL redirects to `/dashboard/advice`
 - Evening participation evaluation form — still deferred
 - Pre-fill `activity_title` from stored DailyBuddy advice (branch 8)
 - Link `activity_session_id` in participation evaluations when recording feedback (branch 9)

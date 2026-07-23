@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         destination: "/care",
         permanent: false,
       },
+      {
+        source: "/dashboard/activities",
+        destination: "/dashboard/advice",
+        permanent: false,
+      },
       ...legacyPlanningSegments.flatMap((segment) => [
         {
           source: `/planning/${segment}`,

@@ -69,10 +69,8 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 ## Patient participation
 
 - Patients express daily needs at check-in (multi-select).
-- Patients see a read-only daily overview (blocks, room, requirements, recorded activity).
-- **No** database-tracked enrollment, interest, or decline state in PoC.
-- Patient autonomy is supported through read-only daily overview and voluntary participation copy.
-- `/dashboard/advice` remains a **placeholder** until `feature/dailybuddy-participation-advice`.
+- Patients receive personalised participation advice and optional interest / withdraw actions via DagBuddy (`/dashboard/advice`). There is no separate patient activity overview page.
+- Volunteer-recorded afternoon activity remains available for DailyBuddy and staff workflows.
 
 ---
 
@@ -114,7 +112,7 @@ Use cautious Dutch phrasing: “kan passen”, “zou geschikt kunnen zijn”, �
 
 | Role | PoC scope |
 |------|-----------|
-| `patient` | Check-in needs, daily overview (`Vandaag`), DagBuddy placeholder |
+| `patient` | Check-in needs, zorgcontext, DagBuddy participation advice |
 | `volunteer` | Availability self-service, shared effective availability overview, daily needs view, afternoon recording |
 | `activity_coordinator` | Dedicated `/planning` module (not `/care`): daily dashboard + afternoon record fallback + `/planning/volunteers` profile overview |
 | `caregiver` | Unchanged care workflows on `/care`; no volunteer availability overview; `/care/activities` removed |

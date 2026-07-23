@@ -30,6 +30,10 @@ export const DAILYBUDDY_COPY = {
     title: "Middagactiviteit",
     complementaryIntro:
       "Hier kun je aangeven of je mogelijk wilt meedoen, of de bekende activiteit bekijken.",
+    knownActivityIntro:
+      "Hier zie je de bekende middagactiviteit. Je kunt nog aangeven of je mogelijk interesse hebt.",
+    knownActivityWithInterestIntro:
+      "Hier zie je de bekende middagactiviteit. Je kunt je interessesignaal nog intrekken.",
     description:
       "Vanmiddag is er een gezamenlijke activiteit. De exacte invulling kan later vandaag bekend worden en mag meegroeien met de interesses van deelnemers.",
     disclaimer:

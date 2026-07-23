@@ -43,14 +43,6 @@ export type VolunteerBlockAvailabilityOverviewRow = {
   afternoon_effective: boolean;
 };
 
-export type PatientDailyParticipationRow = {
-  plan_date: string;
-  afternoon_category: AfternoonCategoryValue | null;
-  afternoon_title: string | null;
-  participant_message: string | null;
-  updated_at: string;
-};
-
 export interface UpsertDailyParticipationPlanInput {
   plan_date: string;
   afternoon_category: AfternoonCategoryValue | null;

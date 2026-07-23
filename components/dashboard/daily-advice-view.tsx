@@ -24,7 +24,6 @@ import {
 } from "@/hooks/use-morning-visit-requests";
 import { useTodayCheckIn } from "@/hooks/use-patient-checkins";
 import { useOwnPatientContext } from "@/hooks/use-patient-context";
-import { usePatientDailyParticipation } from "@/hooks/use-patient-daily-participation";
 import {
   canShowAfternoonInterestCta,
   morningVisitAvailable,
@@ -38,7 +37,6 @@ import {
 import { formTextareaClasses } from "@/components/forms/form-styles";
 import { isEssentialCareContextComplete } from "@/lib/patient-context/completeness";
 import { isDailyBuddyDevToolsEnabled } from "@/lib/config/dailybuddy-dev";
-import { getAmsterdamDateString } from "@/lib/utils/amsterdam-date";
 import { ADVICE_PRIMARY_OUTCOME_LABELS } from "@/types/daily-advice";
 import type { AdvicePrimaryOutcome } from "@/types/daily-advice";
 import type { DailyBuddyPrerequisite } from "@/types/daily-advice-prerequisites";
@@ -60,7 +58,6 @@ export function DailyAdviceView() {
   const ownRequest = useOwnMorningVisitRequest();
   const createRequest = useCreateMorningVisitRequest();
   const cancelRequest = useCancelMorningVisitRequest();
-  const patientPlan = usePatientDailyParticipation(getAmsterdamDateString());
   const ownInterest = useOwnAfternoonInterest();
   const expressInterest = useExpressAfternoonInterest();
   const withdrawInterest = useWithdrawAfternoonInterest();
@@ -361,7 +358,6 @@ export function DailyAdviceView() {
     access: ownContext.data?.can_independently_reach_activity_room,
     visitActivityPossibility: ownContext.data?.visit_activity_possibility,
     roomRestriction: ownContext.data?.room_restriction,
-    hasPlan: Boolean(patientPlan.data?.afternoon_title),
     hasCheckIn: Boolean(checkin),
     careContextComplete,
     energy_level: checkin?.energy_level ?? 0,
@@ -369,6 +365,7 @@ export function DailyAdviceView() {
     motivation_score: checkin?.motivation_score ?? 0,
   });
   const interestActive = ownInterest.data?.status === "interested";
+  const showInterestControls = showAfternoonInterest || interestActive;
   const inspirationIds = advice.inspiration_ids ?? [];
   const activeInspirationSelection =
     selectedInspirations.length > 0
@@ -378,10 +375,17 @@ export function DailyAdviceView() {
   const hasConcreteAfternoonTitle = Boolean(advice.afternoon_title);
   const showAfternoonBlock =
     showAfternoonInterest ||
+    interestActive ||
     (hasConcreteAfternoonTitle &&
       (advice.afternoon_status === "recommended" ||
         advice.afternoon_status === "informational" ||
         primary === "afternoon_group_activity"));
+
+  const afternoonIntro = hasConcreteAfternoonTitle
+    ? interestActive
+      ? DAILYBUDDY_COPY.afternoonActivity.knownActivityWithInterestIntro
+      : DAILYBUDDY_COPY.afternoonActivity.knownActivityIntro
+    : DAILYBUDDY_COPY.afternoonActivity.complementaryIntro;
 
   const afternoonIsPrimaryRecommendation =
     primary === "awaiting_afternoon_programme" ||
@@ -555,9 +559,7 @@ export function DailyAdviceView() {
           <h2 className="text-xl font-semibold text-carbon-black-900">
             {DAILYBUDDY_COPY.afternoonActivity.title}
           </h2>
-          <p className="text-sm text-carbon-black-600">
-            {DAILYBUDDY_COPY.afternoonActivity.complementaryIntro}
-          </p>
+          <p className="text-sm text-carbon-black-600">{afternoonIntro}</p>
           <p className="text-sm font-medium text-carbon-black-600">
             {DAILYBUDDY_COPY.afternoonActivity.timeLabel}{" "}
             {PARTICIPATION_BLOCKS.afternoon.label}
@@ -575,48 +577,49 @@ export function DailyAdviceView() {
               ) : null}
             </>
           ) : (
-            <>
-              <p className="text-sm text-carbon-black-700">
-                {DAILYBUDDY_COPY.afternoonActivity.description}
-              </p>
-              {showAfternoonInterest ? (
-                <div className="space-y-3 pt-1">
-                  <p className="text-sm text-carbon-black-600">
-                    {DAILYBUDDY_COPY.afternoonActivity.disclaimer}
-                  </p>
-                  {interestActive ? (
-                    <>
-                      <p className="text-sm font-medium text-carbon-black-800">
-                        {DAILYBUDDY_COPY.afternoonActivity.expressedLabel}
-                      </p>
-                      <SecondaryButton
-                        onClick={() => void handleWithdrawInterest()}
-                        disabled={withdrawInterest.isPending}
-                      >
-                        {withdrawInterest.isPending
-                          ? "Bezig..."
-                          : DAILYBUDDY_COPY.afternoonActivity.withdrawLabel}
-                      </SecondaryButton>
-                    </>
-                  ) : (
-                    <PrimaryButton
-                      onClick={() => void handleExpressInterest()}
-                      disabled={expressInterest.isPending}
-                    >
-                      {expressInterest.isPending
-                        ? "Bezig..."
-                        : DAILYBUDDY_COPY.afternoonActivity.expressLabel}
-                    </PrimaryButton>
-                  )}
-                  {interestError ? (
-                    <p className="text-sm text-red-600" role="alert">
-                      {interestError}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </>
+            <p className="text-sm text-carbon-black-700">
+              {DAILYBUDDY_COPY.afternoonActivity.description}
+            </p>
           )}
+
+          {showInterestControls ? (
+            <div className="space-y-3 border-t border-parchment-200 pt-3">
+              {!interestActive ? (
+                <p className="text-sm text-carbon-black-600">
+                  {DAILYBUDDY_COPY.afternoonActivity.disclaimer}
+                </p>
+              ) : null}
+              {interestActive ? (
+                <>
+                  <p className="text-sm font-medium text-carbon-black-800">
+                    {DAILYBUDDY_COPY.afternoonActivity.expressedLabel}
+                  </p>
+                  <SecondaryButton
+                    onClick={() => void handleWithdrawInterest()}
+                    disabled={withdrawInterest.isPending}
+                  >
+                    {withdrawInterest.isPending
+                      ? "Bezig..."
+                      : DAILYBUDDY_COPY.afternoonActivity.withdrawLabel}
+                  </SecondaryButton>
+                </>
+              ) : showAfternoonInterest ? (
+                <PrimaryButton
+                  onClick={() => void handleExpressInterest()}
+                  disabled={expressInterest.isPending}
+                >
+                  {expressInterest.isPending
+                    ? "Bezig..."
+                    : DAILYBUDDY_COPY.afternoonActivity.expressLabel}
+                </PrimaryButton>
+              ) : null}
+              {interestError ? (
+                <p className="text-sm text-red-600" role="alert">
+                  {interestError}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </DashboardCard>
       ) : null}
 

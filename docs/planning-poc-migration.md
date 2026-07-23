@@ -13,7 +13,7 @@ OpnameBuddy is **not** an operational workforce or activity scheduling system. T
 |------|----------------|
 | Coordinator UI | Single dashboard at `/planning` (date, blocks, needs, volunteer availability, afternoon record) |
 | Volunteer UI | `/volunteer` daily needs + afternoon recording; `/volunteer/availability` block-based weekly + one-time absences |
-| Patient UI | Check-in needs; read-only daily overview (`Vandaag`); `/dashboard/advice` placeholder (DailyBuddy deferred) |
+| Patient UI | Check-in needs; DagBuddy at `/dashboard/advice` (personalised advice; no separate patient activity overview) |
 | Database | `participation_needs` on check-ins; `daily_participation_plans`; `volunteer_weekly_blocks`; `volunteer_day_absences` |
 | AI | **Not on this branch** — see [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md) |
 
@@ -95,8 +95,8 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 | `/volunteer/availability` | Block-based weekly availability + monthly one-time absences |
 | `/volunteer/profile` | Volunteer profile |
 | `/dashboard/checkin` | Extended with `participation_needs` |
-| `/dashboard/activities` | Read-only patient daily participation overview (`Vandaag`) |
-| `/dashboard/advice` | Placeholder only — DailyBuddy on future branch `feature/dailybuddy-participation-advice` |
+| `/dashboard/advice` | DagBuddy personalised participation advice |
+| `/dashboard/activities` | Redirects to `/dashboard/advice` (legacy bookmark) |
 
 ### Navigation after PoC
 
@@ -104,7 +104,7 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 |--------|-------|
 | Planning | **Dagplanning** → `/planning`; **Vrijwilligers** → `/planning/volunteers` |
 | Volunteer | Vandaag, Beschikbaarheid, Mijn profiel |
-| Patient | Vandaag → `/dashboard/activities` |
+| Patient | DagBuddy → `/dashboard/advice` |
 | Care | No volunteer availability or activity planning links |
 
 ### Routing rules
@@ -177,7 +177,7 @@ All removed `/planning/*` URLs (except `/planning/volunteers`) redirect to `/pla
 | 2 | `supabase/migrations/00050_daily_participation_poc.sql`, `types/daily-participation.ts`, validations |
 | 3 | Check-in form/summary updates |
 | 4 | `coordinator-daily-planning-view.tsx`, `volunteer-daily-view.tsx`, `volunteer-block-availability-view.tsx`, services/hooks |
-| 5 | `patient-daily-participation-view.tsx` |
+| 5 | _(removed)_ Patient standalone daily overview; patients use DagBuddy instead |
 | 6 | Redirects; delete legacy files; simplified `/planning/volunteers`; planning nav trim |
 | 7 | Final QA, limitations doc, lint/typecheck/build — **no AI** |
 
@@ -291,7 +291,7 @@ PoC services write only to `volunteer_weekly_blocks`, `volunteer_day_absences`, 
 | Volunteer daily (`/volunteer`) | Same + recorded activity summary | Load failure alert |
 | Volunteer availability (`/volunteer/availability`) | No weekly slots in month | Weekly/absence load and save errors |
 | Coordinator volunteers (`/planning/volunteers`) | No volunteers | Load failure alert |
-| Patient daily (`/dashboard/activities`) | No afternoon activity, no check-in needs | Load failure alert |
+| DagBuddy (`/dashboard/advice`) | No check-in or incomplete care context | Prerequisite empty states; generation failure retry |
 
 ### Verification commands
 

@@ -38,7 +38,7 @@ The account/domain model rules are defined in [Domain and identity model](#domai
 
 | Role | Primary route | Typical responsibilities |
 |------|---------------|------------------------|
-| **patient** | `/dashboard` | Check-ins, questions, daily overview (`Vandaag`), DagBuddy placeholder |
+| **patient** | `/dashboard` | Check-ins, questions, zorgcontext, DagBuddy participation advice |
 | **caregiver** | `/care` | Patient overview, restrictions, recovery context, review check-ins and questions |
 | **activity_coordinator** | `/planning` | Daily participation coordination: needs overview, volunteer block availability, afternoon activity record |
 | **admin** | `/admin` | User and role management |
@@ -235,7 +235,7 @@ Detailed implementation plans live in `docs/branch-plans/`. The living data blue
 |-------|---------|
 | `/dashboard/link` | Patient link-code redemption |
 | `/dashboard/context` | Patient read-only zorgcontext |
-| `/dashboard/activities` | Patient read-only daily participation overview (`Vandaag`) |
+| `/dashboard/advice` | DagBuddy personalised participation advice (including interest / withdraw when eligible) |
 | `/care/patients/admit` | New clinical patient + admission |
 | `/care/patients/[patientId]/admit` | Readmission for existing patient |
 | `/care/patients/[patientId]/edit` | Edit patient demographics |

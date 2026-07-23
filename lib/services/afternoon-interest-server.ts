@@ -51,18 +51,13 @@ async function assertInterestEligibility(
   admissionId: string,
   interestDate: string,
 ): Promise<void> {
-  const [contextResult, planResult, checkinResult] = await Promise.all([
+  const [contextResult, checkinResult] = await Promise.all([
     supabase
       .from("patient_context")
       .select(
         "mobility_status, transfer_support, fall_risk, requires_supervision, mobility_aid_type, mobility_aid_available, visit_activity_possibility, room_restriction, can_independently_reach_activity_room",
       )
       .eq("admission_id", admissionId)
-      .maybeSingle(),
-    supabase
-      .from("daily_participation_plans")
-      .select("afternoon_title")
-      .eq("plan_date", interestDate)
       .maybeSingle(),
     supabase
       .from("patient_checkins")
@@ -77,9 +72,6 @@ async function assertInterestEligibility(
   if (contextResult.error) {
     throw new Error(contextResult.error.message);
   }
-  if (planResult.error) {
-    throw new Error(planResult.error.message);
-  }
   if (checkinResult.error) {
     throw new Error(checkinResult.error.message);
   }
@@ -89,7 +81,6 @@ async function assertInterestEligibility(
     access: contextResult.data?.can_independently_reach_activity_room,
     visitActivityPossibility: contextResult.data?.visit_activity_possibility,
     roomRestriction: contextResult.data?.room_restriction,
-    hasPlan: Boolean(planResult.data?.afternoon_title),
     hasCheckIn: Boolean(checkin),
     careContextComplete: isEssentialCareContextComplete(
       (contextResult.data as PatientContext | null) ?? null,
@@ -101,7 +92,7 @@ async function assertInterestEligibility(
 
   if (!eligible) {
     throw new Error(
-      "Interesse aangeven is nu niet mogelijk. Er is al een middagplan, de toegang is beperkt, of rust past vandaag beter.",
+      "Interesse aangeven is nu niet mogelijk. De toegang is beperkt, of rust past vandaag beter.",
     );
   }
 }
