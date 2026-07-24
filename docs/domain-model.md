@@ -35,13 +35,13 @@ For each area:
 >
 > **Patient admission management — implemented (branch 6):** Caregiver workflows for Patiënt opnemen, Nieuwe opname, Ontslag, demographics edit, expected discharge date, duplicate-prevention search, and patient link-code redemption. Plan: [`docs/branch-plans/branch-06-patient-admission-management.md`](branch-plans/branch-06-patient-admission-management.md).
 >
-> **Activity planning refactor — implemented:** Optional user-only facilitator assignments (`activity_session_facilitators`, `activity_recurring_schedule_facilitators`), simplified session lifecycle (`draft` → `confirmed` → `completed | cancelled`), soft minimum-participant warnings, unified coordinator flow at `/planning/plan`, series management at `/planning/series`, and read-only facilitator views at `/volunteer` and `/care/activities`. Removed `proposed` status, `requires_supervision`, `requires_volunteer`, and volunteer-only session staffing gates.
+> **Branch 7 activity catalog / sessions — historical, UI superseded:** Catalog, recurring series, session lifecycle, and facilitator assignment UIs were built then replaced by the daily participation PoC. Legacy tables may remain in the database; active routes redirect (`/planning/*` legacy → `/planning`, `/care/activities` → `/care`). Historical plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). Inventory: [`docs/planning-poc-migration.md`](planning-poc-migration.md).
 >
-> **Activity planning and volunteers — implemented (branch 7):** Activity catalog, weekly recurring schedules, one-off sessions, human approval workflow, volunteer portal, coordinator planning views, and patient read-only confirmed sessions. Plan: [`docs/branch-plans/branch-07-activity-planning-volunteers.md`](branch-plans/branch-07-activity-planning-volunteers.md). AI matching and activity feedback remain deferred (branches 8–9).
+> **Daily participation PoC — shipped:** Two-block daily model; coordinator dashboard at `/planning`; volunteer availability + afternoon recording; no patient activities overview (`/dashboard/activities` → `/dashboard/advice`). Limitations: [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
 >
-> **Daily participation PoC — Phases 1–6 shipped; Phase 7 QA pending:** Replaces branch-7 scheduling with a two-block daily model. Coordinator dashboard at `/planning`. DailyBuddy deferred to `feature/dailybuddy-participation-advice`. See [`docs/planning-poc-migration.md`](planning-poc-migration.md).
+> **DailyBuddy — shipped:** Patient advice at `/dashboard/advice` with tools, deterministic gates, and `daily_advice` persistence. Boundary: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md). Plan: [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md).
 >
-> **Still deferred:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role (and retiring `requireRole("patient")`-only reliance). Full history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
+> **Still deferred / excluded from final PoC UI:** organizational (department/team/admission) caregiver access instead of the global `caregiver` role; admin department CRUD page; caregiver check-in / question **UI** (patient-side flows exist; future: read-only care views, later secured answering); evening evaluation UI; QuestionBuddy. Full identity history: [`docs/branch-plans/branch-04-account-domain-model.md`](branch-plans/branch-04-account-domain-model.md).
 
 ### User / problem
 
@@ -116,7 +116,7 @@ When an admin submits `/admin/users/new/volunteer` with an email that already be
 
 #### User / problem
 
-Patients need a simple daily moment to reflect on how they feel. Structured input supports caregiver review and later DailyBuddy advice without requiring medical self-diagnosis.
+Patients need a simple daily moment to reflect on how they feel. Structured input supports DailyBuddy advice and (future) caregiver review without requiring medical self-diagnosis.
 
 #### Entity: PatientCheckin
 
@@ -133,7 +133,7 @@ A patient-owned reflection about physical and emotional state on a given day.
 - UI encourages **one check-in per day**; database does **not** yet enforce uniqueness on `(admission_id, check_in_date)` — flexibility for MVP iteration
 - Patients may **create** and **update** their own check-ins
 - Patients may **not delete** check-ins (audit trail for caregivers and AI)
-- Caregivers review check-ins in branch 3; patients only CRUD in branch 2
+- Patients create/update their own check-ins; caregivers have SELECT RLS for check-ins, but **care UI for check-ins is not part of this PoC** (caregivers manage Zorgcontext). Future: read-only care access to check-ins.
 
 #### Blueprint: `patient_checkins` (branch 2 — **Implemented**)
 
@@ -180,7 +180,7 @@ A question the patient wants to discuss with a specific caregiver specialism.
 - Status lifecycle: `open` → `discussed` → `answered`
 - Patients may **create** questions (default status `open`)
 - Patients may **edit** and **delete** only their own **open** questions
-- `answer_notes` is reserved for **caregiver** use (branch 3); patients may read it when populated
+- `answer_notes` is reserved for **caregiver** use; patients may read it when populated. Care UI to write notes is **not** in the final PoC (future secured answering workflow).
 - **No in-app daily summary in branch 2** — QuestionBuddy (branch 8) produces an organized daily list from open questions; it does not answer them
 
 #### Blueprint: `patient_questions` (branch 2 — **Implemented**)
@@ -268,7 +268,7 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 **Critical completeness fields:**
 
-- `mobility_status`, `transfer_support`, `fall_risk`, `requires_supervision` (Begeleiding), `isolation_type`, `room_restriction` (Bewegingsvrijheid)
+- `mobility_status`, `transfer_support`, `fall_risk`, `requires_supervision` (Begeleiding), `visit_activity_possibility` (Mogelijkheden voor bezoek en activiteiten), `room_restriction` (Bewegingsvrijheid)
 - `mobility_aid_available` when mobility status requires an aid
 - Attention chips and notes do **not** block completeness
 
@@ -284,7 +284,7 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 | `requires_supervision` | text | unknown, not_required, required (UI: Begeleiding) |
 | `mobility_aid_type` | text | Conditional; unknown, cane, walker, wheelchair, own_aid, other |
 | `mobility_aid_available` | text | Conditional critical; unknown, yes, no |
-| `isolation_type` | text | unknown, none, contact, droplet, airborne, strict, protective |
+| `visit_activity_possibility` | text | unknown, no_relevant_restriction, visit_allowed_with_protection, no_non_care_contact (UI: Mogelijkheden voor bezoek en activiteiten; not a clinical isolation diagnosis) |
 | `room_restriction` | text | unknown, room_only, ward_only, no_restriction (UI: Bewegingsvrijheid) |
 | `additional_attention_points` | text[] | iv_pump, oxygen, catheter, wound_or_drain, post_surgery, fatigue, wandering_risk, language_barrier, cognitive_support, hearing_support, vision_support, communication_support, other |
 | `additional_attention_notes` | text | Optional; UI when `other` chip selected |
@@ -302,11 +302,9 @@ A caregiver-maintained snapshot of functional care context for one patient. One 
 
 > **Branch 7 (`feature/activity-planning-volunteers`) — deprecated (PoC refactor):** The catalog, recurring series, session workflow, facilitator assignments, and time-range volunteer availability described below are being replaced by a minimal daily participation proof-of-concept. Legacy tables and migrations (`00039`–`00049`) remain in the database but stop receiving application writes. See [`docs/planning-poc-migration.md`](planning-poc-migration.md) and [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
 
-### Daily participation proof-of-concept (Phases 1–6 shipped; Phase 7 QA pending)
+### Daily participation proof-of-concept (shipped)
 
-OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system. **DailyBuddy AI is deferred** to `feature/dailybuddy-participation-advice`.
-
-OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system.
+OpnameBuddy demonstrates how patient check-in data and expressed needs support participation and patient choice. It is not an operational scheduling system. **DailyBuddy is implemented** (see AI boundary below and [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md)).
 
 #### Fixed daily blocks (application constants)
 
@@ -365,9 +363,9 @@ Dedicated activity-coordinator environment (post-login redirect stays `/planning
 
 Migration `00051_volunteer_availability_auth.sql` enforces this at RLS and RPC level.
 
-#### AI boundary (future branch)
+#### AI boundary (DailyBuddy — shipped)
 
-DailyBuddy is advisory and patient-facing only, on branch `feature/dailybuddy-participation-advice`. The PoC branch provides `get_morning_contact_availability_signal` and documentation only. See [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
+DailyBuddy is advisory and patient-facing only. It uses check-in, care context, `daily_participation_plans`, and `get_morning_contact_availability_signal` (boolean). Advice persists in `daily_advice`. See [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
 
 ---
 
@@ -510,19 +508,9 @@ Patients benefit from a short, readable daily summary that combines their input 
 
 Stored output from DailyBuddy for a clinical patient's admission on a given day.
 
-#### Blueprint: `daily_advice` (branch 6)
+#### Blueprint: `daily_advice` (DailyBuddy — **Implemented**)
 
-| Field | Type (planned) | Notes |
-|-------|----------------|-------|
-| `id` | uuid PK | |
-| `admission_id` | uuid FK → admissions | **NOT NULL** ownership key |
-| `advice_date` | date | |
-| `context_summary` | text | Compact interpreted context |
-| `motivation` | text | |
-| `suggestions` | jsonb | 2–3 participation suggestions |
-| `rest_suggestion` | text | |
-| `open_questions_reminder` | text | Nullable |
-| `created_at` | timestamptz | |
+Living columns are defined in migrations (`00052`+) and `types/database.ts`. Conceptually: one advice row per admission per date with status (`generating` / `ready` / `failed` / `stale`), structured outcomes, source fingerprints, afternoon fields, and error message for failed runs. Prefer the generated types over older “motivation / suggestions jsonb” sketches.
 
 ---
 
@@ -607,6 +595,8 @@ Always pair new tables with **explicit GRANT migrations** for `authenticated` an
 ### Caregiver patient list must be database-filtered
 
 The caregiver patient list uses the `list_care_patients()` SECURITY DEFINER RPC, **not** a direct `profiles` select. Since migration `00033` it returns **clinical patients** with `first_name`, `last_name`, `birth_date`, `sex`, active `admission_id`, `expected_discharge_on`, and linked `user_id`. The caregiver UI keys routes by `patients.id` and reads/writes care data by admission.
+
+**Care UI split (PoC):** `/care` (**Overzicht**) is a compact dashboard with aggregate statistics derived from that same RPC result. `/care/patients` (**Patiënten**) is the only complete patient table and applies client-side admission-status filters (`Alle patiënten` / `Actieve opname` / `Geen actieve opname`) without changing inclusion rules. **Mijn patiënten** (department- or caregiver-scoped) remains deferred until organizational access exists — do not use that label for the current global list.
 
 ---
 

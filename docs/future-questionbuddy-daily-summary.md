@@ -1,10 +1,10 @@
 # Future: QuestionBuddy daily question summary
 
-**Status:** Parked — branch 2 provides patient question editor only  
-**Added:** 2026-06-30  
+**Status:** Parked / deferred — patient question **editor** is shipped (branch 2); QuestionBuddy AI summary is **not** implemented. Caregiver in-app answering (`answer_notes` / status) also lacks care UI (RLS only).
+**Added:** 2026-06-30
 **Trigger:** Branch 10 (`feature/questionbuddy-agent`) — Vercel AI SDK integration
 
-Related: [`docs/domain-model.md`](domain-model.md) (`patient_questions`), [`docs/project-context.md`](project-context.md) (QuestionBuddy).
+Related: [`docs/domain-model.md`](domain-model.md) (`patient_questions`), [`docs/project-context.md`](project-context.md), [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
 
 ---
 
@@ -17,7 +17,7 @@ Patient questions are **never answered** by the app or AI.
 | **Branch 2 (now)** | Preparation editor — write questions, label by hospital specialism, edit/delete open items |
 | **Branch 10 (later)** | **Daily summary** — QuestionBuddy organizes open questions into a concise list for rounds or caregiver conversations |
 
-Medical answers always stay in the **caregiver conversation** (in person). `answer_notes` on `patient_questions` is written by caregivers in branch 3, not by AI.
+Medical answers always stay in the **caregiver conversation** (in person). `answer_notes` on `patient_questions` is intended for caregivers, but **care UI to write it is not implemented** in this PoC (RLS UPDATE exists; patient UI can display notes if present).
 
 ---
 

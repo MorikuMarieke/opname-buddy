@@ -1,10 +1,10 @@
 # Future: Morning / evening participation scheduling
 
-**Status:** Parked — not implemented  
-**Added:** 2026-06-30  
-**Trigger:** Implement patient-facing evening evaluation UI, home-dashboard reminders, or DagBuddy daily rhythm.
+**Status:** Parked — evening evaluation UI, time-of-day reminders, and dynamic greetings are **not** implemented. DailyBuddy and the two-block daily participation model **are** implemented separately.
+**Added:** 2026-06-30
+**Trigger:** Implement patient-facing evening evaluation UI, home-dashboard reminders, or time-aware DagBuddy rhythm.
 
-Related: [`docs/domain-model.md`](domain-model.md) (check-in + participation evaluation entities).
+Related: [`docs/domain-model.md`](domain-model.md) (check-in + participation evaluation entities), [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
 
 ---
 
@@ -26,7 +26,7 @@ There is **no**:
 - Time-of-day window (e.g. morning before 14:00, evening after 17:00)
 - Push or in-app notifications
 - Automatic link from evening eval to a DagBuddy-suggested activity
-- Dynamic greeting (shell always says “Goedemorgen”)
+- Dynamic greeting (patient shell uses a neutral `Hallo` / `Hallo, {firstName}!`; no time-of-day logic)
 
 **UX vs database (morning):** UI encourages one check-in per day; DB does not enforce `UNIQUE (patient_id, check_in_date)`.
 
@@ -73,9 +73,9 @@ export function getParticipationPhase(now = new Date()): ParticipationPhase;
 export function getAmsterdamHour(now = new Date()): number;
 ```
 
-- **morning** — prompt check-in if missing  
-- **between** — optional soft reminders; no evening eval yet  
-- **evening** — prompt participation evaluation if morning check-in exists and eval missing  
+- **morning** — prompt check-in if missing
+- **between** — optional soft reminders; no evening eval yet
+- **evening** — prompt participation evaluation if morning check-in exists and eval missing
 
 ### 3. Home dashboard
 
@@ -94,7 +94,7 @@ Example headlines:
 
 ### 4. Routes / UI (follow-up slices)
 
-- **Shipped (branch 7):** read-only confirmed upcoming sessions on `/dashboard/activities` (title, time, location, volunteer name when assigned)
+- **Removed:** standalone patient `/dashboard/activities` (“Vandaag”) overview — patients use DagBuddy instead; legacy URL redirects to `/dashboard/advice`
 - Evening participation evaluation form — still deferred
 - Pre-fill `activity_title` from stored DailyBuddy advice (branch 8)
 - Link `activity_session_id` in participation evaluations when recording feedback (branch 9)

@@ -3,14 +3,22 @@
 import { useState } from "react";
 
 import { FormField } from "@/components/forms/form-field";
-import { formInputClasses, formSelectClasses, formTextareaClasses } from "@/components/forms/form-styles";
+import {
+  formInputClasses,
+  formSelectClasses,
+  formTextareaClasses,
+} from "@/components/forms/form-styles";
 import { PrimaryButton } from "@/components/ui/primary-button";
+import { SecondaryButton } from "@/components/ui/secondary-button";
 import {
   AFTERNOON_CATEGORY_LABELS,
   AFTERNOON_CATEGORY_VALUES,
   type AfternoonCategoryValue,
 } from "@/lib/constants/daily-participation";
-import { getFieldErrors, getFirstErrorMessage } from "@/lib/validations/error-messages";
+import {
+  getFieldErrors,
+  getFirstErrorMessage,
+} from "@/lib/validations/error-messages";
 import {
   upsertDailyParticipationPlanSchema,
   type UpsertDailyParticipationPlanValues,
@@ -22,6 +30,9 @@ interface AfternoonActivityRecordFormProps {
   existingPlan: DailyParticipationPlanWithAudit | null;
   suggestedCategory?: AfternoonCategoryValue | null;
   isSubmitting: boolean;
+  submitLabel?: string;
+  onCancel?: () => void;
+  cancelLabel?: string;
   onSubmit: (values: UpsertDailyParticipationPlanValues) => Promise<void>;
 }
 
@@ -30,15 +41,20 @@ export function AfternoonActivityRecordForm({
   existingPlan,
   suggestedCategory,
   isSubmitting,
+  submitLabel = "Activiteit vastleggen",
+  onCancel,
+  cancelLabel = "Annuleren",
   onSubmit,
 }: AfternoonActivityRecordFormProps) {
-  const [values, setValues] = useState<UpsertDailyParticipationPlanValues>(() => ({
-    plan_date: planDate,
-    afternoon_category:
-      existingPlan?.afternoon_category ?? suggestedCategory ?? null,
-    afternoon_title: existingPlan?.afternoon_title ?? "",
-    participant_message: existingPlan?.participant_message ?? "",
-  }));
+  const [values, setValues] = useState<UpsertDailyParticipationPlanValues>(
+    () => ({
+      plan_date: planDate,
+      afternoon_category:
+        existingPlan?.afternoon_category ?? suggestedCategory ?? null,
+      afternoon_title: existingPlan?.afternoon_title ?? "",
+      participant_message: existingPlan?.participant_message ?? "",
+    }),
+  );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -153,9 +169,20 @@ export function AfternoonActivityRecordForm({
         </p>
       ) : null}
 
-      <PrimaryButton type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Bezig met opslaan..." : "Middagactiviteit vastleggen"}
-      </PrimaryButton>
+      <div className="flex flex-wrap gap-3">
+        <PrimaryButton type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Bezig met opslaan..." : submitLabel}
+        </PrimaryButton>
+        {onCancel ? (
+          <SecondaryButton
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {cancelLabel}
+          </SecondaryButton>
+        ) : null}
+      </div>
     </form>
   );
 }

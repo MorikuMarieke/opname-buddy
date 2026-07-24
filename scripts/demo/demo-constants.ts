@@ -74,6 +74,7 @@ export interface DemoPatientScenario {
     mobilityAidType: MobilityAidType;
     mobilityAidAvailable: MobilityAidAvailable;
     roomRestriction: MovementFreedom;
+    canIndependentlyReachActivityRoom: "unknown" | "yes" | "no";
     additionalAttentionPoints: AttentionPoint[];
     notes: string;
   };
@@ -213,6 +214,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "walker",
       mobilityAidAvailable: "yes",
       roomRestriction: "ward_only",
+      canIndependentlyReachActivityRoom: "yes",
       additionalAttentionPoints: ["post_surgery"],
       notes: "Herstellende na appendectomie; lichte beweging op afdeling toegestaan.",
     },
@@ -246,6 +248,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "walker",
       mobilityAidAvailable: "yes",
       roomRestriction: "ward_only",
+      canIndependentlyReachActivityRoom: "no",
       additionalAttentionPoints: ["fatigue", "oxygen"],
       notes: "Vermoeid door longontsteking; begeleiding nodig bij transfer.",
     },
@@ -280,6 +283,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "wheelchair",
       mobilityAidAvailable: "yes",
       roomRestriction: "room_only",
+      canIndependentlyReachActivityRoom: "no",
       additionalAttentionPoints: ["fatigue", "iv_pump"],
       notes: "Chemokuur; rust op kamer heeft prioriteit.",
     },
@@ -313,6 +317,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "unknown",
       mobilityAidAvailable: "unknown",
       roomRestriction: "no_restriction",
+      canIndependentlyReachActivityRoom: "yes",
       additionalAttentionPoints: ["post_surgery"],
       notes: "Handoperatie; creatieve activiteiten passen goed bij herstel.",
     },
@@ -346,6 +351,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "unknown",
       mobilityAidAvailable: "unknown",
       roomRestriction: "no_restriction",
+      canIndependentlyReachActivityRoom: "yes",
       additionalAttentionPoints: ["cognitive_support", "fatigue"],
       notes: "Burn-out opname; geen druk, kleine stappen.",
     },
@@ -379,6 +385,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "unknown",
       mobilityAidAvailable: "unknown",
       roomRestriction: "ward_only",
+      canIndependentlyReachActivityRoom: "unknown",
       additionalAttentionPoints: ["cognitive_support"],
       notes: "Angststoornis; rustige benadering en voorspelbaarheid helpen.",
     },
@@ -412,6 +419,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "walker",
       mobilityAidAvailable: "yes",
       roomRestriction: "ward_only",
+      canIndependentlyReachActivityRoom: "no",
       additionalAttentionPoints: ["post_surgery", "wound_or_drain"],
       notes: "Heupprothese; beweging alleen volgens fysio-protocol.",
     },
@@ -447,6 +455,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "unknown",
       mobilityAidAvailable: "unknown",
       roomRestriction: "no_restriction",
+      canIndependentlyReachActivityRoom: "yes",
       additionalAttentionPoints: [],
       notes: "Afrondende opnamecontrole; ontslag verwacht morgen.",
     },
@@ -481,6 +490,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "cane",
       mobilityAidAvailable: "yes",
       roomRestriction: "ward_only",
+      canIndependentlyReachActivityRoom: "unknown",
       additionalAttentionPoints: [],
       notes: "Cardiale observatie; stabiel maar nog onder monitoring.",
     },
@@ -515,6 +525,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "unknown",
       mobilityAidAvailable: "unknown",
       roomRestriction: "no_restriction",
+      canIndependentlyReachActivityRoom: "yes",
       additionalAttentionPoints: [],
       notes: "Sociale isolatie; enthousiast over groepscontact.",
     },
@@ -549,6 +560,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "walker",
       mobilityAidAvailable: "yes",
       roomRestriction: "ward_only",
+      canIndependentlyReachActivityRoom: "yes",
       additionalAttentionPoints: ["post_surgery"],
       notes: "Schouderoperatie; beweging en creatief werk in overleg.",
     },
@@ -582,6 +594,7 @@ export const DEMO_PATIENT_SCENARIOS: DemoPatientScenario[] = [
       mobilityAidType: "unknown",
       mobilityAidAvailable: "unknown",
       roomRestriction: "no_restriction",
+      canIndependentlyReachActivityRoom: "unknown",
       additionalAttentionPoints: ["cognitive_support"],
       notes: "Aanpassingsstoornis; liever rustig individueel contact.",
     },

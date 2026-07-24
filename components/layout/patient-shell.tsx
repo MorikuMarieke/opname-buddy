@@ -11,29 +11,26 @@ interface PatientShellProps {
   user: User;
 }
 
-function getGreetingName(user: User): string {
+function getGreetingFirstName(user: User): string | null {
   const fullName = user.user_metadata?.full_name;
 
   if (typeof fullName === "string" && fullName.trim()) {
-    return fullName.trim().split(/\s+/)[0] ?? fullName;
+    return fullName.trim().split(/\s+/)[0] ?? null;
   }
 
-  if (user.email) {
-    return user.email.split("@")[0] ?? "daar";
-  }
-
-  return "daar";
+  return null;
 }
 
 export function PatientShell({ children, user }: PatientShellProps) {
-  const greetingName = getGreetingName(user);
+  const firstName = getGreetingFirstName(user);
+  const greeting = firstName ? `Hallo, ${firstName}!` : "Hallo!";
 
   return (
     <PatientQueryProvider>
       <DashboardShell
         variant="patient"
         navItems={patientNavItems}
-        greeting={`Goedemorgen ${greetingName}, hoe gaat het vandaag?`}
+        greeting={greeting}
       >
         {children}
       </DashboardShell>

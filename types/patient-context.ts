@@ -39,14 +39,14 @@ export type MobilityAidType =
 
 export type MobilityAidAvailable = "unknown" | "yes" | "no";
 
-export type IsolationType =
+export type ActivityRoomAccess = "unknown" | "yes" | "no";
+
+/** Product field for DailyBuddy visit/activity routes (not a clinical isolation diagnosis). */
+export type VisitActivityPossibility =
   | "unknown"
-  | "none"
-  | "contact"
-  | "droplet"
-  | "airborne"
-  | "strict"
-  | "protective";
+  | "no_relevant_restriction"
+  | "visit_allowed_with_protection"
+  | "no_non_care_contact";
 
 export type MovementFreedom =
   | "unknown"
@@ -120,14 +120,21 @@ export const MOBILITY_AID_AVAILABLE_LABELS: Record<MobilityAidAvailable, string>
     no: "Nee",
   };
 
-export const ISOLATION_TYPE_LABELS: Record<IsolationType, string> = {
+export const ACTIVITY_ROOM_ACCESS_LABELS: Record<ActivityRoomAccess, string> = {
   unknown: "Onbekend",
-  none: "Geen",
-  contact: "Contact",
-  droplet: "Druppel",
-  airborne: "Luchtwegen",
-  strict: "Strikt",
-  protective: "Beschermend",
+  yes: "Ja, zelfstandig",
+  no: "Nee",
+};
+
+export const VISIT_ACTIVITY_POSSIBILITY_LABELS: Record<
+  VisitActivityPossibility,
+  string
+> = {
+  unknown: "Onbekend",
+  no_relevant_restriction: "Geen beperking voor bezoek en activiteiten",
+  visit_allowed_with_protection:
+    "Bezoek op de afdeling mogelijk met bescherming",
+  no_non_care_contact: "Geen bezoek of gezamenlijke activiteit mogelijk",
 };
 
 export const MOVEMENT_FREEDOM_LABELS: Record<MovementFreedom, string> = {
@@ -167,8 +174,9 @@ export const PATIENT_CONTEXT_FIELD_LABELS: Record<string, string> = {
   requires_supervision: "Begeleiding",
   mobility_aid_type: "Type loophulpmiddel",
   mobility_aid_available: "Loophulpmiddel beschikbaar",
-  isolation_type: "Isolatietype",
+  visit_activity_possibility: "Mogelijkheden voor bezoek en activiteiten",
   room_restriction: "Bewegingsvrijheid",
+  can_independently_reach_activity_room: "Activiteitenruimte zelfstandig bereiken",
   notes: "Notities",
 };
 
@@ -177,8 +185,9 @@ export const CRITICAL_CONTEXT_FIELDS = [
   "transfer_support",
   "fall_risk",
   "requires_supervision",
-  "isolation_type",
+  "visit_activity_possibility",
   "room_restriction",
+  "can_independently_reach_activity_room",
 ] as const;
 
 export type CriticalContextField = (typeof CRITICAL_CONTEXT_FIELDS)[number];
@@ -203,5 +212,10 @@ export const MOBILITY_AID_TYPE_OPTIONS = enumOptionsWithUnknown(MOBILITY_AID_TYP
 export const MOBILITY_AID_AVAILABLE_OPTIONS = enumOptionsWithUnknown(
   MOBILITY_AID_AVAILABLE_LABELS,
 );
-export const ISOLATION_TYPE_OPTIONS = enumOptionsWithUnknown(ISOLATION_TYPE_LABELS);
+export const ACTIVITY_ROOM_ACCESS_OPTIONS = enumOptionsWithUnknown(
+  ACTIVITY_ROOM_ACCESS_LABELS,
+);
+export const VISIT_ACTIVITY_POSSIBILITY_OPTIONS = enumOptionsWithUnknown(
+  VISIT_ACTIVITY_POSSIBILITY_LABELS,
+);
 export const MOVEMENT_FREEDOM_OPTIONS = enumOptionsWithUnknown(MOVEMENT_FREEDOM_LABELS);

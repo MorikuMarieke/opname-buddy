@@ -21,10 +21,23 @@
       [...queryKeys.patientContext.all, "admission", admissionId] as const,
     own: () => [...queryKeys.patientContext.all, "own"] as const,
   },
-  patientDailyParticipation: {
-    all: ["patient-daily-participation"] as const,
-    byDate: (planDate: string) =>
-      ["patient-daily-participation", planDate] as const,
+  dailyAdvice: {
+    all: ["daily-advice"] as const,
+    today: () => [...queryKeys.dailyAdvice.all, "today"] as const,
+  },
+  morningVisitRequests: {
+    all: ["morning-visit-requests"] as const,
+    own: () => [...queryKeys.morningVisitRequests.all, "own"] as const,
+    byDate: (requestDate: string) =>
+      [...queryKeys.morningVisitRequests.all, "date", requestDate] as const,
+  },
+  afternoonInterest: {
+    all: ["afternoon-interest"] as const,
+    own: () => [...queryKeys.afternoonInterest.all, "own"] as const,
+    byDate: (interestDate: string) =>
+      [...queryKeys.afternoonInterest.all, "date", interestDate] as const,
+    count: (interestDate: string) =>
+      [...queryKeys.afternoonInterest.all, "count", interestDate] as const,
   },
   adminAccounts: {
     all: ["admin-accounts"] as const,
@@ -98,7 +111,6 @@
     own: () => ["patient-link", "own"] as const,
   },
   departments: {
-    all: ["departments"] as const,
     active: ["departments", "active"] as const,
   },
   planning: {

@@ -1,7 +1,7 @@
 # Branch plan — feature/activity-planning-volunteers
 
-**Branch:** `feature/activity-planning-volunteers`  
-**Status:** Shipped  
+**Branch:** `feature/activity-planning-volunteers`
+**Status:** Shipped historically; **active UX superseded** by the daily participation PoC (catalog/session routes redirect to `/planning` or `/care`). Keep this plan for implementation history. Current product behaviour: [`docs/planning-poc-migration.md`](../planning-poc-migration.md), [`docs/planning-poc-limitations.md`](../planning-poc-limitations.md).
 **Depends on:** branches 1–6 (auth, clinical domain, admin, patient admission)
 
 ## Design principle
@@ -70,20 +70,20 @@ Keep the domain model rich enough for future AI reasoning, while keeping user in
 | `/volunteer` | volunteer | Assigned sessions (proposed/confirmed) |
 | `/volunteer/availability` | volunteer | Own availability CRUD |
 | `/admin/users/new/volunteer` | admin | Create volunteer accounts |
-| `/dashboard/activities` | patient | Read-only confirmed upcoming sessions |
+| `/dashboard/advice` | patient | DagBuddy personalised participation advice |
 
 ## QA checklist (manual)
 
 - [ ] Coordinator: create activity → recurring schedule → materialized draft sessions
 - [ ] Coordinator: one-off session → assign patient + volunteer → propose → confirm
 - [ ] Volunteer: see assigned session on `/volunteer`; manage availability
-- [ ] Patient (linked + active admission): see confirmed session on `/dashboard/activities`
+- [ ] Patient (linked + active admission): receive DagBuddy advice on `/dashboard/advice` (legacy `/dashboard/activities` redirects here)
 - [ ] Admin: create volunteer account; appears in planning volunteer list
 
 ## Known limitations (MVP)
 
 - No AI-assisted matching or auto-assignment
 - Calendar is a simple week grid, not drag-and-drop
-- Patient view shows confirmed sessions only; no description, feedback, or actions
+- Patients use DagBuddy for personalised participation context; no separate patient activity catalogue
 - Coordinator overview is day-centric on `/planning`; calendar is week-centric
 - Volunteer availability is not validated against session overlap in UI (coordinator assigns manually)

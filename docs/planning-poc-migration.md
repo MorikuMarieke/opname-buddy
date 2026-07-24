@@ -1,6 +1,6 @@
 # Planning PoC — migration and legacy inventory
 
-**Status:** Phases 1–6 shipped; Phase 7 (final QA) pending. DailyBuddy deferred to `feature/dailybuddy-participation-advice`.  
+**Status:** Daily participation PoC shipped; DailyBuddy shipped (`feature/dailybuddy-participation-advice`). This file remains the inventory of what the PoC replaced and which legacy objects remain in the database.
 **Goal:** Replace branch-7 activity scheduling with a minimal two-block daily participation proof-of-concept.
 
 OpnameBuddy is **not** an operational workforce or activity scheduling system. The PoC demonstrates how patient check-in data and expressed needs support participation and patient choice.
@@ -13,9 +13,9 @@ OpnameBuddy is **not** an operational workforce or activity scheduling system. T
 |------|----------------|
 | Coordinator UI | Single dashboard at `/planning` (date, blocks, needs, volunteer availability, afternoon record) |
 | Volunteer UI | `/volunteer` daily needs + afternoon recording; `/volunteer/availability` block-based weekly + one-time absences |
-| Patient UI | Check-in needs; read-only daily overview (`Vandaag`); `/dashboard/advice` placeholder (DailyBuddy deferred) |
+| Patient UI | Check-in needs; DagBuddy at `/dashboard/advice` (personalised advice; no separate patient activity overview) |
 | Database | `participation_needs` on check-ins; `daily_participation_plans`; `volunteer_weekly_blocks`; `volunteer_day_absences` |
-| AI | **Not on this branch** — see [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md) |
+| AI | **Shipped** — [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md), [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md) |
 
 ---
 
@@ -49,6 +49,8 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 | `list_patient_activity_sessions` | `get_daily_participation_for_patient` |
 | `list_planning_patients` | None |
 | `list_planning_volunteers` | Volunteer profile list if still needed |
+
+**Hardening (migration `00054`, Jul 2026):** Deprecated legacy planning tables remain in place to avoid a risky late schema drop. Direct `PUBLIC` / `anon` / `authenticated` `EXECUTE` on the six unused SECURITY DEFINER RPCs above (excluding still-active `list_planning_volunteers`) was revoked. Active PoC RPCs and application flows are unchanged.
 
 ### New RPCs (Phase 2)
 
@@ -93,8 +95,8 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 | `/volunteer/availability` | Block-based weekly availability + monthly one-time absences |
 | `/volunteer/profile` | Volunteer profile |
 | `/dashboard/checkin` | Extended with `participation_needs` |
-| `/dashboard/activities` | Read-only patient daily participation overview (`Vandaag`) |
-| `/dashboard/advice` | Placeholder only — DailyBuddy on future branch `feature/dailybuddy-participation-advice` |
+| `/dashboard/advice` | DagBuddy personalised participation advice |
+| `/dashboard/activities` | Redirects to `/dashboard/advice` (legacy bookmark) |
 
 ### Navigation after PoC
 
@@ -102,7 +104,7 @@ Applied remotely in migrations `00039`–`00049`. Stop all application writes af
 |--------|-------|
 | Planning | **Dagplanning** → `/planning`; **Vrijwilligers** → `/planning/volunteers` |
 | Volunteer | Vandaag, Beschikbaarheid, Mijn profiel |
-| Patient | Vandaag → `/dashboard/activities` |
+| Patient | DagBuddy → `/dashboard/advice` |
 | Care | No volunteer availability or activity planning links |
 
 ### Routing rules
@@ -175,9 +177,11 @@ All removed `/planning/*` URLs (except `/planning/volunteers`) redirect to `/pla
 | 2 | `supabase/migrations/00050_daily_participation_poc.sql`, `types/daily-participation.ts`, validations |
 | 3 | Check-in form/summary updates |
 | 4 | `coordinator-daily-planning-view.tsx`, `volunteer-daily-view.tsx`, `volunteer-block-availability-view.tsx`, services/hooks |
-| 5 | `patient-daily-participation-view.tsx` |
+| 5 | _(removed)_ Patient standalone daily overview; patients use DagBuddy instead |
 | 6 | Redirects; delete legacy files; simplified `/planning/volunteers`; planning nav trim |
 | 7 | Final QA, limitations doc, lint/typecheck/build — **no AI** |
+
+See [Phase 7 — QA verification](#phase-7--qa-verification) below.
 
 ### Deferred to `feature/dailybuddy-participation-advice`
 
@@ -185,7 +189,7 @@ All removed `/planning/*` URLs (except `/planning/volunteers`) redirect to `/pla
 - Streaming advice UI on `/dashboard/advice`
 - Optional `daily_advice` persistence
 
-See [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md).
+See [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md).
 
 ---
 
@@ -248,6 +252,53 @@ Volunteers edit only their own `volunteer_weekly_blocks` and `volunteer_day_abse
 
 ---
 
-## AI data boundary (future branch only)
+## AI data boundary (DailyBuddy — shipped)
 
-DailyBuddy is **not implemented** on the daily participation PoC branch. The RPC `get_morning_contact_availability_signal` exists for a future AI branch. Specification: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
+DailyBuddy is implemented. The RPC `get_morning_contact_availability_signal` feeds a boolean-only tool. Full specification: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md). Branch plan: [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md).
+
+---
+
+## Phase 7 — QA verification
+
+Completed for the participation PoC before / alongside DailyBuddy hardening.
+
+### RLS and authorization
+
+| Surface | Enforcement | Verified |
+|---------|-------------|----------|
+| `volunteer_weekly_blocks` / `volunteer_day_absences` SELECT | Own rows; `activity_coordinator` and `admin` read all; **not** `caregiver` | Migration `00051` replaces caregiver access from `00050` |
+| `volunteer_weekly_blocks` / `volunteer_day_absences` writes | Volunteer own rows only | RLS insert/update/delete policies in `00050` |
+| `get_volunteer_block_availability_overview` | Volunteer, coordinator, admin only | `00051` function guard + `REVOKE`/`GRANT` |
+| `daily_participation_plans` | Staff read/write; patient read via RPC | Policies in `00050`; patient uses `get_daily_participation_for_patient` |
+| `get_daily_needs_summary` | Volunteer, coordinator, caregiver | `00050` function guard |
+
+Authorization matrix: [Authorization (volunteer availability)](#authorization-volunteer-availability) above.
+
+### Legacy write audit
+
+Confirmed no active writes from `app/` or `lib/services/` to:
+
+- Activity catalog, recurring schedules, sessions, or facilitator tables (`00039`–`00049`)
+- `volunteer_recurring_availability` or `volunteer_availability_exceptions`
+
+PoC services write only to `volunteer_weekly_blocks`, `volunteer_day_absences`, `daily_participation_plans`, and `patient_checkins.participation_needs`. Details: [`docs/planning-poc-limitations.md`](planning-poc-limitations.md).
+
+### Empty and error states
+
+| View | Empty state | Error state |
+|------|-------------|-------------|
+| Coordinator daily (`/planning`) | No volunteers, no needs, no afternoon record | Load failure alert |
+| Volunteer daily (`/volunteer`) | Same + recorded activity summary | Load failure alert |
+| Volunteer availability (`/volunteer/availability`) | No weekly slots in month | Weekly/absence load and save errors |
+| Coordinator volunteers (`/planning/volunteers`) | No volunteers | Load failure alert |
+| DagBuddy (`/dashboard/advice`) | No check-in or incomplete care context | Prerequisite empty states; generation failure retry |
+
+### Verification commands
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+All must pass before marking Phase 7 complete.

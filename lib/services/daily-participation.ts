@@ -164,7 +164,7 @@ export async function upsertDailyParticipationPlan(
 
   const recordedBy = data.recorded_by as { full_name: string | null } | null;
 
-  return {
+  const result: DailyParticipationPlanWithAudit = {
     id: data.id,
     plan_date: data.plan_date,
     afternoon_category: data.afternoon_category as DailyParticipationPlanWithAudit["afternoon_category"],
@@ -175,4 +175,11 @@ export async function upsertDailyParticipationPlan(
     updated_at: data.updated_at,
     recorded_by_name: recordedBy?.full_name ?? null,
   };
+
+  // Best-effort deterministic afternoon advice patch (non-blocking).
+  void fetch("/api/dailybuddy/afternoon-patch", { method: "POST" }).catch(
+    () => undefined,
+  );
+
+  return result;
 }

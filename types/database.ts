@@ -1,14 +1,3 @@
-/**
- * Supabase database types for OpnameBuddy.
- *
- * Regenerate when the schema changes:
- * - Dashboard: Project Settings -> API -> Generate types
- * - CLI (remote, no Docker): npx supabase gen types typescript --project-id <ref>
- *
- * Custom convenience aliases and the RoleName union are appended at the bottom
- * and must be preserved when regenerating.
- */
-
 export type Json =
   | string
   | number
@@ -129,6 +118,49 @@ export type Database = {
           },
         ]
       }
+      activity_recurring_schedule_facilitators: {
+        Row: {
+          assigned_at: string
+          assigned_by_staff_id: string | null
+          recurring_schedule_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          recurring_schedule_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by_staff_id?: string | null
+          recurring_schedule_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_recurring_schedule_facilita_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "activity_recurring_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitat_assigned_by_staff_id_fkey"
+            columns: ["assigned_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurring_schedule_facilitators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_recurring_schedules: {
         Row: {
           activity_id: string
@@ -201,49 +233,6 @@ export type Database = {
           },
         ]
       }
-      activity_session_participants: {
-        Row: {
-          admission_id: string
-          assigned_at: string
-          assigned_by_staff_id: string | null
-          session_id: string
-        }
-        Insert: {
-          admission_id: string
-          assigned_at?: string
-          assigned_by_staff_id?: string | null
-          session_id: string
-        }
-        Update: {
-          admission_id?: string
-          assigned_at?: string
-          assigned_by_staff_id?: string | null
-          session_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_session_participants_admission_id_fkey"
-            columns: ["admission_id"]
-            isOneToOne: false
-            referencedRelation: "admissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_session_participants_assigned_by_staff_id_fkey"
-            columns: ["assigned_by_staff_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_session_participants_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "activity_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       activity_session_facilitators: {
         Row: {
           assigned_at: string
@@ -287,45 +276,45 @@ export type Database = {
           },
         ]
       }
-      activity_recurring_schedule_facilitators: {
+      activity_session_participants: {
         Row: {
+          admission_id: string
           assigned_at: string
           assigned_by_staff_id: string | null
-          recurring_schedule_id: string
-          user_id: string
+          session_id: string
         }
         Insert: {
+          admission_id: string
           assigned_at?: string
           assigned_by_staff_id?: string | null
-          recurring_schedule_id: string
-          user_id: string
+          session_id: string
         }
         Update: {
+          admission_id?: string
           assigned_at?: string
           assigned_by_staff_id?: string | null
-          recurring_schedule_id?: string
-          user_id?: string
+          session_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "activity_recurring_schedule_facilitators_assigned_by_staff_id_fkey"
+            foreignKeyName: "activity_session_participants_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_session_participants_assigned_by_staff_id_fkey"
             columns: ["assigned_by_staff_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "activity_recurring_schedule_facilitators_recurring_schedule_id_fkey"
-            columns: ["recurring_schedule_id"]
+            foreignKeyName: "activity_session_participants_session_id_fkey"
+            columns: ["session_id"]
             isOneToOne: false
-            referencedRelation: "activity_recurring_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_recurring_schedule_facilitators_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "activity_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -486,6 +475,117 @@ export type Database = {
           },
         ]
       }
+      daily_advice: {
+        Row: {
+          admission_id: string
+          advice_date: string
+          afternoon_claims_need_match: boolean
+          afternoon_note: string | null
+          afternoon_status: string | null
+          afternoon_title: string | null
+          choice_reminder: string | null
+          created_at: string
+          error_message: string | null
+          explanation: string | null
+          generated_at: string | null
+          generation_started_at: string | null
+          id: string
+          inspiration_ids: string[]
+          is_active: boolean
+          iteration: number
+          generation_kind: string
+          model_id: string | null
+          motivation: string | null
+          primary_outcome: string | null
+          safety_flags_applied: string[]
+          secondary_morning_note: string | null
+          secondary_morning_visit: boolean
+          source_checkin_id: string | null
+          source_context_fingerprint: string | null
+          source_plan_updated_at: string | null
+          stale_reason: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          advice_date: string
+          afternoon_claims_need_match?: boolean
+          afternoon_note?: string | null
+          afternoon_status?: string | null
+          afternoon_title?: string | null
+          choice_reminder?: string | null
+          created_at?: string
+          error_message?: string | null
+          explanation?: string | null
+          generated_at?: string | null
+          generation_started_at?: string | null
+          generation_kind?: string
+          id?: string
+          inspiration_ids?: string[]
+          is_active?: boolean
+          iteration?: number
+          model_id?: string | null
+          motivation?: string | null
+          primary_outcome?: string | null
+          safety_flags_applied?: string[]
+          secondary_morning_note?: string | null
+          secondary_morning_visit?: boolean
+          source_checkin_id?: string | null
+          source_context_fingerprint?: string | null
+          source_plan_updated_at?: string | null
+          stale_reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          advice_date?: string
+          afternoon_claims_need_match?: boolean
+          afternoon_note?: string | null
+          afternoon_status?: string | null
+          afternoon_title?: string | null
+          choice_reminder?: string | null
+          created_at?: string
+          error_message?: string | null
+          explanation?: string | null
+          generated_at?: string | null
+          generation_started_at?: string | null
+          generation_kind?: string
+          id?: string
+          inspiration_ids?: string[]
+          is_active?: boolean
+          iteration?: number
+          model_id?: string | null
+          motivation?: string | null
+          primary_outcome?: string | null
+          safety_flags_applied?: string[]
+          secondary_morning_note?: string | null
+          secondary_morning_visit?: boolean
+          source_checkin_id?: string | null
+          source_context_fingerprint?: string | null
+          source_plan_updated_at?: string | null
+          stale_reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_advice_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_advice_source_checkin_id_fkey"
+            columns: ["source_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "patient_checkins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_participation_plans: {
         Row: {
           afternoon_category: string | null
@@ -556,6 +656,85 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      afternoon_group_interest_signals: {
+        Row: {
+          admission_id: string
+          created_at: string
+          id: string
+          interest_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          created_at?: string
+          id?: string
+          interest_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          created_at?: string
+          id?: string
+          interest_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "afternoon_group_interest_signals_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      morning_volunteer_visit_requests: {
+        Row: {
+          admission_id: string
+          block: string
+          created_at: string
+          id: string
+          inspiration_ids: string[]
+          patient_message: string | null
+          request_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          block?: string
+          created_at?: string
+          id?: string
+          inspiration_ids?: string[]
+          patient_message?: string | null
+          request_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          block?: string
+          created_at?: string
+          id?: string
+          inspiration_ids?: string[]
+          patient_message?: string | null
+          request_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "morning_volunteer_visit_requests_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patient_account_links: {
         Row: {
@@ -657,10 +836,11 @@ export type Database = {
           additional_attention_notes: string | null
           additional_attention_points: string[]
           admission_id: string
+          can_independently_reach_activity_room: string
           created_at: string
           fall_risk: string
           id: string
-          isolation_type: string
+          visit_activity_possibility: string
           mobility_aid_available: string
           mobility_aid_type: string
           mobility_status: string
@@ -675,10 +855,11 @@ export type Database = {
           additional_attention_notes?: string | null
           additional_attention_points?: string[]
           admission_id: string
+          can_independently_reach_activity_room?: string
           created_at?: string
           fall_risk?: string
           id?: string
-          isolation_type?: string
+          visit_activity_possibility?: string
           mobility_aid_available?: string
           mobility_aid_type?: string
           mobility_status?: string
@@ -693,10 +874,11 @@ export type Database = {
           additional_attention_notes?: string | null
           additional_attention_points?: string[]
           admission_id?: string
+          can_independently_reach_activity_room?: string
           created_at?: string
           fall_risk?: string
           id?: string
-          isolation_type?: string
+          visit_activity_possibility?: string
           mobility_aid_available?: string
           mobility_aid_type?: string
           mobility_status?: string
@@ -1146,6 +1328,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      afternoon_category_valid: { Args: { category: string }; Returns: boolean }
       current_admission_ids: { Args: never; Returns: string[] }
       current_patient_ids: { Args: never; Returns: string[] }
       get_daily_needs_summary: {
@@ -1158,9 +1341,9 @@ export type Database = {
       get_daily_participation_for_patient: {
         Args: { p_plan_date: string }
         Returns: {
-          afternoon_category: string | null
-          afternoon_title: string | null
-          participant_message: string | null
+          afternoon_category: string
+          afternoon_title: string
+          participant_message: string
           plan_date: string
           updated_at: string
         }[]
@@ -1179,6 +1362,10 @@ export type Database = {
         }[]
       }
       has_role: { Args: { role_name: string }; Returns: boolean }
+      is_facilitator_eligible_role: {
+        Args: { p_role_name: string }
+        Returns: boolean
+      }
       issue_patient_link_code: {
         Args: { p_created_by_staff_id: string; p_patient_id: string }
         Returns: Json
@@ -1210,6 +1397,41 @@ export type Database = {
           status: string
         }[]
       }
+      list_morning_volunteer_visit_requests: {
+        Args: { p_request_date: string }
+        Returns: {
+          admission_id: string
+          block: string
+          can_independently_reach_activity_room: string
+          created_at: string
+          id: string
+          inspiration_ids: string[]
+          patient_display_name: string
+          patient_message: string
+          request_date: string
+          room_number: string
+          room_restriction: string
+          status: string
+          visit_activity_possibility: string
+        }[]
+      }
+      list_afternoon_group_interest_signals: {
+        Args: { p_interest_date: string }
+        Returns: {
+          admission_id: string
+          created_at: string
+          id: string
+          interest_date: string
+          patient_display_name: string
+          room_number: string
+          status: string
+          updated_at: string
+        }[]
+      }
+      count_afternoon_group_interest_signals: {
+        Args: { p_interest_date: string }
+        Returns: number
+      }
       list_patient_activity_sessions: {
         Args: never
         Returns: {
@@ -1222,6 +1444,14 @@ export type Database = {
           starts_at: string
         }[]
       }
+      list_planning_facilitator_candidates: {
+        Args: { p_search?: string }
+        Returns: {
+          full_name: string
+          role_names: string[]
+          user_id: string
+        }[]
+      }
       list_planning_patients: {
         Args: never
         Returns: {
@@ -1230,14 +1460,6 @@ export type Database = {
           department_name: string
           patient_display_name: string
           room_number: string
-        }[]
-      }
-      list_planning_facilitator_candidates: {
-        Args: { p_search?: string }
-        Returns: {
-          full_name: string
-          role_names: string[]
-          user_id: string
         }[]
       }
       list_planning_sessions: {
@@ -1279,6 +1501,8 @@ export type Database = {
         Args: { p_schedule_id: string; p_weeks_ahead?: number }
         Returns: number
       }
+      participation_block_valid: { Args: { block: string }; Returns: boolean }
+      participation_needs_valid: { Args: { needs: string[] }; Returns: boolean }
       planning_allowed_settings_valid: {
         Args: { settings: string[] }
         Returns: boolean
@@ -1447,6 +1671,9 @@ export type VolunteerAvailabilityExceptionRow =
 export type DailyParticipationPlanRow = Tables<"daily_participation_plans">;
 export type VolunteerWeeklyBlockRow = Tables<"volunteer_weekly_blocks">;
 export type VolunteerDayAbsenceRow = Tables<"volunteer_day_absences">;
+export type DailyAdviceRow = Tables<"daily_advice">;
+export type MorningVolunteerVisitRequestRow =
+  Tables<"morning_volunteer_visit_requests">;
 
 export type RoleName =
   | "patient"

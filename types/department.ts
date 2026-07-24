@@ -6,13 +6,3 @@ export interface Department {
   createdAt: string;
   updatedAt: string;
 }
-
-export interface DepartmentInput {
-  name: string;
-  code?: string | null;
-}
-
-export interface DepartmentUpdateInput {
-  name?: string;
-  code?: string | null;
-}

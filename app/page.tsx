@@ -75,8 +75,13 @@ export default function Home() {
         </div>
 
         <DashboardCard className="mt-6 text-center" density="comfortable">
-          <p className="text-sm text-carbon-black-600">
-            Ontwikkelaarsnavigatie — snelle links naar alle modules op localhost.
+          <p className="text-sm font-medium text-carbon-black-800">
+            Demonstratie-overzicht
+          </p>
+          <p className="mt-1 text-sm text-carbon-black-600">
+            Navigatiehulp voor demonstratie en testen van deze PoC. Geen
+            productiescherm voor patiënten — links omzeilen geen login of
+            rolrechten.
           </p>
         </DashboardCard>
       </main>

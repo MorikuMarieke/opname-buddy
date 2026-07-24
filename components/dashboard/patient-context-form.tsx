@@ -27,7 +27,8 @@ import { cn } from "@/lib/utils/cn";
 import {
   FALL_RISK_OPTIONS,
   GUIDANCE_LEVEL_OPTIONS,
-  ISOLATION_TYPE_OPTIONS,
+  VISIT_ACTIVITY_POSSIBILITY_OPTIONS,
+  ACTIVITY_ROOM_ACCESS_OPTIONS,
   MOBILITY_AID_AVAILABLE_OPTIONS,
   MOBILITY_AID_TYPE_OPTIONS,
   MOBILITY_STATUS_OPTIONS,
@@ -224,19 +225,45 @@ export function PatientContextForm({
           </ContextFormField>
 
           <ContextFormField
-            label={PATIENT_CONTEXT_FIELD_LABELS.isolation_type}
-            htmlFor="isolation_type"
-            error={fieldErrors.isolation_type}
-            incomplete={isFieldIncomplete(values, "isolation_type")}
+            label={
+              PATIENT_CONTEXT_FIELD_LABELS.can_independently_reach_activity_room
+            }
+            htmlFor="can_independently_reach_activity_room"
+            error={fieldErrors.can_independently_reach_activity_room}
+            incomplete={isFieldIncomplete(
+              values,
+              "can_independently_reach_activity_room",
+            )}
           >
             <ContextFormSelect
-              id="isolation_type"
-              value={values.isolation_type}
-              options={ISOLATION_TYPE_OPTIONS}
+              id="can_independently_reach_activity_room"
+              value={values.can_independently_reach_activity_room}
+              options={ACTIVITY_ROOM_ACCESS_OPTIONS}
               onChange={(event) =>
                 updateField(
-                  "isolation_type",
-                  event.target.value as PatientContextFormValues["isolation_type"],
+                  "can_independently_reach_activity_room",
+                  event.target
+                    .value as PatientContextFormValues["can_independently_reach_activity_room"],
+                )
+              }
+            />
+          </ContextFormField>
+
+          <ContextFormField
+            label={PATIENT_CONTEXT_FIELD_LABELS.visit_activity_possibility}
+            htmlFor="visit_activity_possibility"
+            error={fieldErrors.visit_activity_possibility}
+            incomplete={isFieldIncomplete(values, "visit_activity_possibility")}
+          >
+            <ContextFormSelect
+              id="visit_activity_possibility"
+              value={values.visit_activity_possibility}
+              options={VISIT_ACTIVITY_POSSIBILITY_OPTIONS}
+              onChange={(event) =>
+                updateField(
+                  "visit_activity_possibility",
+                  event.target
+                    .value as PatientContextFormValues["visit_activity_possibility"],
                 )
               }
             />

@@ -1,8 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import {
-  Calendar,
   ClipboardList,
-  LineChart,
   MessageCircleQuestion,
   Sun,
 } from "lucide-react";
@@ -62,27 +60,11 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
           size="kiosk"
         />
         <ActionTile
-          href="/dashboard/activities"
-          icon={Calendar}
-          title="Vandaag"
-          description="Bekijk de vaste dagdelen en wat er gepland is."
-          accent="blue-slate"
-          size="kiosk"
-        />
-        <ActionTile
           href="/dashboard/advice"
           icon={Sun}
           title="DagBuddy"
           description="Jouw persoonlijke advies."
           accent="copper"
-          size="kiosk"
-        />
-        <ActionTile
-          href="/dashboard"
-          icon={LineChart}
-          title="Mijn overzicht"
-          description="Bekijk je weekoverzicht."
-          accent="pearl-aqua"
           size="kiosk"
         />
         <PatientHomeSummary />

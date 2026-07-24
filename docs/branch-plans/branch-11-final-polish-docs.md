@@ -1,8 +1,8 @@
 # Branch plan — feature/final-polish-docs
 
-**Branch:** `feature/final-polish-docs`  
-**Status:** Planned  
-**Depends on:** branches 1–10 (core product slices complete)
+**Branch:** `feature/final-polish-docs`
+**Status:** Planned — documentation sync for the shipped PoC may land here or earlier; this plan remains the home for remaining polish/QA debt.
+**Depends on:** core product slices (branches 1–8 shipped; 9–10 optional)
 
 ---
 

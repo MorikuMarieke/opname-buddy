@@ -19,6 +19,7 @@ type CheckinMode = "summary" | "create" | "edit";
 
 export function CheckinView() {
   const [mode, setMode] = useState<CheckinMode>("summary");
+  const [showAdviceCta, setShowAdviceCta] = useState(false);
   const todayQuery = useTodayCheckIn();
   const recentQuery = useRecentCheckIns();
 
@@ -27,6 +28,7 @@ export function CheckinView() {
 
   function handleFormSuccess() {
     setMode("summary");
+    setShowAdviceCta(true);
   }
 
   function renderContent() {
@@ -48,10 +50,23 @@ export function CheckinView() {
 
     if (todayCheckIn) {
       return (
-        <CheckinSummary
-          checkIn={todayCheckIn}
-          onEdit={() => setMode("edit")}
-        />
+        <>
+          <CheckinSummary
+            checkIn={todayCheckIn}
+            onEdit={() => setMode("edit")}
+          />
+          {showAdviceCta ? (
+            <DashboardCard density="compact" className="mt-4 space-y-3">
+              <p className="text-sm text-carbon-black-800">
+                Je check-in is opgeslagen. Ga naar DagBuddy voor je advies van
+                vandaag.
+              </p>
+              <PrimaryButton href="/dashboard/advice">
+                Bekijk DagBuddy-advies
+              </PrimaryButton>
+            </DashboardCard>
+          ) : null}
+        </>
       );
     }
 
@@ -78,17 +93,13 @@ export function CheckinView() {
         size="kiosk"
       />
 
-      <DashboardCard density="comfortable" padding="lg">
-        {renderContent()}
-      </DashboardCard>
+      {renderContent()}
 
-      {!isLoading && recentQuery.data ? (
-        <DashboardCard density="comfortable" padding="lg">
-          <CheckinHistoryList
-            checkIns={recentQuery.data}
-            todayCheckInId={todayCheckIn?.id}
-          />
-        </DashboardCard>
+      {recentQuery.data && recentQuery.data.length > 0 ? (
+        <CheckinHistoryList
+          checkIns={recentQuery.data}
+          todayCheckInId={todayCheckIn?.id}
+        />
       ) : null}
     </div>
   );

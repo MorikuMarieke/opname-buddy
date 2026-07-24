@@ -1,11 +1,12 @@
 # Future: Admin, staff accounts, and role assignment
 
-**Status:** Parked — not implemented in UI  
-**Target branch:** `feature/admin-users-roles` (branch 5)  
-**Added:** 2026-07-01  
-**Trigger:** Implement `/admin/users`, `/admin/roles`, or any feature that needs reliable staff identity (names in audit trails, caregiver lists, coordinator access).
+**Status:** Superseded — **implemented** in branch 5 (`feature/admin-account-management`). This file is retained as historical context for the pre-admin state (manual `user_roles` SQL).
+**Shipped plan:** [`docs/branch-plans/branch-05-admin-account-management.md`](branch-plans/branch-05-admin-account-management.md)
+**Added:** 2026-07-01
 
-Related: [`docs/project-context.md`](project-context.md) (roles and redirect rules), [`docs/domain-model.md`](domain-model.md) (`profiles`, `roles`, `user_roles`), [`docs/branch-plans/branch-03-care-restrictions-context.md`](branch-plans/branch-03-care-restrictions-context.md) (Zorgcontext audit metadata).
+> Do not treat sections below as current product behaviour. Prefer `/admin/users`, `/admin/roles`, and the branch-5 plan for the live admin UI.
+
+Related: [`docs/project-context.md`](project-context.md), [`docs/domain-model.md`](domain-model.md), [`docs/branch-plans/branch-05-admin-account-management.md`](branch-plans/branch-05-admin-account-management.md).
 
 ---
 

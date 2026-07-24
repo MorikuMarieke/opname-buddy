@@ -20,7 +20,7 @@ export const PARTICIPATION_BLOCKS = {
     label: "14:00–16:00",
     dutchTitle: "Middag",
     dutchDescription:
-      "Eén gezamenlijke groepsactiviteit voor de dag.",
+      "Een gezamenlijke groepsactiviteit in dit tijdvak. De concrete invulling kan later vandaag worden afgestemd.",
   },
 } as const;
 

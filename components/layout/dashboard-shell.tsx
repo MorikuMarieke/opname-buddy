@@ -39,7 +39,7 @@ export function DashboardShell({
     return (
       <div className="flex h-dvh min-h-dvh flex-col overflow-hidden bg-parchment-50">
         <TopNavigation variant="patient" greeting={greeting} />
-        <main className="min-h-0 flex-1 overflow-y-auto px-6 py-8 pb-28 lg:pb-8">
+        <main className="min-h-0 flex-1 overflow-y-auto px-6 py-8 pb-28 lg:pb-10">
           <div className="mx-auto w-full max-w-3xl md:max-w-4xl">{children}</div>
         </main>
         <PatientBottomNavigation />
@@ -66,8 +66,8 @@ export function DashboardShell({
           userHeader={userHeader}
         />
 
-        <div className="flex min-h-0 flex-1 overflow-y-auto">
-          <main className="flex-1 p-4 lg:p-5">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <main className="min-h-0 flex-1 overflow-y-auto p-4 pb-10 lg:p-5 lg:pb-12">
             <div
               className={cn(
                 "mx-auto w-full",
@@ -79,7 +79,7 @@ export function DashboardShell({
           </main>
 
           {rightPanel ? (
-            <aside className="hidden w-64 shrink-0 border-l border-parchment-200 bg-parchment-50 p-4 xl:block">
+            <aside className="hidden w-64 shrink-0 overflow-y-auto border-l border-parchment-200 bg-parchment-50 p-4 pb-10 xl:block">
               {rightPanel}
             </aside>
           ) : null}

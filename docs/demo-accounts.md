@@ -2,6 +2,8 @@
 
 Fictional accounts for graduation demonstrations and local PoC testing. All accounts use the `@opnamebuddy.test` domain and are tagged with `app_metadata.demo_account = true`.
 
+**Teacher / grader:** start with [`functioneel-testdraaiboek.md`](./functioneel-testdraaiboek.md). This file only lists who to log in as.
+
 ## Shared password
 
 | Field | Value |
@@ -9,6 +11,20 @@ Fictional accounts for graduation demonstrations and local PoC testing. All acco
 | Password | `Demo123!` |
 
 Use this password for every demo account below at `/login`.
+
+## Playbook role codes → demo logins
+
+| Code | Role / scenario | Demo email | Notes |
+|------|-----------------|------------|-------|
+| A1 | Admin | `admin.demo@opnamebuddy.test` | |
+| C1 | Caregiver | `caregiver1.demo@opnamebuddy.test` | Also `caregiver2.demo@…` |
+| O1 | Activity coordinator | `coordinator.demo@opnamebuddy.test` | |
+| V1 | Volunteer | `volunteer2.demo@opnamebuddy.test` (Finn) | Grace = `volunteer3` (mornings); Emma = `volunteer1`; Hugo = `volunteer4` |
+| P1 | Ready patient (complete context, access yes) | `patient10.demo@opnamebuddy.test` (Fatima) | See seed prep in the testdraaiboek §3.4 |
+| P2 | Patient without today’s check-in | — | Not true after seed; see §3.4 |
+| P3 | Incomplete zorgcontext | `patient6.demo@opnamebuddy.test` (Tom) | Also Iris `patient9`, Lien `patient12` (access `unknown`) |
+| P4 | Bounding zorgcontext (no afternoon group) | `patient2.demo@opnamebuddy.test` (Kees) | Also Mia `patient7` |
+| T1 | Temporary staff account | Create only in a test environment | Do not use for mutating production demo data |
 
 ## Staff and volunteers
 
