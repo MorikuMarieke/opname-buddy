@@ -1,6 +1,6 @@
 # Planning proof-of-concept — limitations
 
-This document describes intentional boundaries of the daily participation PoC. These are **product decisions**, not bugs.
+This document describes intentional boundaries of the **current** daily participation PoC (including shipped DailyBuddy). These are **product decisions**, not bugs.
 
 ---
 
@@ -10,7 +10,7 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 
 - An operational workforce scheduling system
 - An activity catalog or recurrence manager
-- A volunteer-patient matching engine
+- A volunteer–patient matching engine
 - A clinical decision or treatment tool
 
 ---
@@ -21,16 +21,17 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 
 - Individual moments between a patient and a volunteer are coordinated **outside** the app.
 - Volunteers indicate weekly block availability and one-time absences.
-- The coordinator dashboard shows **effective availability** for oversight.
-- No minute-level appointments, no volunteer-patient assignment, no contact records.
+- Coordinator and volunteer dashboards show **effective availability** for oversight.
+- Patients may request a morning ward visit via DagBuddy when advice/eligibility allows.
+- No minute-level appointments, no automatic volunteer–patient assignment.
 
 ### Afternoon block — 14:00–16:00
 
-- One group activity communication per date.
+- One group activity **communication** per calendar date (`daily_participation_plans`).
 - **Fixed shared room** (application constant — not a location module).
-- **Maximum capacity: 10 patients** (displayed; not enforced in database).
-- Patients must be able to reach the room **independently** (displayed requirement; not clinically validated by the app).
-- No transport planning, no volunteer assistance for the group block, no room selection.
+- **Maximum capacity: 10 patients** (displayed; not enforced in the database).
+- Patients must be able to reach the room **independently** when afternoon group advice is allowed (`patient_context.can_independently_reach_activity_room`).
+- No transport planning, no room selection UI, no activity catalog.
 
 ---
 
@@ -40,7 +41,6 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 
 - **Weekly:** per weekday, morning and/or afternoon checkboxes for the fixed blocks.
 - **One-time absences:** per month, mark specific date+block combinations unavailable.
-- Changing weekly checkboxes **is** the permanent update (simple confirmation dialog only).
 
 ### What volunteers do not manage
 
@@ -51,9 +51,9 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 
 ### Legacy tables
 
-`volunteer_recurring_availability` and `volunteer_availability_exceptions` remain in the database for remote compatibility but are **not used** by the PoC.
+`volunteer_recurring_availability` and `volunteer_availability_exceptions` remain in the database for remote compatibility but are **not used** by the PoC UI.
 
-**Phase 7 audit (2026-07-15):** No active application code in `app/` or `lib/services/` writes to legacy planning tables (`activities`, `activity_recurring_schedules`, `activity_sessions`, facilitator tables) or legacy volunteer availability tables. Demo seed scripts write only to PoC tables (`volunteer_weekly_blocks`, `volunteer_day_absences`, `daily_participation_plans`). The `patient_participation_evaluations` service remains for a future evaluation UI and does not link new records to activity sessions from the PoC UI.
+Legacy activity/session tables (`activities`, `activity_sessions`, facilitator tables, etc.) are likewise unused by active application writes. See [`planning-poc-migration.md`](planning-poc-migration.md).
 
 ---
 
@@ -61,50 +61,33 @@ OpnameBuddy supports **recovery participation and patient choice**. It is not:
 
 - Volunteers (or coordinator as fallback) **decide** the afternoon activity using aggregated patient needs and judgment.
 - The app records the **communication** of that choice: category, title, optional patient-facing message.
-- The app does **not** auto-select or suggest-save the activity.
-- Last write wins if multiple volunteers update the same date (acceptable for PoC).
+- The app does **not** auto-select or invent the activity.
+- Last write wins if multiple people update the same date (acceptable for PoC).
 
 ---
 
 ## Patient participation
 
 - Patients express daily needs at check-in (multi-select).
-- Patients receive personalised participation advice and optional interest / withdraw actions via DagBuddy (`/dashboard/advice`). There is no separate patient activity overview page.
-- Volunteer-recorded afternoon activity remains available for DailyBuddy and staff workflows.
+- Patients receive personalised participation advice and optional interest / withdraw actions via DagBuddy (`/dashboard/advice`).
+- There is **no** separate patient activity overview page. Legacy `/dashboard/activities` redirects to `/dashboard/advice`.
 
 ---
 
-## AI (DailyBuddy) — deferred
+## DailyBuddy (implemented)
 
-**Not in scope** for the daily participation PoC branch. No API route, tools, streaming UI, or `daily_advice` persistence on this branch.
+DailyBuddy is **in scope** for the current PoC. Summary:
 
-Future branch `feature/dailybuddy-participation-advice` will implement patient-facing advisory using:
+- Server-side generation with Vercel AI SDK (`gpt-4.1`), four read-only tools, structured output, Zod validation
+- Deterministic policy when no afternoon title is recorded; hard afternoon access gate from care context
+- Persistence in `daily_advice`; reuse until stale / failed / forced retry
+- Patient UI on `/dashboard/advice` with progress streaming (NDJSON), morning visit requests, afternoon interest when eligible
+- Failures surface patient-safe messages; failed generations are recorded
+- Development-only advice-iteration controls were removed after the PoC finalize pass
 
-- Check-in data and `participation_needs`
-- Care restrictions (`patient_context`)
-- Recorded afternoon activity
-- Simple morning-contact availability signal (and optional aggregate availability summary)
+Boundary detail: [`dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md). Branch plan: [`branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md).
 
-Specification: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md) and [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md).
-
-### Future AI may
-
-- Analyse check-in data, needs, care restrictions, and recorded afternoon activity
-- Suggest rest, optional morning individual contact, or afternoon group participation
-- Use a **simple availability signal** only — no volunteer names or schedules
-
-### Future AI must not
-
-- Diagnose or give treatment advice
-- Override clinical restrictions
-- Schedule patients or activities
-- Assign volunteers or optimise staffing
-- Replace absent volunteers
-- Receive individual volunteer names or detailed schedules
-
-### Language (future)
-
-Use cautious Dutch phrasing: “kan passen”, “zou geschikt kunnen zijn”, “op basis van wat je invulde”, “de keuze is aan jou”, “bespreek met je zorgteam als je twijfelt”.
+DailyBuddy must not diagnose, treat, override care context, schedule, or invent afternoon titles.
 
 ---
 
@@ -112,44 +95,54 @@ Use cautious Dutch phrasing: “kan passen”, “zou geschikt kunnen zijn”, �
 
 | Role | PoC scope |
 |------|-----------|
-| `patient` | Check-in needs, zorgcontext, DagBuddy participation advice |
-| `volunteer` | Availability self-service, shared effective availability overview, daily needs view, afternoon recording |
-| `activity_coordinator` | Dedicated `/planning` module (not `/care`): daily dashboard + afternoon record fallback + `/planning/volunteers` profile overview |
-| `caregiver` | Unchanged care workflows on `/care`; no volunteer availability overview; `/care/activities` removed |
-| `admin` | Volunteer account creation unchanged; may read volunteer availability overview when required |
+| `patient` | Check-in needs, zorgcontext (read), DagBuddy, questions editor, linking |
+| `volunteer` | Availability self-service, daily needs/requests view, afternoon recording, profile |
+| `activity_coordinator` | `/planning` dashboard + afternoon record fallback + `/planning/volunteers` |
+| `caregiver` | Clinical patients, admissions, link codes, zorgcontext; **no** volunteer availability overview; **no** check-in or question UI |
+| `admin` | Accounts and roles; may read volunteer overview when required |
 
 ### Post-login routing
 
-- `activity_coordinator` → `/planning` (never redirected to `/care`)
-- Removed `/planning/*` subroutes redirect to `/planning`
+- Priority: `admin` > `activity_coordinator` > `caregiver` > `volunteer` > `patient`
+- Removed `/planning/*` legacy subroutes redirect to `/planning`
 - `/care/activities` redirects to `/care`
+- `/dashboard/activities` redirects to `/dashboard/advice`
 
-### Volunteer availability authorization
+### Caregiver check-ins and questions
 
-- Volunteers, activity coordinators, and admins may read the shared effective availability overview.
-- Caregivers do **not** automatically receive this access.
-- Volunteers may edit only their own weekly blocks and one-time absences.
+- **Implemented for patients:** check-in CRUD; question create/edit/delete; display of `answer_notes` if present.
+- **Implemented for caregivers in this PoC:** Zorgcontext (and clinical patient / admission workflows as built).
+- **Database:** caregiver SELECT on check-ins; caregiver UPDATE on questions (policies in migrations) — not sufficient to claim shipped care UI.
+- **Not in the caregiver interface:** reviewing check-ins or setting question `status` / `answer_notes`.
+
+**Future development:** read-only care views of check-ins and submitted questions; later a secured answering / status workflow.
+
+### Removed placeholder UI (finalize pass)
+
+- Fake caregiver nav items (Meldingen / Instellingen) and disabled search chrome on care/planning
+- Misleading patient “week overview” home tile
+- Permanently empty caregiver patient-table columns for Check-in / Vragen
+- Unused placeholder shell components (`CarePatientDetailView`, `PatientSubPageView`)
+- Admin department management page (`/admin/departments`) — excluded from final PoC UI; `departments` table and admission department select remain
 
 ---
 
 ## Out of scope (explicit)
 
-- Activity catalog, recurring series, generated sessions
-- Facilitator roles and session assignments
+- Activity catalog, recurring series, generated sessions, facilitator assignment UIs
 - Volunteer capacity optimisation and readiness workflows
 - Location scheduling and room management
-- Patient-volunteer matching
-- Recurring activity planning
+- Patient–volunteer matching
 - Evening participation evaluation UI (data layer may exist)
-- **DailyBuddy AI** (API, tools, streaming UI, persistence)
+- QuestionBuddy AI
+- Organizational caregiver access (department/team assignment)
+- Admin department CRUD UI (reference table + admission select remain)
 
 ---
 
-## Future extensions (not in PoC)
+## Future extensions (not in this PoC)
 
-- **DailyBuddy** on `feature/dailybuddy-participation-advice`
-- Caregiver read-only daily plan on `/care`
-- `daily_advice` persistence table
-- Capacity enforcement and enrollment tracking
-- Time-of-day participation phase helpers
-- Data migration from legacy availability tables
+- QuestionBuddy — [`future-questionbuddy-daily-summary.md`](future-questionbuddy-daily-summary.md)
+- Time-of-day rhythm / evening evaluation UI — [`future-participation-scheduling.md`](future-participation-scheduling.md)
+- Coordinator/volunteer UI polish — [`future-ui-polish.md`](future-ui-polish.md)
+- Organizational caregiver access and related identity extensions — see project context deferred themes

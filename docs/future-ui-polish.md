@@ -1,9 +1,9 @@
 # Future: UI polish (coordinator & volunteers)
 
-**Status:** Deferred — out of scope for the current AI branch  
-**Target branch:** future polish / UX branch (TBD)  
-**Added:** 2026-07-15  
-**Trigger:** Tackle after the current AI / planning work is stable; do not mix into AI-agent or data-model branches.
+**Status:** Deferred — still valid UX debt for `/planning` and volunteer screens after DailyBuddy shipped
+**Target branch:** future polish / UX branch (e.g. branch 11)
+**Added:** 2026-07-15
+**Trigger:** Tackle after planning + DailyBuddy are stable; do not mix into AI-agent or data-model branches.
 
 Related: planning module routes under `app/planning/`, especially coordinator daily view and volunteer overview.
 

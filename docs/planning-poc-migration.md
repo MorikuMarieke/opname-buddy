@@ -1,6 +1,6 @@
 # Planning PoC — migration and legacy inventory
 
-**Status:** Phases 1–6 shipped; Phase 7 (final QA) pending. DailyBuddy deferred to `feature/dailybuddy-participation-advice`.  
+**Status:** Daily participation PoC shipped; DailyBuddy shipped (`feature/dailybuddy-participation-advice`). This file remains the inventory of what the PoC replaced and which legacy objects remain in the database.
 **Goal:** Replace branch-7 activity scheduling with a minimal two-block daily participation proof-of-concept.
 
 OpnameBuddy is **not** an operational workforce or activity scheduling system. The PoC demonstrates how patient check-in data and expressed needs support participation and patient choice.
@@ -15,7 +15,7 @@ OpnameBuddy is **not** an operational workforce or activity scheduling system. T
 | Volunteer UI | `/volunteer` daily needs + afternoon recording; `/volunteer/availability` block-based weekly + one-time absences |
 | Patient UI | Check-in needs; DagBuddy at `/dashboard/advice` (personalised advice; no separate patient activity overview) |
 | Database | `participation_needs` on check-ins; `daily_participation_plans`; `volunteer_weekly_blocks`; `volunteer_day_absences` |
-| AI | **Not on this branch** — see [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md) |
+| AI | **Shipped** — [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md), [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md) |
 
 ---
 
@@ -189,7 +189,7 @@ See [Phase 7 — QA verification](#phase-7--qa-verification) below.
 - Streaming advice UI on `/dashboard/advice`
 - Optional `daily_advice` persistence
 
-See [`docs/branch-plans/branch-dailybuddy-participation-advice.md`](branch-plans/branch-dailybuddy-participation-advice.md).
+See [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md).
 
 ---
 
@@ -252,15 +252,15 @@ Volunteers edit only their own `volunteer_weekly_blocks` and `volunteer_day_abse
 
 ---
 
-## AI data boundary (future branch only)
+## AI data boundary (DailyBuddy — shipped)
 
-DailyBuddy is **not implemented** on the daily participation PoC branch. The RPC `get_morning_contact_availability_signal` exists for a future AI branch. Specification: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md).
+DailyBuddy is implemented. The RPC `get_morning_contact_availability_signal` feeds a boolean-only tool. Full specification: [`docs/dailybuddy-ai-boundary.md`](dailybuddy-ai-boundary.md). Branch plan: [`docs/branch-plans/branch-08-dailybuddy-participation-advice.md`](branch-plans/branch-08-dailybuddy-participation-advice.md).
 
 ---
 
 ## Phase 7 — QA verification
 
-Completed before DailyBuddy implementation (`docs(qa): finalize participation proof of concept`).
+Completed for the participation PoC before / alongside DailyBuddy hardening.
 
 ### RLS and authorization
 

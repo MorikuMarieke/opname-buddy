@@ -1,23 +1,8 @@
 export const DEPARTMENT_COPY = {
-  pageTitle: "Afdelingen",
-  pageDescription:
-    "Beheer ziekenhuisafdelingen voor opnames. Deactiveer samengevoegde afdelingen in plaats van verwijderen.",
-  nameLabel: "Naam",
-  codeLabel: "Afkorting",
-  codeHint: "Optionele afdelingsafkorting, bijv. INT of IC.",
-  activeLabel: "Actief",
-  inactiveLabel: "Inactief",
-  createDepartment: "Afdeling toevoegen",
-  saveDepartment: "Opslaan",
-  cancel: "Annuleren",
-  edit: "Bewerken",
-  deactivate: "Deactiveren",
-  reactivate: "Heractiveren",
   departmentLabel: "Afdeling",
   departmentPlaceholder: "Kies een afdeling",
   roomNumberLabel: "Kamernummer",
   roomNumberPlaceholder: "Bijv. 312A of IC-05",
   noDepartments: "Geen actieve afdelingen beschikbaar.",
   loadError: "Afdelingen konden niet worden geladen.",
-  duplicateName: "Er bestaat al een actieve afdeling met deze naam.",
 } as const;

@@ -1,10 +1,10 @@
 # Branch 3: Zorgcontext (patient_context)
 
-**Branch:** `feature/care-restrictions-context`  
-**Status:** Implemented  
+**Branch:** `feature/care-restrictions-context`
+**Status:** Implemented (zorgcontext UI + policies). Caregiver SELECT on check-ins and UPDATE on question `status` / `answer_notes` exist in RLS (`00010`); **care UI for those flows was not delivered** and remains deferred.
 **Depends on:** `feature/patient-checkins-questions` (branch 2)
 
-Caregiver-maintained practical care facts for safe participation. Planning decisions (volunteer suitability, intensity, duration) are **not** stored — DagBuddy derives those later.
+Caregiver-maintained practical care facts for safe participation. Planning decisions (volunteer suitability, intensity, duration) are **not** stored — DagBuddy derives suggestions within these boundaries.
 
 ---
 

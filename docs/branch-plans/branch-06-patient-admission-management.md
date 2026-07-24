@@ -1,7 +1,7 @@
 # Branch plan — feature/patient-admission-management
 
-**Branch:** `feature/patient-admission-management`  
-**Status:** Implemented in codebase (migrations `00031`–`00037` on remote)  
+**Branch:** `feature/patient-admission-management`
+**Status:** Implemented in codebase (migrations `00031`–`00037` on remote). Admin **Afdelingen** CRUD UI (`/admin/departments`) was later **removed from the final PoC** — department reference data and admission department select remain.
 **Depends on:** `feature/account-domain-model`, `feature/admin-account-management`
 
 ---

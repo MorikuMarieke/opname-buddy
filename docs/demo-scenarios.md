@@ -1,6 +1,18 @@
 # Demo scenarios
 
-Fictional patient and volunteer profiles for demonstrations and future DailyBuddy testing. All dates are relative to Amsterdam "today" when you run `npm run demo:seed`.
+Fictional patient and volunteer profiles for demonstrations and DailyBuddy testing. All dates are relative to Amsterdam "today" when you run `npm run demo:seed`.
+
+**Teacher / grader:** operate the app with [`functioneel-testdraaiboek.md`](./functioneel-testdraaiboek.md). This file explains *which patient shows which story*.
+
+## Playbook mapping (after seed)
+
+| Playbook | Best demo patient | Why |
+|----------|-------------------|-----|
+| P1 | PAT-10 Fatima | Access `yes`, social/creative needs; good for full DailyBuddy + interest (after clearing today’s afternoon title — see testdraaiboek §3.4) |
+| P3 | PAT-06 Tom (also PAT-09 Iris, PAT-12 Lien) | `can_independently_reach_activity_room = unknown` → advice gate |
+| P4 | PAT-02 Kees or PAT-07 Mia | Access `no` → no afternoon group recommendation |
+| Morning visit story | PAT-12 Lien | Prefers individual morning contact |
+| Empty needs | PAT-09 Iris | `participation_needs: []` still valid |
 
 ## Participation need coverage
 
@@ -12,57 +24,57 @@ Fictional patient and volunteer profiles for demonstrations and future DailyBudd
 | `relaxation` | PAT-03, PAT-05, PAT-06 |
 | *(none)* | PAT-09 |
 
-## Required archetypes
+## Highlighted archetypes
 
 ### PAT-09 Iris — no participation preference
 
 - **Check-in:** `participation_needs: []`, neutral scores
 - **Note:** "Geen specifieke wens vandaag."
-- **Future AI angle:** should not invent needs; gentle optional contact only
+- **DailyBuddy:** must not invent needs; gentle optional contact only
 
 ### PAT-07 Mia — conflicting needs vs symptoms
 
 - **Need:** `movement`
 - **Symptoms:** pain 6, mobility 1, wheelchair context, high fall risk
-- **Future AI angle:** acknowledge wish, defer to clinical limits, suggest safe alternatives
+- **DailyBuddy:** acknowledge wish, stay within care limits; no afternoon group (access `no`)
 
 ### PAT-10 Fatima — highly social
 
 - **Needs:** `social`, `movement`, `creative`; mood 5
-- **Future AI angle:** enthusiastic group participation; match with social/creative volunteers
+- **DailyBuddy:** strong candidate for afternoon group when access and plan allow
 
 ### PAT-08 Ruben — close to discharge
 
 - **Expected discharge:** tomorrow
 - **Need:** `social`; optimistic check-in
-- **Future AI angle:** celebrate progress; light social closure, no new commitments
+- **DailyBuddy:** light social closure, no heavy new commitments
 
 ### PAT-12 Lien — prefers individual contact
 
 - **Need:** `social`
 - **Note:** quiet morning 1-on-1, not large groups
-- **Future AI angle:** route to morning block and empathetic volunteers (Grace), not afternoon group
+- **DailyBuddy:** morning path when offered; access `unknown` blocks afternoon group
 
 ## Full patient roster
 
 | Ref | Name | Admission | Key context | Today's needs | Demo talking point |
 |-----|------|-----------|-------------|---------------|-------------------|
 | PAT-01 | Sanne de Vries | Appendectomy | Walker, ward only | social, movement | Recovering well; discharge in ~5 days |
-| PAT-02 | Kees Bakker | Pneumonia | Chair only, supervision | social | Lonely; fatigue limits energy |
+| PAT-02 | Kees Bakker | Pneumonia | Chair only, supervision | social | Lonely; fatigue limits energy (**P4**) |
 | PAT-03 | Lotte Jansen | Chemo support | Room only, wheelchair | relaxation | Rest-first; nausea |
 | PAT-04 | Noah Vermeer | Hand surgery | Independent walking | creative | Aligns with today's creative plan |
 | PAT-05 | Eva Mulder | Burnout | Cognitive support | social, relaxation | Gentle nudge only |
-| PAT-06 | Tom Hendriks | Anxiety | Medium fall risk | relaxation, social | Calming, predictable contact |
-| PAT-07 | Mia van Dijk | Hip replacement | Wheelchair, high fall risk | movement | **Conflict** need vs pain/mobility |
+| PAT-06 | Tom Hendriks | Anxiety | Medium fall risk | relaxation, social | Calming contact (**P3** unknown access) |
+| PAT-07 | Mia van Dijk | Hip replacement | Wheelchair, high fall risk | movement | **Conflict** need vs pain/mobility (**P4**) |
 | PAT-08 | Ruben Smit | Pre-discharge | Independent | social | **Discharge tomorrow** |
-| PAT-09 | Iris de Boer | Observation | Walking with aid | *(empty)* | **No preference** |
-| PAT-10 | Fatima El Amrani | Social isolation | Independent | social, movement, creative | **Highly social** |
+| PAT-09 | Iris de Boer | Observation | Walking with aid | *(empty)* | **No preference** (**P3**) |
+| PAT-10 | Fatima El Amrani | Social isolation | Independent | social, movement, creative | **Highly social** (**P1**) |
 | PAT-11 | Jan Kuipers | Shoulder surgery | Walker | movement, creative | Moderate recovery |
-| PAT-12 | Lien Vos | Depression | Cognitive support | social | **Individual morning contact** |
+| PAT-12 | Lien Vos | Depression | Cognitive support | social | **Individual morning contact** (**P3**) |
 
 ## Volunteer personalities
 
-Each volunteer has a Dutch bio on `/planning/volunteers` and a preferred activity type for future AI matching.
+Each volunteer has a Dutch bio on `/planning/volunteers`.
 
 | Volunteer | Personality | Preferred type | Availability highlight |
 |-----------|-------------|----------------|------------------------|
@@ -71,16 +83,18 @@ Each volunteer has a Dutch bio on `/planning/volunteers` and a preferred activit
 | Grace | Calm listener | `relaxation` | Mon–Fri mornings only |
 | Hugo | Practical motivator | `movement` | Sparse Wed PM / Sat AM; absence today on first block |
 
-## Daily participation plans
+## Daily participation plans (after seed)
 
 | Date | Recorder | Category | Title |
 |------|----------|----------|-------|
 | Today | Finn | `creative` | Samen kleuren en muziek luisteren |
 | Tomorrow | Coordinator | `movement` | Rustige ochtendwandeling in de binnentuin |
 
+For playbook steps that need **no afternoon title** (interest CTA), clear or change today’s title first — see testdraaiboek §3.4.
+
 ## DailyBuddy evaluation matrix
 
-Assume seeded today plan = **creative** (“Samen kleuren…”); morning signal **true** when demo volunteers are seeded. Access = `can_independently_reach_activity_room`.
+Assume seeded today plan = **creative** (“Samen kleuren…”) unless you cleared the title; morning signal **true** when demo volunteers are seeded. Access = `can_independently_reach_activity_room`.
 
 | Ref | Access | Expected primary | Acceptable alt | Prohibited | Afternoon |
 |-----|--------|------------------|----------------|------------|-----------|
@@ -97,7 +111,7 @@ Assume seeded today plan = **creative** (“Samen kleuren…”); morning signal
 | PAT-11 Jan | yes | morning or afternoon | rest + secondary | ignore access field | may recommend |
 | PAT-12 Lien | unknown | morning | rest + secondary | afternoon as primary | never (unknown) |
 
-Wording must include patient-autonomy phrases. Updating check-in regenerates advice; page refresh does not. AI failure must not block check-in save.
+Wording must include patient-autonomy phrases. Updating check-in regenerates advice; page refresh of ready advice does not start a new model run. AI failure must not block check-in save.
 
 ## DailyBuddy automation note
 

@@ -68,11 +68,6 @@ export function SidebarNavigation({
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden />
                 <span className="flex-1">{item.label}</span>
-                {item.badge ? (
-                  <span className="rounded-full bg-cherry-rose-600 px-2 py-0.5 text-xs font-semibold text-white">
-                    {item.badge}
-                  </span>
-                ) : null}
               </Link>
             );
           })}

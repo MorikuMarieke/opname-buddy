@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { assertDailyBuddyDevIterateAllowed } from "@/lib/config/dailybuddy-dev";
 import {
   afternoonStatusForAccess,
   buildAfternoonPatchNote,
@@ -42,7 +41,6 @@ export type GenerateAdviceResult =
 
 export type EnsureDailyAdviceOptions = {
   forceRetry?: boolean;
-  devIterate?: boolean;
   onProgress?: (event: DailyBuddyProgressEvent) => void;
 };
 
@@ -197,54 +195,11 @@ async function getActiveAdviceRow(
   return data;
 }
 
-async function getNextAdviceIteration(
-  writeClient: ServerSupabase,
-  admissionId: string,
-  adviceDate: string,
-): Promise<number> {
-  const { data, error } = await writeClient
-    .from("daily_advice")
-    .select("iteration")
-    .eq("admission_id", admissionId)
-    .eq("advice_date", adviceDate)
-    .order("iteration", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(`Iteration lookup failed: ${error.message}`);
-  }
-
-  return (data?.iteration ?? 0) + 1;
-}
-
-async function supersedeActiveAdvice(
-  writeClient: ServerSupabase,
-  advice: DailyAdvice,
-): Promise<void> {
-  const { error } = await writeClient
-    .from("daily_advice")
-    .update({
-      is_active: false,
-      status: "superseded",
-      generation_started_at: null,
-    })
-    .eq("id", advice.id)
-    .eq("is_active", true);
-
-  if (error) {
-    throw new Error(`Supersede advice failed: ${error.message}`);
-  }
-}
-
 /**
  * Idempotent generate controller.
  * `writeClient` must be service-role (patients cannot insert/update daily_advice).
  * `readClient` must be the authenticated session client (RLS + morning RPC).
  * `admissionId` must already be verified via the session client.
- *
- * `devIterate` creates a new active row and preserves prior iterations.
- * Server must call `assertDailyBuddyDevIterateAllowed` before passing it.
  */
 export async function ensureDailyAdviceGenerated(
   writeClient: ServerSupabase,
@@ -253,12 +208,7 @@ export async function ensureDailyAdviceGenerated(
   options?: EnsureDailyAdviceOptions,
 ): Promise<GenerateAdviceResult> {
   const adviceDate = getAmsterdamDateString();
-  const isDevIterate = Boolean(options?.devIterate);
   const progress = createProgressEmitter(options?.onProgress);
-
-  if (isDevIterate) {
-    assertDailyBuddyDevIterateAllowed();
-  }
 
   const prerequisites = await resolveDailyBuddyPrerequisites(
     readClient,
@@ -302,7 +252,6 @@ export async function ensureDailyAdviceGenerated(
       : { stale: false, reason: null };
 
   if (
-    !isDevIterate &&
     existing?.status === "ready" &&
     !refresh.stale &&
     !options?.forceRetry
@@ -313,16 +262,7 @@ export async function ensureDailyAdviceGenerated(
   if (
     existing?.status === "generating" &&
     !isClaimExpired(existing.generation_started_at) &&
-    !options?.forceRetry &&
-    !isDevIterate
-  ) {
-    return { advice: existing, startedGeneration: false };
-  }
-
-  if (
-    isDevIterate &&
-    existing?.status === "generating" &&
-    !isClaimExpired(existing.generation_started_at)
+    !options?.forceRetry
   ) {
     return { advice: existing, startedGeneration: false };
   }
@@ -330,41 +270,7 @@ export async function ensureDailyAdviceGenerated(
   const nowIso = new Date().toISOString();
   let claimed: DailyAdvice;
 
-  if (isDevIterate) {
-    if (existing) {
-      await supersedeActiveAdvice(writeClient, existing);
-    }
-
-    const iteration = await getNextAdviceIteration(
-      writeClient,
-      admissionId,
-      adviceDate,
-    );
-
-    const { data, error } = await writeClient
-      .from("daily_advice")
-      .insert({
-        admission_id: admissionId,
-        advice_date: adviceDate,
-        status: "generating",
-        iteration,
-        generation_kind: "dev_iteration",
-        is_active: true,
-        source_checkin_id: latestCheckinId,
-        source_context_fingerprint: meta.contextFingerprint,
-        generation_started_at: nowIso,
-        error_message: null,
-        stale_reason: null,
-      })
-      .select("*")
-      .single();
-
-    if (error || !data) {
-      throw new Error(error?.message ?? "Dev-iteratie starten mislukt.");
-    }
-
-    claimed = data;
-  } else if (!existing) {
+  if (!existing) {
     const { data, error } = await writeClient
       .from("daily_advice")
       .insert({

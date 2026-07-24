@@ -4,7 +4,7 @@ Reproducible fictional dataset for the daily participation proof of concept. Dat
 
 ## Prerequisites
 
-1. A Supabase project with migrations applied (including `00050` / `00051`).
+1. A Supabase project with migrations applied (through at least the daily participation + DailyBuddy migrations, e.g. `00050`–`00053` as present in this repo).
 2. `.env.local` configured from [`.env.example`](../.env.example):
 
 | Variable | Required for demo scripts |
@@ -12,7 +12,7 @@ Reproducible fictional dataset for the daily participation proof of concept. Dat
 | `NEXT_PUBLIC_SUPABASE_URL` or `SUPABASE_URL` | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes (server-only) |
 
-The service role key is never exposed to the browser. Demo scripts use it only from the command line.
+`OPENAI_API_KEY` is **not** required for seed/cleanup, but is required to generate DagBuddy advice during a live demo.
 
 ## Commands
 
@@ -76,6 +76,7 @@ Demo tooling does **not** implement DailyBuddy AI helpers, API routes, prompts, 
 
 ## Related docs
 
-- [demo-accounts.md](./demo-accounts.md) — login table
+- [functioneel-testdraaiboek.md](./functioneel-testdraaiboek.md) — **primary** teacher/grader playbook (incl. seed prep §3.4)
+- [demo-accounts.md](./demo-accounts.md) — login table and playbook role codes
 - [demo-scenarios.md](./demo-scenarios.md) — patient and volunteer narratives
-- [demo-walkthrough.md](./demo-walkthrough.md) — graduation demonstration script
+- [demo-walkthrough.md](./demo-walkthrough.md) — short pointer to the testdraaiboek

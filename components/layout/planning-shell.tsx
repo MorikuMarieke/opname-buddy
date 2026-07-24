@@ -17,6 +17,7 @@ export function PlanningShell({ children, userHeader }: PlanningShellProps) {
         variant="professional"
         navItems={planningNavItems}
         pageTitle="Dagplanning"
+        showSearch={false}
         userHeader={userHeader}
       >
         {children}

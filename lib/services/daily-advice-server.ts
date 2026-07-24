@@ -1,5 +1,4 @@
 import { getCurrentUserRoles } from "@/lib/auth/get-current-user-roles";
-import { assertDailyBuddyDevIterateAllowed } from "@/lib/config/dailybuddy-dev";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -58,13 +57,8 @@ export async function requirePatientSession() {
 
 export async function generateAdviceForCurrentPatient(options?: {
   forceRetry?: boolean;
-  devIterate?: boolean;
   onProgress?: (event: DailyBuddyProgressEvent) => void;
 }): Promise<GenerateAdviceResult> {
-  if (options?.devIterate) {
-    assertDailyBuddyDevIterateAllowed();
-  }
-
   const { supabase: readClient } = await requirePatientSession();
   const admissionId = await resolveActiveAdmissionId(readClient);
   // Writes require service role after admission was verified via session RLS.

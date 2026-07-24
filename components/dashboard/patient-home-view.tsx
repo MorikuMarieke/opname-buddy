@@ -1,7 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import {
   ClipboardList,
-  LineChart,
   MessageCircleQuestion,
   Sun,
 } from "lucide-react";
@@ -66,14 +65,6 @@ export function PatientHomeView({ user }: PatientHomeViewProps) {
           title="DagBuddy"
           description="Jouw persoonlijke advies."
           accent="copper"
-          size="kiosk"
-        />
-        <ActionTile
-          href="/dashboard"
-          icon={LineChart}
-          title="Mijn overzicht"
-          description="Bekijk je weekoverzicht."
-          accent="pearl-aqua"
           size="kiosk"
         />
         <PatientHomeSummary />

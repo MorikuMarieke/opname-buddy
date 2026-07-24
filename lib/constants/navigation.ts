@@ -1,6 +1,4 @@
 import {
-  Bell,
-  Building2,
   Calendar,
   ClipboardList,
   Heart,
@@ -8,7 +6,6 @@ import {
   LayoutDashboard,
   MessageCircleQuestion,
   Repeat2,
-  Settings,
   Shield,
   Sun,
   User,
@@ -34,8 +31,6 @@ export const patientNavItems: NavItem[] = patientBottomNavItems;
 export const careNavItems: NavItem[] = [
   { label: "Overzicht", href: "/care", icon: LayoutDashboard },
   { label: "Patiënten", href: "/care/patients", icon: Users },
-  { label: "Meldingen", href: "/care", icon: Bell, badge: 3 },
-  { label: "Instellingen", href: "/care", icon: Settings },
 ];
 
 export const planningNavItems: NavItem[] = [
@@ -53,7 +48,6 @@ export const adminNavItems: NavItem[] = [
   { label: "Overzicht", href: "/admin", icon: LayoutDashboard },
   { label: "Gebruikers", href: "/admin/users", icon: Users },
   { label: "Rollen", href: "/admin/roles", icon: Shield },
-  { label: "Afdelingen", href: "/admin/departments", icon: Building2 },
 ];
 
 export function getCarePatientSubNavItems(patientId: string): NavItem[] {

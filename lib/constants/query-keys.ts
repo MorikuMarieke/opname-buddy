@@ -111,7 +111,6 @@
     own: () => ["patient-link", "own"] as const,
   },
   departments: {
-    all: ["departments"] as const,
     active: ["departments", "active"] as const,
   },
   planning: {

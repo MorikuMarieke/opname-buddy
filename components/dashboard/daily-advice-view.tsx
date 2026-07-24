@@ -36,12 +36,9 @@ import {
 } from "@/lib/constants/visit-inspirations";
 import { formTextareaClasses } from "@/components/forms/form-styles";
 import { isEssentialCareContextComplete } from "@/lib/patient-context/completeness";
-import { isDailyBuddyDevToolsEnabled } from "@/lib/config/dailybuddy-dev";
 import { ADVICE_PRIMARY_OUTCOME_LABELS } from "@/types/daily-advice";
 import type { AdvicePrimaryOutcome } from "@/types/daily-advice";
 import type { DailyBuddyPrerequisite } from "@/types/daily-advice-prerequisites";
-
-const SHOW_DEV_ITERATE = isDailyBuddyDevToolsEnabled();
 
 export function DailyAdviceView() {
   const todayCheckIn = useTodayCheckIn();
@@ -70,7 +67,6 @@ export function DailyAdviceView() {
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
   const [interestError, setInterestError] = useState<string | null>(null);
-  const [devIterateError, setDevIterateError] = useState<string | null>(null);
 
   const advice = adviceQuery.data?.advice ?? null;
   const hasCheckIn = Boolean(todayCheckIn.data);
@@ -158,24 +154,6 @@ export function DailyAdviceView() {
       }
     } catch {
       generationStartedRef.current = false;
-    }
-  }
-
-  async function handleDevIterate() {
-    setDevIterateError(null);
-    try {
-      generationStartedRef.current = true;
-      const result = await generateAdviceAsync({ devIterate: true });
-      if (result.prerequisite) {
-        generationStartedRef.current = false;
-      }
-    } catch (error) {
-      generationStartedRef.current = false;
-      setDevIterateError(
-        error instanceof Error
-          ? error.message
-          : "Dev-iteratie mislukt.",
-      );
     }
   }
 
@@ -619,31 +597,6 @@ export function DailyAdviceView() {
                 </p>
               ) : null}
             </div>
-          ) : null}
-        </DashboardCard>
-      ) : null}
-
-      {SHOW_DEV_ITERATE ? (
-        <DashboardCard density="compact" className="space-y-3 border-dashed">
-          <h3 className="text-sm font-semibold text-carbon-black-900">
-            Development only
-          </h3>
-          <p className="text-sm text-carbon-black-600">
-            Genereert een nieuwe adviesiteratie voor vandaag zonder eerdere
-            records te wissen.
-          </p>
-          <SecondaryButton
-            onClick={() => void handleDevIterate()}
-            disabled={isGenerating || advice.status === "generating"}
-          >
-            {isGenerating || advice.status === "generating"
-              ? "Bezig..."
-              : "Dev: generate new advice iteration"}
-          </SecondaryButton>
-          {devIterateError ? (
-            <p className="text-sm text-red-600" role="alert">
-              {devIterateError}
-            </p>
           ) : null}
         </DashboardCard>
       ) : null}

@@ -1,7 +1,7 @@
 # Branch 2: Patient Check-ins & Questions
 
-**Branch:** `feature/patient-checkins-questions`  
-**Status:** Implemented  
+**Branch:** `feature/patient-checkins-questions`
+**Status:** Implemented (check-in + questions). Notes in this plan about `/dashboard/activities` and `/dashboard/advice` **placeholders** are obsolete: activities overview removed (redirect → advice); DagBuddy shipped. The placeholder shell `PatientSubPageView` was removed after the PoC UI audit.
 **Depends on:** `feature/supabase-auth-roles` (completed)
 
 Concrete implementation plan for the first patient CRUD vertical slices. For stable product context see [`docs/project-context.md`](../project-context.md). For domain rules see [`docs/domain-model.md`](../domain-model.md).

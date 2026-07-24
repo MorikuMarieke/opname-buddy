@@ -1,7 +1,7 @@
 # Branch plan — feature/activity-planning-volunteers
 
-**Branch:** `feature/activity-planning-volunteers`  
-**Status:** Shipped  
+**Branch:** `feature/activity-planning-volunteers`
+**Status:** Shipped historically; **active UX superseded** by the daily participation PoC (catalog/session routes redirect to `/planning` or `/care`). Keep this plan for implementation history. Current product behaviour: [`docs/planning-poc-migration.md`](../planning-poc-migration.md), [`docs/planning-poc-limitations.md`](../planning-poc-limitations.md).
 **Depends on:** branches 1–6 (auth, clinical domain, admin, patient admission)
 
 ## Design principle
