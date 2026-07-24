@@ -57,9 +57,16 @@ export function RegisterForm() {
       });
 
       if ("error" in result) {
+        // #region agent log
+        fetch('http://127.0.0.1:7659/ingest/31a06e07-99da-4d29-9cf9-11682d37a007',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ff723e'},body:JSON.stringify({sessionId:'ff723e',runId:'post-fix',hypothesisId:'A,C',location:'register-form.tsx:error-in-result',message:'client received error result',data:{error:result.error},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         setError(result.error);
         return;
       }
+
+      // #region agent log
+      fetch('http://127.0.0.1:7659/ingest/31a06e07-99da-4d29-9cf9-11682d37a007',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ff723e'},body:JSON.stringify({sessionId:'ff723e',runId:'post-fix',hypothesisId:'A',location:'register-form.tsx:success-path',message:'client received ok result',data:{hasSession:result.hasSession},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
 
       if (result.hasSession) {
         isRedirecting = true;
@@ -68,7 +75,10 @@ export function RegisterForm() {
       }
 
       setConfirmationSent(true);
-    } catch {
+    } catch (clientErr) {
+      // #region agent log
+      fetch('http://127.0.0.1:7659/ingest/31a06e07-99da-4d29-9cf9-11682d37a007',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ff723e'},body:JSON.stringify({sessionId:'ff723e',runId:'post-fix',hypothesisId:'B',location:'register-form.tsx:catch',message:'client catch generic error',data:{errMessage:clientErr instanceof Error?clientErr.message:String(clientErr),errName:clientErr instanceof Error?clientErr.name:'unknown'},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       setError("Registreren is mislukt. Probeer het opnieuw.");
     } finally {
       if (!isRedirecting) {
