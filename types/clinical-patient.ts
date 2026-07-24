@@ -6,6 +6,9 @@ export type PatientMatchTier = "strong" | "possible";
 
 export type PatientAdmissionStatus = "active" | "none";
 
+/** Client-side filter for caregiver patient lists (admission-based). */
+export type CareAdmissionFilter = "all" | PatientAdmissionStatus;
+
 export type ClinicalPatient = Patient;
 
 export type ClinicalAdmission = Admission;

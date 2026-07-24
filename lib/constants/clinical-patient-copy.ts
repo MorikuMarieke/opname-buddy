@@ -23,6 +23,19 @@ export const CLINICAL_PATIENT_COPY = {
   admittedOnLabel: "Opnamedatum",
   activeAdmission: "Actieve opname",
   noActiveAdmission: "Geen actieve opname",
+  allPatients: "Alle patiënten",
+  viewAllPatients: "Alle patiënten bekijken",
+  recentlyAddedPatient: "Laatst toegevoegde patiënt",
+  recentlyAddedPatientEmpty: "Nog geen patiënten toegevoegd.",
+  addedOnLabel: "Toegevoegd op",
+  admissionFilterLabel: "Opnamefilter",
+  matchingPatientsCount: (count: number) =>
+    count === 1 ? "1 patiënt" : `${count} patiënten`,
+  emptyFilteredActiveAdmission:
+    "Geen patiënten met een actieve opname.",
+  emptyFilteredNoActiveAdmission:
+    "Geen patiënten zonder actieve opname.",
+  emptyPatients: "Geen patiënten gevonden.",
   accountLinked: "Account gekoppeld",
   accountNotLinked: "Account niet gekoppeld",
   generateLinkCode: "Koppelcode genereren",

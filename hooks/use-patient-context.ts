@@ -78,6 +78,9 @@ export function useUpsertPatientContext(
       void queryClient.invalidateQueries({
         queryKey: queryKeys.patientContext.all,
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.carePatients.all,
+      });
     },
   });
 }
